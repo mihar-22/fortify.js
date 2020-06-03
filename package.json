@@ -1,0 +1,87 @@
+{
+  "name": "@mihar-22/serverless-auth",
+  "description": "Customizable authentication microservice built for serverless architectures",
+  "version": "1.0.0",
+  "license": "MIT",
+  "sideEffects": false,
+  "main": "dist/client.js",
+  "module": "dist/client.esm.js",
+  "unpkg": "dist/client.js",
+  "jsdelivr": "dist/client.js",
+  "types": "dist/types/index.d.ts",
+  "author": "Rahim Alwer <rahim_alwer@hotmail.com>",
+  "homepage": "https://github.com/mihar-22/serverless-auth#readme",
+  "repository": "https://github.com/mihar-22/serverless-auth",
+  "bugs": {
+    "url": "https://github.com/mihar-22/serverless-auth/issues"
+  },
+  "engines": {
+    "node": ">= 10"
+  },
+  "keywords": [
+    "firebase",
+    "session",
+    "token",
+    "jwt",
+    "auth",
+    "authentication",
+    "lite",
+    "microservice",
+    "lightweight",
+    "typescript",
+    "serverless",
+    "nextjs",
+    "netlify",
+    "vercel",
+    "now",
+    "react"
+  ],
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "prebuild": "rimraf dist",
+    "build": "yarn prebuild && tsc --module commonjs && rollup -c rollup.config.ts",
+    "lint": "eslint --ext .js,.ts,.tsx ./ --ignore-path .gitignore --fix",
+    "test": "jest src",
+    "test:watch": "yarn test --watch",
+    "test:coverage": "yarn test --coverage",
+    "release": "semantic-release"
+  },
+  "husky": {
+    "hooks": {
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
+    }
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^8.3.5",
+    "@commitlint/config-conventional": "^8.3.4",
+    "@firebase/auth-types": "^0.10.1",
+    "@rollup/plugin-commonjs": "^12.0.0",
+    "@rollup/plugin-node-resolve": "^8.0.0",
+    "@rollup/plugin-typescript": "^4.1.2",
+    "@types/jest": "^25.2.3",
+    "@types/node": "^14.0.9",
+    "@types/node-fetch": "^2.5.7",
+    "@typescript-eslint/eslint-plugin": "^3.1.0",
+    "eslint": "^7.1.0",
+    "eslint-config-airbnb-typescript": "^7.2.1",
+    "eslint-plugin-import": "^2.20.2",
+    "eslint-plugin-jsx-a11y": "^6.2.3",
+    "eslint-plugin-react": "^7.20.0",
+    "eslint-plugin-react-hooks": "^4.0.4",
+    "husky": "^4.2.5",
+    "jest": "^26.0.1",
+    "next": "^9.4.4",
+    "rimraf": "^3.0.2",
+    "rollup-plugin-terser": "^6.1.0",
+    "ts-jest": "^26.1.0",
+    "typescript": "^3.9.3"
+  },
+  "dependencies": {
+    "inversify": "^5.0.1",
+    "nanoid": "^3.1.9",
+    "node-fetch": "^2.6.0",
+    "reflect-metadata": "^0.1.13"
+  }
+}
