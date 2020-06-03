@@ -1,5 +1,10 @@
 module.exports = {
   testEnvironment: "node",
+  globals: {
+    'ts-jest': {
+      diagnostics: false
+    }
+  },
   transform: {
     ".(ts|tsx)": "ts-jest"
   },

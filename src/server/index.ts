@@ -1,18 +1,14 @@
 import 'reflect-metadata';
 import { Container } from 'inversify';
-import { defaultServiceProviders, Service } from './services';
-import Config from './config';
+import Config from './Config';
+import bootstrap from './bootstrap';
 
 const container = new Container();
 
 export default async function serverlessAuth(config?: Config) {
-  const userDefinedServiceProviders = config?.serviceProviders || {};
-  const serviceProviders = { ...defaultServiceProviders, ...userDefinedServiceProviders };
+  await bootstrap(container, config);
 
-  const registrations = Object.keys(serviceProviders)
-    .map(async (id) => serviceProviders[id as Service]!.register(container, config?.[id]));
+  // const router = (resolve router);
 
-  await Promise.all(registrations);
-
-  // get router handler endpoint and return it
+  // return router.handler;
 }

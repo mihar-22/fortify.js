@@ -1,7 +1,7 @@
 import { Request } from '../../routing/Request';
 import { Response } from '../../routing/Response';
 import User from '../../../../shared/User';
-import { Error } from '../../../errors';
+import { Error } from '../Errors';
 
 // Generally a username or email.
 export type Identifier = string | number;

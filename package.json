@@ -79,6 +79,8 @@
     "typescript": "^3.9.3"
   },
   "dependencies": {
+    "dayjs": "^1.8.28",
+    "hash-equals": "^0.0.3",
     "inversify": "^5.0.1",
     "nanoid": "^3.1.9",
     "node-fetch": "^2.6.0",

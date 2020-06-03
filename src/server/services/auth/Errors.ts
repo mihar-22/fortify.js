@@ -1,0 +1,42 @@
+export enum AuthError {
+  TokenExpired = 'AUTH__TOKEN_EXPIRED',
+  UserDisabled = 'AUTH__USER_DISABLED',
+  UserNotFound = 'AUTH__USER_NOT_FOUND',
+  InvalidRefreshToken = 'AUTH__INVALID_REFRESH_TOKEN',
+  InvalidGrantType = 'AUTH__INVALID_GRANT_TYPE',
+  MissingRefreshToken = 'AUTH__MISSING_REFRESH_TOKEN',
+  EmailExists = 'AUTH__EMAIL_EXISTS',
+  OperationNotAllowed = 'AUTH__OPERATION_NOT_ALLOWED',
+  TooManyAttempts = 'AUTH__TOO_MANY_ATTEMPTS',
+  EmailNotFound = 'AUTH__EMAIL_NOT_FOUND',
+  InvalidPassword = 'AUTH__INVALID_PASSWORD',
+  ExpiredOobCode = 'AUTH__EXPIRED_OOB_CODE',
+  InvalidOobCode = 'AUTH__INVALID_OOB_CODE',
+  InvalidIdToken = 'AUTH__INVALID_ID_TOKEN',
+  OldCredentials = 'AUTH__OLD_CREDENTIALS',
+  WeakPassword = 'AUTH__WEAK_PASSWORD',
+  InvalidEmail = 'AUTH__INVALID_EMAIL',
+  MissingPassword = 'AUTH__MISSING_PASSWORD'
+}
+
+// @TODO: Convert to `HttpErrors`.
+export const AuthErrorForHuman = {
+  [AuthError.TokenExpired]: 'The user\'s credential is no longer valid. The user must sign in again.',
+  [AuthError.UserDisabled]: 'The user account has been disabled by an administrator.',
+  [AuthError.UserNotFound]: 'There is no user record corresponding to this identifier. The user may have been deleted.',
+  [AuthError.InvalidRefreshToken]: 'An invalid refresh token was provided.',
+  [AuthError.InvalidGrantType]: 'The grant type specified is invalid.',
+  [AuthError.MissingRefreshToken]: 'No refresh token provided.',
+  [AuthError.EmailExists]: 'The email address is already in use by another account.',
+  [AuthError.OperationNotAllowed]: 'Password sign-in is disabled for this project.',
+  [AuthError.TooManyAttempts]: 'We have blocked all requests from this device due to unusual activity. Try again later.',
+  [AuthError.EmailNotFound]: 'There is no user record corresponding to this identifier. The user may have been deleted.',
+  [AuthError.InvalidPassword]: 'The password is invalid or the user does not have a password.',
+  [AuthError.ExpiredOobCode]: 'The action code has expired.',
+  [AuthError.InvalidOobCode]: 'The action code is invalid. This can happen if the code is malformed, expired, or has already been used.',
+  [AuthError.InvalidIdToken]: 'The user\'s credential is no longer valid. The user must sign in again.',
+  [AuthError.OldCredentials]: 'The user\'s credential is no longer valid. The user must sign in again.',
+  [AuthError.WeakPassword]: 'The password must be 6 characters long or more.',
+  [AuthError.InvalidEmail]: 'The email address is invalid.',
+  [AuthError.MissingPassword]: 'The password field is empty.',
+};

@@ -12,7 +12,7 @@ export interface Tokens {
   expiresIn: number
 }
 
-export default class User {
+export class User {
   id?: string;
 
   nickname?: string;
