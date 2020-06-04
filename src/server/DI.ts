@@ -1,6 +1,7 @@
 enum DI {
   Config = 'config',
-  Encrypter = 'encrypter'
+  Encrypter = 'encrypter',
+  Events = 'events'
 }
 
 export default DI;

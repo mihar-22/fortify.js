@@ -1,15 +1,17 @@
 import { Container } from 'inversify';
-import ServiceProvider from '../../support/ServiceProvider';
-
-// export interface AuthServerEvents {
-//   onSignUp: (user: User) => void
-//   onSignIn: (user: User) => void
-//   onPasswordReset: (user: User, oldPassword: string, newPassword: string) => void
-//   onEmailVerified: (user: User) => void
-// }
+import { ServiceProvider } from '../../support/ServiceProvider';
+import DI from '../../DI';
+import Dispatcher from './Dispatcher';
+import EventDispatcher from './EventDispatcher';
 
 export default class EventsServiceProvider implements ServiceProvider {
-  async register(container: Container) {
-    return undefined;
+  protected container: Container;
+
+  constructor(container: Container) {
+    this.container = container;
+  }
+
+  public async register() {
+    this.container.bind<Dispatcher>(DI.Events).to(EventDispatcher);
   }
 }

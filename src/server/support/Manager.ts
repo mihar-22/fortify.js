@@ -9,7 +9,7 @@ export default abstract class Manager<DriverEnum extends string, Driver> {
 
   protected drivers: Record<string, Driver>;
 
-  public constructor(container: Container) {
+  constructor(container: Container) {
     this.container = container;
     this.config = container.get<Config>(DI.Config);
     this.drivers = {} as Record<string, Driver>;

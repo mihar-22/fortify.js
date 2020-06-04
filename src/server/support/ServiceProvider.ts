@@ -1,5 +1,9 @@
 import { Container } from 'inversify';
 
-export default interface ServiceProvider {
-  register<T>(container: Container, config?: T): Promise<void>
+export interface ServiceProvider {
+  register(): Promise<void>
+}
+
+export interface ServiceProviderConstructor {
+  new(container: Container): ServiceProvider
 }

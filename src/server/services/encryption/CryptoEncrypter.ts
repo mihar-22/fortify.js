@@ -32,7 +32,7 @@ export default class CryptoEncrypter implements Encrypter {
   }
 
   public static supported(key: string, cipherAlgorithm: CipherAlgorithm) {
-    const keyByteLength = Buffer.from(key, 'base64').byteLength;
+    const keyByteLength = Buffer.byteLength(key, 'base64');
     return (cipherAlgorithm === CipherAlgorithm.AES128CBC && keyByteLength === 16)
       || (cipherAlgorithm === CipherAlgorithm.AES256CBC && keyByteLength === 32);
   }
@@ -60,11 +60,15 @@ export default class CryptoEncrypter implements Encrypter {
     const encryptedPayload = this.getJsonPayload(payload);
     const iv = Buffer.from(encryptedPayload.iv, 'base64');
     const decipher = createDecipheriv(this.cipherAlgorithm, Buffer.from(this.key, 'base64'), iv);
-    const decryption = Buffer.concat([
-      decipher.update(Buffer.from(encryptedPayload.value, 'base64')),
-      decipher.final(),
-    ]);
-    return shouldDeserialize ? deserialize(decryption) : decryption.toString('utf-8');
+    try {
+      const decryption = Buffer.concat([
+        decipher.update(Buffer.from(encryptedPayload.value, 'base64')),
+        decipher.final(),
+      ]);
+      return shouldDeserialize ? deserialize(decryption) : decryption.toString('utf-8');
+    } catch (e) {
+      throw Error(EncryptionError.InvalidPayload);
+    }
   }
 
   public decryptString(payload: string) {
@@ -79,8 +83,13 @@ export default class CryptoEncrypter implements Encrypter {
   }
 
   protected getJsonPayload(payload: string) {
-    const encryptedPayload = JSON.parse(Buffer.from(payload, 'base64')
-      .toString('utf-8')) as EncryptedPayload;
+    let encryptedPayload;
+    try {
+      encryptedPayload = JSON.parse(Buffer.from(payload, 'base64')
+        .toString('utf-8')) as EncryptedPayload;
+    } catch (e) {
+      throw Error(EncryptionError.InvalidPayload);
+    }
     if (!this.isPayloadValid(encryptedPayload)) { throw Error(EncryptionError.InvalidPayload); }
     if (!this.isMacValid(encryptedPayload)) { throw Error(EncryptionError.InvalidMac); }
     return encryptedPayload;
@@ -92,7 +101,7 @@ export default class CryptoEncrypter implements Encrypter {
       && payload.iv
       && payload.value
       && payload.mac
-      && (Buffer.from(payload.iv, 'base64').byteLength === CipherIVLength[this.cipherAlgorithm]);
+      && (Buffer.byteLength(payload.iv, 'base64') === CipherIVLength[this.cipherAlgorithm]);
   }
 
   // Determine if the MAC for the given payload is valid.

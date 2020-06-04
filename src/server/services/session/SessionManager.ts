@@ -1,6 +1,6 @@
 import Manager from '../../support/Manager';
 import { Session, SessionDriver } from './Session';
-import { Service } from '../index';
+import { Service } from '../Service';
 
 export default class SessionManager extends Manager<SessionDriver, Session> {
   public getDefaultDriver(): SessionDriver {
