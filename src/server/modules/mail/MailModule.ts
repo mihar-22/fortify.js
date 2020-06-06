@@ -2,13 +2,14 @@ import { AsyncContainerModule } from 'inversify';
 import DIToken from '../../DIToken';
 import Config, { Env } from '../../Config';
 import Module from '../Module';
-import { MailDriver, Mailer } from './Mailer';
-import Mailgun from './drivers/Mailgun';
-import SendGrid from './drivers/SendGrid';
+import { MailTransporter, Mailer, MailerConstructor } from './Mailer';
+import Mailgun from './transporters/Mailgun';
+import SendGrid from './transporters/SendGrid';
 import {
   createSmtpTestAccount, createSmtpTransport, SmtpClient, SmtpProvider,
 } from './SmtpClient';
 import { MailError, MailErrorCode } from './MailError';
+import Smtp from './transporters/Smtp';
 
 const MailModule = new AsyncContainerModule(async (bind) => {
   bind<SmtpProvider>(DIToken.SmtpClientProvider).toProvider<SmtpClient>((context) => async () => {
@@ -37,23 +38,16 @@ const MailModule = new AsyncContainerModule(async (bind) => {
   });
 
   bind<Mailer>(DIToken.Mailer).toDynamicValue((context) => {
+    const transporters: Record<MailTransporter, MailerConstructor> = {
+      [MailTransporter.Smtp]: Smtp,
+      [MailTransporter.Mailgun]: Mailgun,
+      [MailTransporter.SendGird]: SendGrid,
+    };
+
     const config = context.container.get<Config>(DIToken.Config);
-    const driver = config?.[Module.Mail]?.driver ?? MailDriver.Smtp;
-
-    let driverImpl: any;
-
-    switch (driver) {
-      case MailDriver.Smtp:
-        driverImpl = Smtp;
-        break;
-      case MailDriver.MailGun:
-        driverImpl = Mailgun;
-        break;
-      case MailDriver.SendGird:
-        driverImpl = SendGrid;
-        break;
-    }
-  });
+    const transporter = config?.[Module.Mail]?.transporter ?? MailTransporter.Smtp;
+    return context.container.resolve<Mailer>(transporters[transporter]);
+  }).inSingletonScope();
 });
 
 export default MailModule;

@@ -2,10 +2,10 @@ import { inject, injectable } from 'inversify';
 import { Mail, Mailer } from '../Mailer';
 import Dispatcher from '../../events/Dispatcher';
 import DIToken from '../../../DIToken';
-import { SmtpProvider } from '../MailModule';
+import { SmtpProvider } from '../SmtpClient';
 
 @injectable()
-export default class SmtpMailer implements Mailer {
+export default class Smtp implements Mailer {
   private readonly clientProvider: SmtpProvider;
 
   private readonly sender: string;
@@ -20,14 +20,12 @@ export default class SmtpMailer implements Mailer {
     this.clientProvider = clientProvider;
     this.events = events;
     this.sender = sender;
-
-    console.log(clientProvider);
-    console.log(sender);
   }
 
   public async send<T>(mail: Mail<T>) {
     // if there is a template we need to grab it.
-    console.log(mail);
+    console.log(this.clientProvider);
+    console.log(this.sender);
 
     // this.events.dispatch(MailEvent.MailSending, mail);
     // const info = await this.client.sendMail({ from: this.sender, ...mail });

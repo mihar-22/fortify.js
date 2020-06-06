@@ -9,7 +9,7 @@ export enum MailErrorCode {
 export const MailError: Errors<MailErrorCode> = {
   [MailErrorCode.MissingSmtpConfig]: new ConfigurationError(
     MailErrorCode.MissingSmtpConfig,
-    'The SMTP mail driver was selected but no configuration has been specified.',
+    'The SMTP mail transporter was selected but no configuration has been specified.',
     Module.Mail,
     `config.${Module.Mail}.smtp`,
   ),

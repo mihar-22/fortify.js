@@ -1,6 +1,5 @@
 import Mail from 'nodemailer/lib/mailer';
 import nodemailer from 'nodemailer';
-import { SmtpConfig } from './Mailer';
 
 export type SmtpClient = Mail;
 export type SmtpProvider = Promise<SmtpClient>;
@@ -10,6 +9,15 @@ export interface SmtpTestAccount {
   senderName: string
   senderAddress: string,
   password: string
+}
+
+export interface SmtpConfig {
+  host: string
+  port: number
+  username: string
+  password: string
+  fromName: string
+  fromAddress: string
 }
 
 export const createSmtpTestAccount = async (): Promise<SmtpTestAccount> => {

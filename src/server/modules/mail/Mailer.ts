@@ -1,22 +1,13 @@
-export enum MailDriver {
+import { SmtpConfig } from './SmtpClient';
+import { MailTemplate } from './MailTemplate';
+
+export enum MailTransporter {
   Smtp = 'smtp',
-  SendGird = 'sendgrid',
-  MailGun = 'mailgun'
+  SendGird = 'sendGrid',
+  Mailgun = 'mailgun'
 }
 
-export interface MailTemplates {
-  verifyEmail?: string,
-  passwordReset?: string,
-}
-
-export interface SmtpConfig {
-  host: string
-  port: number
-  username: string
-  password: string
-  fromName: string
-  fromAddress: string
-}
+export type MailTemplates = { [T in MailTemplate]?: string };
 
 export interface Mail<T> {
   from?: string,
@@ -28,11 +19,15 @@ export interface Mail<T> {
 }
 
 export interface MailConfig {
-  driver: MailDriver
+  transporter?: MailTransporter
   smtp?: SmtpConfig
   templates?: MailTemplates
 }
 
 export interface Mailer {
   send<T>(mail: Mail<T>): Promise<void>
+}
+
+export interface MailerConstructor {
+  new(...args: any[]): Mailer
 }
