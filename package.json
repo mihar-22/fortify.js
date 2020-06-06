@@ -21,11 +21,20 @@
   "keywords": [
     "firebase",
     "session",
+    "aws",
+    "lambda",
     "token",
     "jwt",
     "auth",
     "authentication",
+    "oauth2",
+    "google",
+    "facebook",
+    "github",
     "lite",
+    "graphql",
+    "apollo",
+    "koa",
     "microservice",
     "lightweight",
     "typescript",
@@ -43,7 +52,7 @@
     "prebuild": "rimraf dist",
     "build": "yarn prebuild && tsc --module commonjs && rollup -c rollup.config.ts",
     "lint": "eslint --ext .js,.ts,.tsx ./ --ignore-path .gitignore --fix",
-    "test": "jest src",
+    "test": "jest src --maxWorkers=1",
     "test:watch": "yarn test --watch",
     "test:coverage": "yarn test --coverage",
     "release": "semantic-release"
@@ -62,7 +71,7 @@
     "@rollup/plugin-typescript": "^4.1.2",
     "@types/jest": "^25.2.3",
     "@types/node": "^14.0.9",
-    "@types/node-fetch": "^2.5.7",
+    "@types/nodemailer": "^6.4.0",
     "@typescript-eslint/eslint-plugin": "^3.1.0",
     "eslint": "^7.1.0",
     "eslint-config-airbnb-typescript": "^7.2.1",
@@ -79,11 +88,12 @@
     "typescript": "^3.9.3"
   },
   "dependencies": {
+    "axios": "^0.19.2",
     "dayjs": "^1.8.28",
     "hash-equals": "^0.0.3",
     "inversify": "^5.0.1",
     "nanoid": "^3.1.9",
-    "node-fetch": "^2.6.0",
+    "nodemailer": "^6.4.8",
     "reflect-metadata": "^0.1.13"
   }
 }

@@ -1,5 +1,5 @@
-import { Request } from '../../../../services/routing/Request';
-import { Response } from '../../../../services/routing/Response';
+import { Request } from '../../../../modules/http/Request';
+import { Response } from '../../../../modules/http/Response';
 
 export default (req: Request, res: Response) => {
   // POST -> /signIn/:provider

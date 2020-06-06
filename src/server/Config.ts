@@ -1,21 +1,19 @@
-import { MailerConfig } from './services/mailer/Mailer';
-import ServerlessProvider from './ServerlessProvider';
-import { SessionConfig } from './services/session/Session';
-import { EncryptionConfig } from './services/encryption/Encrypter';
-import { Service, ServiceProviders } from './services/Service';
+import { AsyncContainerModule } from 'inversify';
+import { MailConfig } from './modules/mail/Mailer';
+import { SessionConfig } from './modules/session/Session';
+import { EncryptionConfig } from './modules/encryption/Encrypter';
+import Module from './modules/Module';
 
 export enum Env {
   Development = 'development',
-  Testing = 'testing',
   Production = 'production'
 }
 
 export default interface Config {
   [id: string]: string | Record<string, any> | undefined
-  [Service.Mailer]?: MailerConfig,
-  [Service.Session]?: SessionConfig,
-  [Service.Encryption]: EncryptionConfig,
   env: Env,
-  serviceProviders?: ServiceProviders,
-  serverlessProvider: ServerlessProvider
+  modules?: AsyncContainerModule[],
+  [Module.Mail]?: MailConfig,
+  [Module.Session]?: SessionConfig,
+  [Module.Encryption]?: EncryptionConfig,
 }

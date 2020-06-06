@@ -1,5 +1,8 @@
 module.exports = {
   root: true,
+  globals: {
+    testContainer: true
+  },
   parserOptions: {
     project: 'tsconfig.json',
   },
@@ -7,6 +10,7 @@ module.exports = {
   rules: {
     'no-console': 'off',
     'react/jsx-props-no-spreading': 'off',
+    'default-case': 'off',
     '@typescript-eslint/camelcase': 'off',
     '@typescript-eslint/explicit-member-accessibility': ['error', {
       accessibility: 'explicit',

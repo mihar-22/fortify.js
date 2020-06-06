@@ -18,7 +18,12 @@
     "outDir": "dist/lib",
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
-    "lib": ["dom", "esnext"]
+    "lib": ["dom", "esnext"],
+    "types": [
+      "@types/node",
+      "@types/jest",
+      "@types/nodemailer"
+    ]
   },
   "include": [
     "src"

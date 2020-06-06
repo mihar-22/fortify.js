@@ -13,6 +13,9 @@ module.exports = {
     "tsx",
     "js"
   ],
+  setupFiles: [
+    './src/server/support/testing/bootstrapTestEnv.ts'
+  ],
   coveragePathIgnorePatterns: [
     "/node_modules",
     "/tests"

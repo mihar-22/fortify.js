@@ -1,34 +1,34 @@
-import { Container } from 'inversify';
+import { Container, ContainerModule } from 'inversify';
+import Axios from 'axios';
 import Config, { Env } from './Config';
-import DI from './DI';
-import { Service } from './services/Service';
-import coreServiceProviders from './services';
+import DIToken from './DIToken';
+import coreModules from './modules';
+import { HttpClient } from './support/types';
 
 let hasBootstrapped = false;
-let pendingBootstrap: Promise<any[]> | undefined;
+let bootstrapping: Promise<void> | undefined;
 
-export default async function bootstrap(container: Container, config: Config) {
-  if (hasBootstrapped && config.env !== Env.Testing) { return; }
+const coreDependencies = (config?: Config) => new ContainerModule((bind) => {
+  bind(DIToken.Config).toConstantValue(config);
+  bind<Env>(DIToken.Env).toConstantValue(config?.env ?? Env.Development);
+  bind<HttpClient>(DIToken.HttpClient)
+    .toDynamicValue(() => Axios)
+    .inSingletonScope();
+});
 
-  if (pendingBootstrap) {
-    await pendingBootstrap;
+export default async function bootstrap(container: Container, config?: Config) {
+  if (hasBootstrapped) { return; }
+
+  if (bootstrapping) {
+    await bootstrapping;
     return;
   }
 
-  container.bind(DI.Config).toConstantValue(config);
+  container.load(coreDependencies(config));
+  const userModules = config?.modules ?? [];
+  bootstrapping = container.loadAsync(...[...coreModules, ...userModules]);
 
-  const userDefinedServiceProviders = config?.serviceProviders || {};
-  const serviceProviders = { ...coreServiceProviders, ...userDefinedServiceProviders };
-
-  const registrations = Object.keys(serviceProviders)
-    .map(async (id) => {
-      const ServiceProvider = serviceProviders[id as Service]!;
-      const serviceProvider = new ServiceProvider(container);
-      return serviceProvider!.register();
-    });
-
-  pendingBootstrap = Promise.all(registrations);
-  await pendingBootstrap;
+  await bootstrapping;
   hasBootstrapped = true;
-  pendingBootstrap = undefined;
+  bootstrapping = undefined;
 }
