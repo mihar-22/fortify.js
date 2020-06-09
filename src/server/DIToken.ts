@@ -1,18 +1,20 @@
-import { MailTransporter } from './modules/mail/Mailer';
-import Module from './modules/Module';
+import { Module } from './modules/Module';
 
-const DIToken = Object.freeze({
+const fake = (module: string) => `${module}Fake`;
+
+export const DIToken = Object.freeze({
   Env: 'env',
   Config: 'config',
   Encrypter: Module.Encryption,
+  FakeEncrypter: fake(Module.Encryption),
   EventDispatcher: Module.Events,
+  FakeDispatcher: fake(Module.Events),
+  Logger: Module.Logger,
+  FakeLogger: fake(Module.Logger),
   Mailer: Module.Mail,
-  SmtpMailer: MailTransporter.Smtp,
-  SendGridMailer: MailTransporter.SendGird,
-  MailGunMailer: MailTransporter.Mailgun,
-  MailSender: 'mailSender',
+  FakeMailer: fake(Module.Mail),
+  MailSenderFactory: 'mailSenderFactory',
   HttpClient: 'httpClient',
   SmtpClientProvider: 'smtpClientProvider',
+  FakeSmtpClient: fake('smtpClient'),
 });
-
-export default DIToken;

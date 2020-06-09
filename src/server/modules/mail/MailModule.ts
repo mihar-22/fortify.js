@@ -1,53 +1,87 @@
 import { AsyncContainerModule } from 'inversify';
-import DIToken from '../../DIToken';
-import Config, { Env } from '../../Config';
-import Module from '../Module';
-import { MailTransporter, Mailer, MailerConstructor } from './Mailer';
-import Mailgun from './transporters/Mailgun';
-import SendGrid from './transporters/SendGrid';
+import { DIToken } from '../../DIToken';
+import { Config, Env } from '../../Config';
+import { Module } from '../Module';
 import {
-  createSmtpTestAccount, createSmtpTransport, SmtpClient, SmtpProvider,
+  Mailer, MailerConstructor, MailSenderFactory, MailTransporter,
+} from './Mailer';
+import { Mailgun, SendGrid, Smtp } from './transporters';
+import {
+  createSmtpTestAccount, createSmtpTransport, SmtpClient, SmtpClientProvider,
 } from './SmtpClient';
-import { MailError, MailErrorCode } from './MailError';
-import Smtp from './transporters/Smtp';
+import { MailError, MailErrors } from './MailErrors';
+import { FakeSmtpClient } from './FakeSmtpClient';
+import { FakeMailer } from './FakeMailer';
 
-const MailModule = new AsyncContainerModule(async (bind) => {
-  bind<SmtpProvider>(DIToken.SmtpClientProvider).toProvider<SmtpClient>((context) => async () => {
-    const config = context.container.get<Config>(DIToken.Config);
-    let smtpConfig = config?.[Module.Mail]?.smtp;
+export const MailModule = new AsyncContainerModule(async (bind) => {
+  bind<SmtpClient>(DIToken.FakeSmtpClient)
+    .toDynamicValue(() => new FakeSmtpClient())
+    .inSingletonScope();
 
-    if (config?.env === Env.Production && !smtpConfig) {
-      throw MailError[MailErrorCode.MissingSmtpConfig];
-    } else {
-      const testAccount = await createSmtpTestAccount();
+  bind<SmtpClientProvider>(DIToken.SmtpClientProvider).toProvider<SmtpClient>(
+    ({ container }) => async () => {
+      const config = container.get<Config>(DIToken.Config);
 
-      smtpConfig = {
-        host: 'smtp.ethereal.email',
-        port: 587,
-        username: testAccount.username,
-        password: testAccount.password,
-        fromName: testAccount.senderName,
-        fromAddress: testAccount.senderAddress,
-      };
-    }
+      if (config?.env === Env.Testing) {
+        return container.get(DIToken.FakeSmtpClient);
+      }
 
-    context.container.bind<string>(DIToken.MailSender)
-      .toConstantValue(`${smtpConfig!.fromName} <${smtpConfig!.fromAddress}>`);
+      const mailConfig = config?.[Module.Mail] || {};
+      let smtpConfig = mailConfig!.smtp;
 
-    return createSmtpTransport(smtpConfig!);
+      if (config?.env === Env.Production && !smtpConfig) {
+        throw MailErrors[MailError.MissingSmtpConfig]();
+      } else {
+        const testAccount = await createSmtpTestAccount();
+
+        smtpConfig = {
+          host: 'smtp.ethereal.email',
+          port: 587,
+          username: testAccount.username,
+          password: testAccount.password,
+        };
+
+        mailConfig.smtp = smtpConfig;
+        mailConfig.from = { name: testAccount.senderName, address: testAccount.senderAddress };
+        config[Module.Mail] = mailConfig;
+      }
+
+      return createSmtpTransport(smtpConfig!);
+    },
+  );
+
+  bind<MailSenderFactory>(DIToken.MailSenderFactory).toFactory<string>(({ container }) => {
+    const config = container.get<Config>(DIToken.Config);
+
+    return () => {
+      const mailConfig = config?.[Module.Mail];
+
+      // @TODO: find suitable defaults.
+      if (!mailConfig?.from) { throw MailErrors[MailError.MissingFromConfig](); }
+
+      return `${mailConfig?.from?.name} <${mailConfig?.from?.address}>`;
+    };
   });
 
-  bind<Mailer>(DIToken.Mailer).toDynamicValue((context) => {
-    const transporters: Record<MailTransporter, MailerConstructor> = {
-      [MailTransporter.Smtp]: Smtp,
-      [MailTransporter.Mailgun]: Mailgun,
-      [MailTransporter.SendGird]: SendGrid,
-    };
+  bind<Mailer>(DIToken.FakeMailer)
+    .toDynamicValue(() => new FakeMailer())
+    .inSingletonScope();
 
-    const config = context.container.get<Config>(DIToken.Config);
-    const transporter = config?.[Module.Mail]?.transporter ?? MailTransporter.Smtp;
-    return context.container.resolve<Mailer>(transporters[transporter]);
-  }).inSingletonScope();
+  bind<Mailer>(DIToken.Mailer)
+    .toDynamicValue(({ container }) => {
+      const config = container.get<Config>(DIToken.Config);
+
+      if (config?.env === Env.Testing) {
+        return container.get(DIToken.FakeMailer);
+      }
+
+      const transporters: Record<MailTransporter, MailerConstructor> = {
+        [MailTransporter.Smtp]: Smtp,
+        [MailTransporter.Mailgun]: Mailgun,
+        [MailTransporter.SendGird]: SendGrid,
+      };
+
+      const transporter = config?.[Module.Mail]?.transporter ?? MailTransporter.Smtp;
+      return container.resolve<Mailer>(transporters[transporter]);
+    }).inSingletonScope();
 });
-
-export default MailModule;

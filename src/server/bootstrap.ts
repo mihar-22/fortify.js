@@ -1,8 +1,8 @@
 import { Container, ContainerModule } from 'inversify';
 import Axios from 'axios';
-import Config, { Env } from './Config';
-import DIToken from './DIToken';
-import coreModules from './modules';
+import { Config, Env } from './Config';
+import { DIToken } from './DIToken';
+import { coreModules } from './modules';
 import { HttpClient } from './support/types';
 
 let hasBootstrapped = false;
@@ -16,7 +16,7 @@ const coreDependencies = (config?: Config) => new ContainerModule((bind) => {
     .inSingletonScope();
 });
 
-export default async function bootstrap(container: Container, config?: Config) {
+export async function bootstrap(container: Container, config?: Config) {
   if (hasBootstrapped) { return; }
 
   if (bootstrapping) {

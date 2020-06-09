@@ -1,32 +1,40 @@
 import { AsyncContainerModule } from 'inversify';
-import DIToken from '../../DIToken';
-import Config, { Env } from '../../Config';
-import Module from '../Module';
-import CryptoEncrypter from './CryptoEncrypter';
+import { DIToken } from '../../DIToken';
+import { Config, Env } from '../../Config';
+import { Module } from '../Module';
+import { CryptoEncrypter } from './CryptoEncrypter';
 import { CipherAlgorithm, Encrypter } from './Encrypter';
-import { EncryptionError, EncryptionErrorCode } from './EncryptionError';
+import { EncryptionErrors, EncryptionError } from './EncryptionErrors';
+import { FakeEncrypter } from './FakeEncrypter';
 
-const EncryptionModule = new AsyncContainerModule(async (bind) => {
+export const EncryptionModule = new AsyncContainerModule(async (bind) => {
+  bind<Encrypter>(DIToken.FakeEncrypter)
+    .toDynamicValue(() => new FakeEncrypter())
+    .inSingletonScope();
+
   bind<Encrypter>(DIToken.Encrypter)
-    .toDynamicValue((context) => {
-      const config = context.container.get<Config>(DIToken.Config);
-      const encryptConfig = config?.[Module.Encryption]!;
+    .toDynamicValue(({ container }) => {
+      const config = container.get<Config>(DIToken.Config);
+
+      if (config?.env === Env.Testing) {
+        return container.get(DIToken.FakeEncrypter);
+      }
+
+      const encryptConfig = config?.[Module.Encryption];
       let { key, cipher } = encryptConfig ?? {};
 
       if (config?.env === Env.Production && (!key || key.length === 0)) {
-        throw EncryptionError[EncryptionErrorCode.MissingKey];
+        throw EncryptionErrors[EncryptionError.MissingKey]();
       } else {
         cipher = cipher ?? CipherAlgorithm.AES256CBC;
         key = key ?? CryptoEncrypter.generateKey(cipher);
       }
 
       if (!CryptoEncrypter.supported(key, cipher)) {
-        throw EncryptionError[EncryptionErrorCode.UnsupportedCipherAndKeyPair];
+        throw EncryptionErrors[EncryptionError.UnsupportedCipherAndKeyPair]();
       }
 
       return new CryptoEncrypter(key, cipher);
     })
     .inSingletonScope();
 });
-
-export default EncryptionModule;

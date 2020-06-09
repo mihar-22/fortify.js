@@ -1,7 +1,7 @@
 import 'reflect-metadata';
 import { Container } from 'inversify';
-import Config from './Config';
-import bootstrap from './bootstrap';
+import { Config } from './Config';
+import { bootstrap } from './bootstrap';
 
 const container = new Container();
 

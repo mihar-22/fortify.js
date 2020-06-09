@@ -1,8 +1,8 @@
 import { injectable } from 'inversify';
-import Dispatcher from './Dispatcher';
+import { Dispatcher } from './Dispatcher';
 
 @injectable()
-export default class EventDispatcher implements Dispatcher {
+export class EventDispatcher implements Dispatcher {
   private listeners: Record<string, ((payload?: any) => void)[] | undefined> = {};
 
   private queue: Record<string, any[] | undefined> = {};

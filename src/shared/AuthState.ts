@@ -1,6 +1,4 @@
-enum AuthState {
+export enum AuthState {
   Stateful,
   Stateless
 }
-
-export default AuthState;

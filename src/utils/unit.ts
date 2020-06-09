@@ -9,6 +9,8 @@ export const getConstructor = (input: any) => (
   !isNullOrUndefined(input) ? input.constructor : undefined
 );
 
+export const isString = (input: any) => getConstructor(input) === String;
+
 export const isObject = (input: any) => getConstructor(input) === Object;
 
 export const isArray = (input: any) => Array.isArray(input);

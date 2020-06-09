@@ -70,6 +70,7 @@
     "@rollup/plugin-node-resolve": "^8.0.0",
     "@rollup/plugin-typescript": "^4.1.2",
     "@types/jest": "^25.2.3",
+    "@types/mustache": "^4.0.1",
     "@types/node": "^14.0.9",
     "@types/nodemailer": "^6.4.0",
     "@typescript-eslint/eslint-plugin": "^3.1.0",
@@ -92,8 +93,10 @@
     "dayjs": "^1.8.28",
     "hash-equals": "^0.0.3",
     "inversify": "^5.0.1",
+    "mustache": "^4.0.1",
     "nanoid": "^3.1.9",
     "nodemailer": "^6.4.8",
-    "reflect-metadata": "^0.1.13"
+    "reflect-metadata": "^0.1.13",
+    "winston": "^3.2.1"
   }
 }

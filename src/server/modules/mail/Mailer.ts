@@ -1,5 +1,4 @@
 import { SmtpConfig } from './SmtpClient';
-import { MailTemplate } from './MailTemplate';
 
 export enum MailTransporter {
   Smtp = 'smtp',
@@ -7,10 +6,7 @@ export enum MailTransporter {
   Mailgun = 'mailgun'
 }
 
-export type MailTemplates = { [T in MailTemplate]?: string };
-
-export interface Mail<T> {
-  from?: string,
+export interface Mail<T extends object> {
   to: string,
   subject: string,
   text?: string
@@ -18,14 +14,21 @@ export interface Mail<T> {
   data?: T
 }
 
+export type MailSenderFactory = () => string;
+
+export interface MailFrom {
+  name: string
+  address: string
+}
+
 export interface MailConfig {
+  from?: MailFrom,
   transporter?: MailTransporter
   smtp?: SmtpConfig
-  templates?: MailTemplates
 }
 
 export interface Mailer {
-  send<T>(mail: Mail<T>): Promise<void>
+  send<T extends object>(mail: Mail<T>): Promise<void>
 }
 
 export interface MailerConstructor {

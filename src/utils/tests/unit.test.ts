@@ -1,6 +1,6 @@
 import {
   getConstructor,
-  isArray, isNull, isObject, isUndefined,
+  isArray, isNull, isObject, isString, isUndefined,
 } from '../unit';
 
 describe('utils', () => {
@@ -22,6 +22,12 @@ describe('utils', () => {
       Object.values(inputs)
         .forEach((input) => expect(check(input.input)).toBe(input.isValid || false));
     };
+
+    describe('isArray', () => {
+      it('should only return true if given a string', () => {
+        expectToBeTrueOnlyFor('string', isString);
+      });
+    });
 
     describe('isArray', () => {
       it('should only return true if given an array', () => {

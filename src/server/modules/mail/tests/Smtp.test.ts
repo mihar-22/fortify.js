@@ -1,5 +1,0 @@
-describe('Mail', () => {
-  describe('Smtp', () => {
-
-  });
-});

@@ -1,7 +1,7 @@
-import ConfigurationError from './ConfigurationError';
-import RuntimeError from './RuntimeError';
-import HttpError from './HttpError';
+import { ConfigurationError } from './ConfigurationError';
+import { RuntimeError } from './RuntimeError';
+import { HttpError } from './HttpError';
 
-type Errors<T extends keyof any> = { [K in T]: ConfigurationError | RuntimeError | HttpError };
-
-export default Errors;
+export type Error<T> = ConfigurationError<T> | RuntimeError<T> | HttpError<T>;
+export type ErrorBuilder<T> = (...args: any[]) => Error<T>;
+export type Errors<T extends keyof any, R> = { [K in T]: ErrorBuilder<R> };

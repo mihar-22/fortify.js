@@ -1,7 +1,5 @@
 import { AsyncContainerModule } from 'inversify';
 
-const DatabaseModule = new AsyncContainerModule(async () => {
+export const DatabaseModule = new AsyncContainerModule(async () => {
   // ...
 });
-
-export default DatabaseModule;

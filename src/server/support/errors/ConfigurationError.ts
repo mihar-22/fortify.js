@@ -1,14 +1,13 @@
-import ServerError from './ServerError';
-import Module from '../../modules/Module';
+import { ServerError } from './ServerError';
 
-export default class ConfigurationError extends Error implements ServerError {
+export class ConfigurationError<T> extends Error implements ServerError<T> {
   public code: string;
 
-  public module: Module;
+  public module: T;
 
   public configPath: string;
 
-  constructor(code: string, message: string, module: Module, configPath: string) {
+  constructor(code: string, message: string, module: T, configPath: string) {
     super(message);
     this.code = code;
     this.module = module;

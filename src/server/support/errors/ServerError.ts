@@ -1,8 +1,6 @@
-import Module from '../../modules/Module';
-
-export default interface ServerError extends Error {
+export interface ServerError<T> extends Error {
   code: string
   message: string
-  module: Module
+  module: T
   stack?: string
 }

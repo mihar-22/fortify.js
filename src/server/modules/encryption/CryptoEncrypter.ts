@@ -11,9 +11,9 @@ import {
   Encrypter,
   HashAlgorithm,
 } from './Encrypter';
-import { EncryptionErrorCode, EncryptionError } from './EncryptionError';
+import { EncryptionError, EncryptionErrors } from './EncryptionErrors';
 
-export default class CryptoEncrypter implements Encrypter {
+export class CryptoEncrypter implements Encrypter {
   protected readonly key: string;
 
   protected readonly cipherAlgorithm: CipherAlgorithm;
@@ -63,7 +63,7 @@ export default class CryptoEncrypter implements Encrypter {
       ]);
       return shouldDeserialize ? deserialize(decryption) : decryption.toString('utf-8');
     } catch (e) {
-      throw EncryptionError[EncryptionErrorCode.InvalidPayload];
+      throw EncryptionErrors[EncryptionError.InvalidPayload]();
     }
   }
 
@@ -84,15 +84,15 @@ export default class CryptoEncrypter implements Encrypter {
       encryptedPayload = JSON.parse(Buffer.from(payload, 'base64')
         .toString('utf-8')) as EncryptedPayload;
     } catch (e) {
-      throw EncryptionError[EncryptionErrorCode.InvalidPayload];
+      throw EncryptionErrors[EncryptionError.InvalidPayload]();
     }
 
     if (!this.isPayloadValid(encryptedPayload)) {
-      throw EncryptionError[EncryptionErrorCode.InvalidPayload];
+      throw EncryptionErrors[EncryptionError.InvalidPayload]();
     }
 
     if (!this.isMacValid(encryptedPayload)) {
-      throw EncryptionError[EncryptionErrorCode.InvalidMac];
+      throw EncryptionErrors[EncryptionError.InvalidMac]();
     }
 
     return encryptedPayload;

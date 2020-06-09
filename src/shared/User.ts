@@ -1,5 +1,5 @@
-import AuthProvider from './AuthProvider';
-import AuthState from './AuthState';
+import { AuthProvider } from './AuthProvider';
+import { AuthState } from './AuthState';
 
 export type RawUserData = Record<string, any>;
 
@@ -13,31 +13,31 @@ export interface Tokens {
 }
 
 export class User {
-  id?: string;
+  public id?: string;
 
-  nickname?: string;
+  public nickname?: string;
 
-  name?: string;
+  public name?: string;
 
-  email?: string;
+  public email?: string;
 
-  birthday?: Date;
+  public birthday?: Date;
 
-  phoneNumber?: string;
+  public phoneNumber?: string;
 
-  avatar?: string;
+  public avatar?: string;
 
-  tokens?: Tokens;
+  public tokens?: Tokens;
 
-  raw?: RawUserData;
+  public raw?: RawUserData;
 
-  claims?: Claims;
+  public claims?: Claims;
 
-  state?: AuthState;
+  public state?: AuthState;
 
-  provider?: AuthProvider;
+  public provider?: AuthProvider;
 
-  isEmailVerified = false;
+  public isEmailVerified = false;
 
   // Check if the raw data contains the given property.
   public hasRawProperty(property: string) {
