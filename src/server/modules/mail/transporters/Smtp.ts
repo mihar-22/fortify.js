@@ -3,14 +3,15 @@ import { Mail, MailSenderFactory } from '../Mailer';
 import { DIToken } from '../../../DIToken';
 import { getPreviewUrl, SmtpClientProvider } from '../SmtpClient';
 import { AbstractMailTransporter } from './AbstractMailTransporter';
-import { Logger } from '../../logger';
-import { Dispatcher } from '../../events';
+import { Logger } from '../../logger/Logger';
+import { Dispatcher } from '../../events/Dispatcher';
 import { MailTemplateBuilder } from '../MailTemplateBuilder';
-import { Module } from '../../Module';
+import { MailLog } from '../MailLog';
+import { MailEventCode } from '../MailEvent';
 
 @injectable()
-export class Smtp extends AbstractMailTransporter {
-  private readonly clientProvider: SmtpClientProvider;
+export class Smtp extends AbstractMailTransporter<object> {
+  protected readonly clientProvider: SmtpClientProvider;
 
   constructor(
   @inject(DIToken.SmtpClientProvider) clientProvider: SmtpClientProvider,
@@ -22,11 +23,11 @@ export class Smtp extends AbstractMailTransporter {
     this.clientProvider = clientProvider;
   }
 
-  public async sendMail<T extends object>(mail: Mail<T>): Promise<any> {
+  public async sendMail(mail: Mail<any>): Promise<object> {
     const client = await this.clientProvider();
 
     const html = mail.template
-      ? (await MailTemplateBuilder.build<T>(mail.template, mail.data))
+      ? (await MailTemplateBuilder.build(mail.template, mail.data))
       : undefined;
 
     const response = await client.sendMail({
@@ -40,11 +41,7 @@ export class Smtp extends AbstractMailTransporter {
     const previewUrl = getPreviewUrl(response);
 
     if (previewUrl) {
-      this.logger.info({
-        label: Module.Mail,
-        action: `Preview URL: ${previewUrl}`,
-        context: { mail, response },
-      });
+      this.logger.info(MailLog[MailEventCode.MailPreviewCreated]({ previewUrl, mail }));
     }
 
     return response;

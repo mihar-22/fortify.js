@@ -2,7 +2,7 @@ import { randomBytes } from 'crypto';
 import { Container } from 'inversify';
 import { CryptoEncrypter } from '../CryptoEncrypter';
 import { CipherAlgorithm } from '../Encrypter';
-import { EncryptionErrors, EncryptionError } from '../EncryptionErrors';
+import { EncryptionError, EncryptionErrorCode } from '../EncryptionError';
 import { EncryptionModule } from '../EncryptionModule';
 import { Config, Env } from '../../../Config';
 import { DIToken } from '../../../DIToken';
@@ -81,7 +81,7 @@ describe('Encryption', () => {
       const encrypter = getEncrypterFromContainer();
       const payload = encrypter.encrypt('foo');
       encrypter.decrypt(payload.split('').sort(() => 0.5 - Math.random()).join(''));
-    }).rejects.toThrow(EncryptionErrors[EncryptionError.InvalidPayload]()));
+    }).rejects.toThrow(EncryptionError[EncryptionErrorCode.InvalidPayload]()));
 
     test('should throw given invalid mac', () => expect(async () => {
       const containerA = await loadModule();
@@ -89,7 +89,7 @@ describe('Encryption', () => {
       const containerB = await loadModule();
       const encrypterB = getEncrypterFromContainer(containerB);
       encrypterA.decrypt(encrypterB.encrypt('foo'));
-    }).rejects.toThrow(EncryptionErrors[EncryptionError.InvalidMac]()));
+    }).rejects.toThrow(EncryptionError[EncryptionErrorCode.InvalidMac]()));
 
     test('should throw when iv is too long', () => expect(async () => {
       await loadModule();
@@ -100,6 +100,6 @@ describe('Encryption', () => {
       data.value = data.value.slice(1);
       const modifiedPayload = Buffer.from(JSON.stringify(data), 'utf-8').toString('base64');
       encrypter.decrypt(modifiedPayload);
-    }).rejects.toThrow(EncryptionErrors[EncryptionError.InvalidPayload]()));
+    }).rejects.toThrow(EncryptionError[EncryptionErrorCode.InvalidPayload]()));
   });
 });

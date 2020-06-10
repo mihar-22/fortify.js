@@ -19,4 +19,6 @@ export interface Config {
   [Module.Mail]?: MailConfig,
   [Module.Session]?: SessionConfig,
   [Module.Encryption]?: EncryptionConfig,
+  // @Todo: Join all server events.
+  // [Module.Events]?: EventsConfig,
 }

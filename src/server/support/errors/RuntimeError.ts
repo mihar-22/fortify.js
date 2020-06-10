@@ -1,11 +1,11 @@
 import { ServerError } from './ServerError';
 
-export class RuntimeError<T> extends Error implements ServerError<T> {
+export class RuntimeError extends Error implements ServerError {
   public code: string;
 
-  public module: T;
+  public module: string;
 
-  constructor(code: string, message: string, module: T) {
+  constructor(code: string, message: string, module: string) {
     super(message);
     this.code = code;
     this.module = module;

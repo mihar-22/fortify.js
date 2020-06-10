@@ -6,12 +6,14 @@ import { EventsModule } from './events/EventsModule';
 import { SessionModule } from './session/SessionModule';
 import { EncryptionModule } from './encryption/EncryptionModule';
 import { LoggerModule } from './logger/LoggerModule';
+import { HttpModule } from './http/HttpModule';
 
 export const coreModules: AsyncContainerModule[] = [
   LoggerModule,
   EncryptionModule,
   EventsModule,
   MailModule,
+  HttpModule,
   DatabaseModule,
   SessionModule,
   AuthModule,

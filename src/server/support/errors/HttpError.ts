@@ -1,10 +1,10 @@
 import { HttpError as IHttpError } from '../../modules/http/HttpError';
 import { ServerError } from './ServerError';
 
-export class HttpError<T> extends Error implements IHttpError, ServerError<T> {
+export class HttpError extends Error implements IHttpError, ServerError {
   public code: string;
 
-  public module: T;
+  public module: string;
 
   public statusCode: number;
 
@@ -13,7 +13,7 @@ export class HttpError<T> extends Error implements IHttpError, ServerError<T> {
   constructor(
     code: string,
     message: string,
-    module: T,
+    module: string,
     statusCode: number,
     errors?: string[],
   ) {

@@ -4,6 +4,7 @@ export enum Module {
   Encryption = 'encryption',
   Events = 'events',
   Logger = 'logger',
+  Http = 'http',
   Mail = 'mail',
   Session = 'session',
 }

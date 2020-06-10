@@ -6,7 +6,7 @@ export enum MailTransporter {
   Mailgun = 'mailgun'
 }
 
-export interface Mail<T extends object> {
+export interface Mail<T extends object | undefined> {
   to: string,
   subject: string,
   text?: string
@@ -28,7 +28,7 @@ export interface MailConfig {
 }
 
 export interface Mailer {
-  send<T extends object>(mail: Mail<T>): Promise<void>
+  send(mail: Mail<any>): Promise<any>
 }
 
 export interface MailerConstructor {

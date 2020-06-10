@@ -1,11 +1,11 @@
-export interface EventsConfig {
-  // ...
-}
+import { Event, EventCallback, EventCode } from './Event';
+
+export type RemoveListenerCallback = () => void;
 
 export interface Dispatcher {
-  listen<T>(event: string, cb: (payload?: T) => void): () => void
-  dispatch(event: string, payload?: any): void
-  push(event: string, payload?: any): void
-  flush(event: string): void
+  listen<PayloadType>(eventCode: EventCode, cb: EventCallback<PayloadType>): RemoveListenerCallback
+  dispatch<PayloadType>(event: Event<PayloadType>): void
+  push<PayloadType>(event: Event<PayloadType>): void
+  flush(eventCode: EventCode): void
   forgetPushed(): void
 }

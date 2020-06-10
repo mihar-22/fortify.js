@@ -9,7 +9,7 @@ import { Mailgun, SendGrid, Smtp } from './transporters';
 import {
   createSmtpTestAccount, createSmtpTransport, SmtpClient, SmtpClientProvider,
 } from './SmtpClient';
-import { MailError, MailErrors } from './MailErrors';
+import { MailErrorCode, MailError } from './MailError';
 import { FakeSmtpClient } from './FakeSmtpClient';
 import { FakeMailer } from './FakeMailer';
 
@@ -30,7 +30,7 @@ export const MailModule = new AsyncContainerModule(async (bind) => {
       let smtpConfig = mailConfig!.smtp;
 
       if (config?.env === Env.Production && !smtpConfig) {
-        throw MailErrors[MailError.MissingSmtpConfig]();
+        throw MailError[MailErrorCode.MissingSmtpConfig]();
       } else {
         const testAccount = await createSmtpTestAccount();
 
@@ -57,7 +57,7 @@ export const MailModule = new AsyncContainerModule(async (bind) => {
       const mailConfig = config?.[Module.Mail];
 
       // @TODO: find suitable defaults.
-      if (!mailConfig?.from) { throw MailErrors[MailError.MissingFromConfig](); }
+      if (!mailConfig?.from) { throw MailError[MailErrorCode.MissingFromConfig](); }
 
       return `${mailConfig?.from?.name} <${mailConfig?.from?.address}>`;
     };

@@ -2,8 +2,6 @@ import winston, { LeveledLogMethod, LoggerOptions, LogMethod } from 'winston';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import * as Transport from 'winston-transport';
 
-const { format } = winston;
-
 export interface Logger {
   silent: boolean
   transports: Transport[]
@@ -39,6 +37,7 @@ export type LoggerConfig = LoggerOptions;
 
 export const createLogger = (logger?: LoggerConfig): Logger => winston.createLogger(logger);
 
+const { format } = winston;
 export const createDefaultConsoleTransport = () => new winston.transports.Console({
   format: winston.format.combine(
     format.colorize(),

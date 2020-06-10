@@ -4,6 +4,7 @@ import { Dispatcher } from '../Dispatcher';
 import { DIToken } from '../../../DIToken';
 import { Config, Env } from '../../../Config';
 import { FakeDispatcher } from '../FakeDispatcher';
+import { Event } from '../Event';
 
 describe('Events', () => {
   describe('EventDispatcher', () => {
@@ -32,57 +33,64 @@ describe('Events', () => {
       expect(dispatcher).toBeInstanceOf(FakeDispatcher);
     });
 
-    test('basic event listening works', async () => {
-      let calls = 0;
-      const expectedPayload = 1;
-      const receivedPayloads: any[] = [];
-      dispatcher.listen('event', (payload) => {
-        calls += 1;
-        receivedPayloads.push(payload);
+    test('basic event listening works', () => {
+      const expectedEvent: Event<number> = { code: 'event', payload: 1 };
+      const receivedEvents: Event<number>[] = [];
+      dispatcher.listen<number>(expectedEvent.code, (event) => {
+        receivedEvents.push(event);
       });
-      dispatcher.listen('event', (payload) => {
-        calls += 1;
-        receivedPayloads.push(payload);
+      dispatcher.dispatch(expectedEvent);
+      dispatcher.dispatch(expectedEvent);
+      expect(receivedEvents).toHaveLength(2);
+      expect(receivedEvents).toEqual([expectedEvent, expectedEvent]);
+      receivedEvents.forEach((event) => {
+        expect(event.firedAt).toBeInstanceOf(Date);
       });
-      dispatcher.dispatch('event', expectedPayload);
-      dispatcher.dispatch('another event');
-      expect(receivedPayloads).toEqual([expectedPayload, expectedPayload]);
-      expect(calls).toBe(2);
     });
 
-    test('event queue works', async () => {
-      let calls = 0;
-      const expectedPayload = 1;
-      const receivedPayloads: any[] = [];
-      dispatcher.push('event', expectedPayload);
-      dispatcher.push('event', expectedPayload);
-      dispatcher.push('event', expectedPayload);
-      dispatcher.listen('event', (payload) => {
-        calls += 1;
-        receivedPayloads.push(payload);
+    test('event queue works', () => {
+      const expectedEvent: Event<number> = { code: 'event', payload: 1 };
+      const receivedEvents: Event<number>[] = [];
+      dispatcher.push(expectedEvent);
+      dispatcher.push(expectedEvent);
+      dispatcher.push(expectedEvent);
+      dispatcher.listen<number>(expectedEvent.code, (event) => {
+        receivedEvents.push(event);
       });
-      expect(calls).toBe(0);
-      expect(receivedPayloads.length).toBe(0);
-      dispatcher.flush('event');
-      expect(calls).toBe(3);
-      expect(receivedPayloads).toEqual([expectedPayload, expectedPayload, expectedPayload]);
+      expect(receivedEvents).toHaveLength(0);
+      dispatcher.flush(expectedEvent.code);
+      expect(receivedEvents).toHaveLength(3);
+      expect(receivedEvents).toEqual([expectedEvent, expectedEvent, expectedEvent]);
+      receivedEvents.forEach((event) => {
+        expect(event.queuedAt).toBeInstanceOf(Date);
+        expect(event.firedAt!.getTime()).toBeGreaterThan(event.queuedAt!.getTime());
+      });
     });
 
-    test('forgetting pushed events clears queue', async () => {
-      let calls = 0;
-      const expectedPayload = 1;
-      const receivedPayloads: any[] = [];
-      dispatcher.push('event', expectedPayload);
-      dispatcher.push('event', expectedPayload);
-      dispatcher.push('event', expectedPayload);
-      dispatcher.listen('event', (payload) => {
-        calls += 1;
-        receivedPayloads.push(payload);
+    test('forgetting pushed events clears queue', () => {
+      const expectedEvent: Event<number> = { code: 'event', payload: 1 };
+      const receivedEvents: Event<number>[] = [];
+      dispatcher.push(expectedEvent);
+      dispatcher.push(expectedEvent);
+      dispatcher.push(expectedEvent);
+      dispatcher.listen<number>(expectedEvent.code, (payload) => {
+        receivedEvents.push(payload);
       });
       dispatcher.forgetPushed();
-      dispatcher.flush('event');
-      expect(calls).toBe(0);
-      expect(receivedPayloads.length).toBe(0);
+      dispatcher.flush(expectedEvent.code);
+      expect(receivedEvents).toHaveLength(0);
+    });
+
+    test('removing an event stops callback from being called', async () => {
+      const expectedEvent: Event<number> = { code: 'event', payload: 1 };
+      const receivedEvents: Event<number>[] = [];
+      const removeListener = dispatcher.listen<number>(expectedEvent.code, (payload) => {
+        receivedEvents.push(payload);
+      });
+      removeListener();
+      dispatcher.dispatch(expectedEvent);
+      dispatcher.dispatch(expectedEvent);
+      expect(receivedEvents).toHaveLength(0);
     });
   });
 });

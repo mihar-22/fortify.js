@@ -4,7 +4,7 @@ import { Config, Env } from '../../Config';
 import { Module } from '../Module';
 import { CryptoEncrypter } from './CryptoEncrypter';
 import { CipherAlgorithm, Encrypter } from './Encrypter';
-import { EncryptionErrors, EncryptionError } from './EncryptionErrors';
+import { EncryptionError, EncryptionErrorCode } from './EncryptionError';
 import { FakeEncrypter } from './FakeEncrypter';
 
 export const EncryptionModule = new AsyncContainerModule(async (bind) => {
@@ -24,14 +24,14 @@ export const EncryptionModule = new AsyncContainerModule(async (bind) => {
       let { key, cipher } = encryptConfig ?? {};
 
       if (config?.env === Env.Production && (!key || key.length === 0)) {
-        throw EncryptionErrors[EncryptionError.MissingKey]();
+        throw EncryptionError[EncryptionErrorCode.MissingKey]();
       } else {
         cipher = cipher ?? CipherAlgorithm.AES256CBC;
         key = key ?? CryptoEncrypter.generateKey(cipher);
       }
 
       if (!CryptoEncrypter.supported(key, cipher)) {
-        throw EncryptionErrors[EncryptionError.UnsupportedCipherAndKeyPair]();
+        throw EncryptionError[EncryptionErrorCode.UnsupportedCipherAndKeyPair]();
       }
 
       return new CryptoEncrypter(key, cipher);

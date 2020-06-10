@@ -1,6 +1,8 @@
-export interface ServerError<T> extends Error {
-  code: string
+export type ErrorCode = string;
+
+export interface ServerError extends Error {
+  code: ErrorCode
   message: string
-  module: T
+  module: string
   stack?: string
 }
