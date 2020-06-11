@@ -28,7 +28,7 @@ export class HttpError extends Error implements IHttpError, ServerError {
     return JSON.stringify({
       code: this.code,
       message: this.message,
-      module: this.module,
+      module: this.module.toUpperCase(),
       statusCode: this.statusCode,
       errors: this.errors,
     });

@@ -1,29 +1,26 @@
 import { inject, injectable } from 'inversify';
 import { Mail, MailSenderFactory } from '../Mailer';
 import { DIToken } from '../../../DIToken';
-import { getPreviewUrl, SmtpClientProvider } from '../SmtpClient';
+import { getPreviewUrl, SmtpClientProvider, SmtpResponse } from '../SmtpClient';
 import { AbstractMailTransporter } from './AbstractMailTransporter';
-import { Logger } from '../../logger/Logger';
 import { Dispatcher } from '../../events/Dispatcher';
 import { MailTemplateBuilder } from '../MailTemplateBuilder';
-import { MailLog } from '../MailLog';
-import { MailEventCode } from '../MailEvent';
+import { MailEvent, MailEventCode } from '../MailEvent';
 
 @injectable()
-export class Smtp extends AbstractMailTransporter<object> {
+export class Smtp extends AbstractMailTransporter<SmtpResponse> {
   protected readonly clientProvider: SmtpClientProvider;
 
   constructor(
   @inject(DIToken.SmtpClientProvider) clientProvider: SmtpClientProvider,
-    @inject(DIToken.Logger) logger: Logger,
     @inject(DIToken.EventDispatcher) events: Dispatcher,
     @inject(DIToken.MailSenderFactory) sender: MailSenderFactory,
   ) {
-    super(logger, events, sender);
+    super(events, sender);
     this.clientProvider = clientProvider;
   }
 
-  public async sendMail(mail: Mail<any>): Promise<object> {
+  public async sendMail(mail: Mail<any>): Promise<SmtpResponse> {
     const client = await this.clientProvider();
 
     const html = mail.template
@@ -41,7 +38,8 @@ export class Smtp extends AbstractMailTransporter<object> {
     const previewUrl = getPreviewUrl(response);
 
     if (previewUrl) {
-      this.logger.info(MailLog[MailEventCode.MailPreviewCreated]({ previewUrl, mail }));
+      const previewCreatedEvent = MailEvent[MailEventCode.MailPreviewCreated];
+      this.events.dispatch(previewCreatedEvent(({ previewUrl, mail })));
     }
 
     return response;

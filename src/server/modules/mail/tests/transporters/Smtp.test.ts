@@ -3,47 +3,83 @@ import { MailModule } from '../../MailModule';
 import { Mailer } from '../../Mailer';
 import { DIToken } from '../../../../DIToken';
 import { FakeDispatcher } from '../../../events/FakeDispatcher';
-import { FakeLogger } from '../../../logger/FakeLogger';
 import { Config, Env } from '../../../../Config';
 import { FakeSmtpClient } from '../../FakeSmtpClient';
-import { LoggerModule } from '../../../logger/LoggerModule';
 import { EventsModule } from '../../../events/EventsModule';
 import { Smtp } from '../../transporters';
+import { MailEvent, MailEventCode } from '../../MailEvent';
 
 describe('Mail', () => {
   describe('Transporters', () => {
     describe('Smtp', () => {
       let container: Container;
       let mailer: Mailer;
-      let logger: FakeLogger;
       let events: FakeDispatcher;
       let smtpClient: FakeSmtpClient;
 
+      const mailRecipient = 'john@example.com';
       const mailSender = 'Test <no-reply@test.com>';
+      const template = require.resolve('../fixtures/dummy-template.html');
 
       beforeEach(async () => {
         container = new Container();
         container.bind<Config>(DIToken.Config).toConstantValue({ env: Env.Testing });
-        await container.loadAsync(LoggerModule, EventsModule, MailModule);
+        await container.loadAsync(EventsModule, MailModule);
 
         container.unbind(DIToken.MailSenderFactory);
         container.bind(DIToken.MailSenderFactory).toFactory<string>(() => () => mailSender);
 
         mailer = container.resolve(Smtp);
-        logger = container.get(DIToken.Logger);
         events = container.get(DIToken.EventDispatcher);
         smtpClient = await container.get<any>(DIToken.SmtpClientProvider)();
       });
 
-      test('hm', async () => {
-        const mail = { subject: 'Subject', to: 'john@example.com', text: 'Fresh email.' };
-        // console.log(await mailer.send(mail));
-        // expect(smtpClient.sendMail).toHaveBeenCalledWith({
-        //   ...mail,
-        //   html: undefined,
-        //   from: mailSender,
-        // });
-        // expect(events.dispatch).toHaveBeenCalledWith(MailEventCode.MailSending, mai);
+      test('sends raw text', async () => {
+        const mail = {
+          subject: 'Subject',
+          to: mailRecipient,
+          text: 'Fresh email.',
+        };
+        await mailer.send(mail);
+        expect(smtpClient.sendMail).toHaveBeenCalledWith({
+          ...mail,
+          html: undefined,
+          from: mailSender,
+        });
+        expect(events.dispatch).toHaveBeenCalledWith(
+          MailEvent[MailEventCode.MailSending]({ mail }),
+        );
+        expect(events.dispatch).toHaveBeenCalledWith(
+          // @ts-ignore
+          MailEvent[MailEventCode.MailSent]({ mail, previewUrl: undefined }),
+        );
+      });
+
+      test('builds html template and sends it', async () => {
+        const mail = {
+          subject: 'Subject',
+          to: mailRecipient,
+          template,
+          data: {
+            firstName: 'John',
+            lastName: 'Doe',
+          },
+        };
+        await mailer.send(mail);
+        expect(smtpClient.sendMail).toHaveBeenCalledWith({
+          from: mailSender,
+          subject: mail.subject,
+          to: mail.to,
+          html: expect.stringContaining('<div>John Doe</div>'),
+          text: undefined,
+        });
+        expect(events.dispatch).toHaveBeenCalledWith(
+          MailEvent[MailEventCode.MailSending]({ mail }),
+        );
+        expect(events.dispatch).toHaveBeenCalledWith(
+          // @ts-ignore
+          MailEvent[MailEventCode.MailSent]({ mail, previewUrl: undefined }),
+        );
       });
     });
   });

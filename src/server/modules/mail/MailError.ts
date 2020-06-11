@@ -14,7 +14,7 @@ export enum MailErrorCode {
 export interface MailErrorContext extends ErrorContextRecord<MailErrorCode> {
   [MailErrorCode.MissingFromConfig]: {}
   [MailErrorCode.MissingFromConfig]: {}
-  [MailErrorCode.CouldNotBuildTemplate]: { template?: string }
+  [MailErrorCode.CouldNotBuildTemplate]: { template?: string, reference?: Error }
 }
 
 export const MailError: ErrorBuilderRecord<MailErrorCode, MailErrorContext> = {
@@ -36,5 +36,10 @@ export const MailError: ErrorBuilderRecord<MailErrorCode, MailErrorContext> = {
     MailErrorCode.CouldNotBuildTemplate,
     `Could not build mail template [${context!.template}]`,
     Module.Mail,
+    context!.reference,
+    [
+      'The template file may have not been created.',
+      'The template contains data that was not included in `mail.data`.',
+    ],
   ),
 };

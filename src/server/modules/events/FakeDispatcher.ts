@@ -11,5 +11,7 @@ export class FakeDispatcher implements Dispatcher {
 
   public listen = jest.fn();
 
+  public listenToAll = jest.fn();
+
   public push = jest.fn();
 }

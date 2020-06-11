@@ -3,41 +3,25 @@ import { Logger } from './Logger';
 
 @injectable()
 export class FakeLogger implements Logger {
-  public transports = [];
+  public level = 'debug';
 
   public silent = false;
+
+  public transports = [];
 
   public error = jest.fn();
 
   public warn = jest.fn();
 
-  public help = jest.fn();
-
-  public data = jest.fn();
-
   public info = jest.fn();
-
-  public debug = jest.fn();
-
-  public prompt = jest.fn();
 
   public http = jest.fn();
 
   public verbose = jest.fn();
 
-  public input = jest.fn();
+  public debug = jest.fn();
 
   public silly = jest.fn();
-
-  public emerg = jest.fn();
-
-  public alert = jest.fn();
-
-  public crit = jest.fn();
-
-  public warning = jest.fn();
-
-  public notice = jest.fn();
 
   public log = jest.fn();
 

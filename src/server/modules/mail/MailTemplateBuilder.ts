@@ -8,8 +8,8 @@ export class MailTemplateBuilder {
     try {
       const fileContent = await promisify(readFile)(template);
       return Mustache.render(fileContent.toString('utf-8'), data);
-    } catch (e) {
-      throw MailError[MailErrorCode.CouldNotBuildTemplate]({ template });
+    } catch (reference) {
+      throw MailError[MailErrorCode.CouldNotBuildTemplate]({ template, reference });
     }
   }
 }

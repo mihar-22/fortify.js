@@ -1,31 +1,30 @@
 import winston, { LeveledLogMethod, LoggerOptions, LogMethod } from 'winston';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import * as Transport from 'winston-transport';
+import { bold, yellow } from 'kleur';
+
+// From the highest priority (error) to the lowest (silly).
+export enum LogLevel {
+  Error = 'error',
+  Warn = ' warn',
+  Info = 'info',
+  Http = 'http',
+  Verbose = 'verbose',
+  Debug = 'debug',
+  Silly = 'silly',
+}
 
 export interface Logger {
+  level: string
   silent: boolean
   transports: Transport[]
-
-  // for cli and npm levels
   error: LeveledLogMethod;
   warn: LeveledLogMethod;
-  help: LeveledLogMethod;
-  data: LeveledLogMethod;
   info: LeveledLogMethod;
-  debug: LeveledLogMethod;
-  prompt: LeveledLogMethod;
   http: LeveledLogMethod;
   verbose: LeveledLogMethod;
-  input: LeveledLogMethod;
+  debug: LeveledLogMethod;
   silly: LeveledLogMethod;
-
-  // for syslog levels only
-  emerg: LeveledLogMethod;
-  alert: LeveledLogMethod;
-  crit: LeveledLogMethod;
-  warning: LeveledLogMethod;
-  notice: LeveledLogMethod;
-
   log: LogMethod;
   add(transport: Transport): Logger;
   remove(transport: Transport): Logger;
@@ -42,8 +41,9 @@ export const createDefaultConsoleTransport = () => new winston.transports.Consol
   format: winston.format.combine(
     format.colorize(),
     format.timestamp({ format: 'YYYY-MM-DD hh:mm:ss.SSS' }),
-    format.printf((info: any) => `[${info.timestamp}] [${info.message.module}] ${info.level}: `
-      + `${info.message.action}`
-      + `${info.message.context ? `\n\n${JSON.stringify(info.message.context, null, 2)}` : ''}`),
+    format.printf(({
+      timestamp, level, label, message, ctx,
+    }) => `${yellow(timestamp)} [${bold(label)}] ${level}: ${message}`
+      + `${(ctx && Object.keys(ctx).length > 0) ? `\n\n${JSON.stringify(ctx, null, 2)}` : ''}`),
   ),
 });

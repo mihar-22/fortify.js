@@ -15,7 +15,7 @@ describe('Encryption', () => {
 
     const loadModule = async (config?: Config) => {
       container = new Container();
-      container.bind(DIToken.Config).toConstantValue(config);
+      container.bind(DIToken.Config).toConstantValue(config ?? {});
       await container.loadAsync(EncryptionModule);
       getEncrypterFromContainer();
     };

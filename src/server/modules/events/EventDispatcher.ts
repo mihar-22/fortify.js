@@ -1,21 +1,38 @@
-import { injectable } from 'inversify';
-import {
-  Dispatcher, RemoveListenerCallback,
-} from './Dispatcher';
+import { inject, injectable } from 'inversify';
+import { Dispatcher, RemoveListenerCallback } from './Dispatcher';
 import { Event, EventCallback, EventCode } from './Event';
+import { DIToken } from '../../DIToken';
+import { Logger, LogLevel } from '../logger/Logger';
 
 @injectable()
 export class EventDispatcher implements Dispatcher {
   private readonly listeners: Record<EventCode, EventCallback<any>[]> = {};
 
+  private globalListeners: EventCallback<any>[] = [];
+
   private queue: Record<EventCode, Event<any>[] | undefined> = {};
 
-  public dispatch<PayloadType>(event: Event<PayloadType>): void {
-    this.listeners[event.code]?.forEach((cb) => {
-      // eslint-disable-next-line no-param-reassign
-      event.firedAt = new Date();
-      cb(event);
+  private readonly logger: Logger;
+
+  constructor(@inject(DIToken.Logger) logger: Logger) {
+    this.logger = logger;
+  }
+
+  private log(event: Event<any>): void {
+    // @ts-ignore
+    this.logger[event.logLevel]({
+      label: event.code,
+      message: event.description,
+      ctx: (this.logger.level === LogLevel.Debug) ? event.payload : {},
     });
+  }
+
+  public dispatch<PayloadType>(event: Event<PayloadType>): void {
+    // eslint-disable-next-line no-param-reassign
+    event.firedAt = new Date();
+    this.log(event);
+    this.listeners[event.code]?.forEach((cb) => { cb(event); });
+    this.globalListeners.forEach((cb) => { cb(event); });
   }
 
   public flush(eventCode: string): void {
@@ -34,6 +51,13 @@ export class EventDispatcher implements Dispatcher {
     this.listeners[eventCode]!.push(cb);
     return () => {
       this.listeners[eventCode] = this.listeners[eventCode]!.filter((callback) => callback !== cb);
+    };
+  }
+
+  public listenToAll(cb: EventCallback<any>): RemoveListenerCallback {
+    this.globalListeners.push(cb);
+    return () => {
+      this.globalListeners = this.globalListeners.filter((callback) => callback !== cb);
     };
   }
 

@@ -23,8 +23,9 @@ describe('Encryption', () => {
       customContainer?: Container,
     ) => (customContainer ?? container).get<CryptoEncrypter>(DIToken.Encrypter);
 
+    beforeEach(() => loadModule());
+
     test('basic encryption works', async () => {
-      await loadModule();
       const encrypter = getEncrypterFromContainer();
       const msg = { foo: 'foo', bar: 2, base: [1, 2, 3] };
       const payload = encrypter.encrypt(msg);
@@ -33,7 +34,6 @@ describe('Encryption', () => {
     });
 
     test('raw string encryption works', async () => {
-      await loadModule();
       const encrypter = getEncrypterFromContainer();
       const payload = encrypter.encryptString('foo');
       expect(payload).not.toBe('foo');
@@ -55,7 +55,6 @@ describe('Encryption', () => {
     });
 
     test('payload length should be fixed', async () => {
-      await loadModule();
       const encrypter = getEncrypterFromContainer();
       const lengths: number[] = [];
       Array(100).fill(0).forEach(() => { lengths.push(encrypter.encrypt('foo').length); });
@@ -77,7 +76,6 @@ describe('Encryption', () => {
     });
 
     test('should throw given invalid payload', async () => expect(async () => {
-      await loadModule();
       const encrypter = getEncrypterFromContainer();
       const payload = encrypter.encrypt('foo');
       encrypter.decrypt(payload.split('').sort(() => 0.5 - Math.random()).join(''));
@@ -92,7 +90,6 @@ describe('Encryption', () => {
     }).rejects.toThrow(EncryptionError[EncryptionErrorCode.InvalidMac]()));
 
     test('should throw when iv is too long', () => expect(async () => {
-      await loadModule();
       const encrypter = getEncrypterFromContainer();
       const payload = encrypter.encrypt('foo');
       const data = JSON.parse(Buffer.from(payload, 'base64').toString('utf-8'));

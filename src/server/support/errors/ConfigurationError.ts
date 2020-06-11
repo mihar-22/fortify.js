@@ -1,3 +1,4 @@
+import { bold, yellow } from 'kleur';
 import { ServerError } from './ServerError';
 
 export class ConfigurationError extends Error implements ServerError {
@@ -8,15 +9,16 @@ export class ConfigurationError extends Error implements ServerError {
   public configPath: string;
 
   constructor(code: string, message: string, module: string, configPath: string) {
-    super(message);
+    super(undefined);
+
     this.code = code;
     this.module = module;
     this.configPath = configPath;
-  }
+    this.stack = undefined;
 
-  public getHumanReadableError(): string {
-    return `The ${this.module} module received an invalid configuration at the path: ${this.configPath}.`
-      + `\n Code: ${this.code}`
-      + `\n Message: ${this.message}`;
+    this.message = `${bold('Code:')} ${bold().red(code)}\n\n`
+      + `${bold('Module:')} ${module.toUpperCase()}\n\n`
+      + `${bold('Config Path:')} ${yellow(configPath)}\n\n`
+      + `${bold('Message:')} ${message}`;
   }
 }

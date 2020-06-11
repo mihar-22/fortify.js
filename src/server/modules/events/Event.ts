@@ -1,3 +1,5 @@
+import { LogLevel } from '../logger/Logger';
+
 export type EventCode = string;
 
 export class Event<PayloadType> {
@@ -9,9 +11,20 @@ export class Event<PayloadType> {
 
   public payload?: PayloadType;
 
-  constructor(code: EventCode, payload?: PayloadType) {
+  public description: string;
+
+  public logLevel: LogLevel;
+
+  constructor(
+    code: EventCode,
+    description: string,
+    payload?: PayloadType,
+    logLevel?: LogLevel,
+  ) {
     this.code = code;
     this.payload = payload;
+    this.description = description;
+    this.logLevel = logLevel ?? LogLevel.Debug;
   }
 }
 

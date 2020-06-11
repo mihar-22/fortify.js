@@ -1,9 +1,11 @@
 import Mail from 'nodemailer/lib/mailer';
-import nodemailer, { SentMessageInfo } from 'nodemailer';
-import SMTPTransport from 'nodemailer/lib/smtp-transport';
+import nodemailer from 'nodemailer';
+import { SentMessageInfo } from 'nodemailer/lib/smtp-transport';
+
+export type SmtpResponse = SentMessageInfo;
 
 export interface SmtpClient {
-  sendMail(mailOptions: Mail.Options): Promise<SentMessageInfo>;
+  sendMail(mailOptions: Mail.Options): Promise<SmtpResponse>;
 }
 
 export type SmtpClientProvider = () => Promise<SmtpClient>;
@@ -22,9 +24,7 @@ export interface SmtpConfig {
   password: string
 }
 
-export const getPreviewUrl = (
-  info: SMTPTransport.SentMessageInfo,
-) => nodemailer.getTestMessageUrl(info);
+export const getPreviewUrl = (response: SmtpResponse) => nodemailer.getTestMessageUrl(response);
 
 export const createSmtpTestAccount = async (): Promise<SmtpTestAccount> => {
   const { user, pass } = await nodemailer.createTestAccount();
