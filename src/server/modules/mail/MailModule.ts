@@ -26,12 +26,14 @@ export const MailModule = new AsyncContainerModule(async (bind) => {
         return container.get(DIToken.FakeSmtpClient);
       }
 
-      const mailConfig = config?.[Module.Mail] || {};
+      const mailConfig = config?.[Module.Mail] ?? {};
       let smtpConfig = mailConfig!.smtp;
 
       if (config?.env === Env.Production && !smtpConfig) {
         throw MailError[MailErrorCode.MissingSmtpConfig]();
-      } else {
+      }
+
+      if (!smtpConfig) {
         const testAccount = await createSmtpTestAccount();
 
         smtpConfig = {
@@ -42,7 +44,6 @@ export const MailModule = new AsyncContainerModule(async (bind) => {
         };
 
         mailConfig.smtp = smtpConfig;
-        mailConfig.from = { name: testAccount.senderName, address: testAccount.senderAddress };
         config[Module.Mail] = mailConfig;
       }
 
@@ -56,8 +57,12 @@ export const MailModule = new AsyncContainerModule(async (bind) => {
     return () => {
       const mailConfig = config?.[Module.Mail];
 
-      // @TODO: find suitable defaults.
-      if (!mailConfig?.from) { throw MailError[MailErrorCode.MissingFromConfig](); }
+      if (config?.env === Env.Production && !mailConfig?.from) {
+        throw MailError[MailErrorCode.MissingFromConfig]();
+      }
+
+      // @TODO: insert app name and domain here.
+      if (!mailConfig?.from) { return 'Test App <no-reply@localhost.com>'; }
 
       return `${mailConfig?.from?.name} <${mailConfig?.from?.address}>`;
     };
@@ -83,5 +88,6 @@ export const MailModule = new AsyncContainerModule(async (bind) => {
 
       const transporter = config?.[Module.Mail]?.transporter ?? MailTransporter.Smtp;
       return container.resolve<Mailer>(transporters[transporter]);
-    }).inSingletonScope();
+    })
+    .inSingletonScope();
 });

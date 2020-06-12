@@ -17,18 +17,14 @@ describe('Mail', () => {
       let events: FakeDispatcher;
       let smtpClient: FakeSmtpClient;
 
-      const mailRecipient = 'john@example.com';
-      const mailSender = 'Test <no-reply@test.com>';
+      const mailRecipient = 'john_doe@localhost.com';
+      const mailSender = 'Test App <no-reply@localhost.com>';
       const template = require.resolve('../fixtures/dummy-template.html');
 
       beforeEach(async () => {
         container = new Container();
         container.bind<Config>(DIToken.Config).toConstantValue({ env: Env.Testing });
         await container.loadAsync(EventsModule, MailModule);
-
-        container.unbind(DIToken.MailSenderFactory);
-        container.bind(DIToken.MailSenderFactory).toFactory<string>(() => () => mailSender);
-
         mailer = container.resolve(Smtp);
         events = container.get(DIToken.EventDispatcher);
         smtpClient = await container.get<any>(DIToken.SmtpClientProvider)();

@@ -12,8 +12,6 @@ export type SmtpClientProvider = () => Promise<SmtpClient>;
 
 export interface SmtpTestAccount {
   username: string
-  senderName: string
-  senderAddress: string,
   password: string
 }
 
@@ -28,13 +26,7 @@ export const getPreviewUrl = (response: SmtpResponse) => nodemailer.getTestMessa
 
 export const createSmtpTestAccount = async (): Promise<SmtpTestAccount> => {
   const { user, pass } = await nodemailer.createTestAccount();
-
-  return {
-    username: user,
-    password: pass,
-    senderName: user.substr(0, user.indexOf('@')),
-    senderAddress: user,
-  };
+  return { username: user, password: pass };
 };
 
 export const createSmtpTransport = (config: SmtpConfig): SmtpClient => nodemailer.createTransport({
