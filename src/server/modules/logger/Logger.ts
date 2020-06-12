@@ -1,5 +1,4 @@
 import winston, { LeveledLogMethod, LoggerOptions, LogMethod } from 'winston';
-// eslint-disable-next-line import/no-extraneous-dependencies
 import * as Transport from 'winston-transport';
 import { bold, yellow } from 'kleur';
 

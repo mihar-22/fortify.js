@@ -11,6 +11,7 @@ export interface Mail<T extends object | undefined> {
   subject: string,
   text?: string
   template?: string
+  remoteTemplate?: boolean
   data?: T
 }
 

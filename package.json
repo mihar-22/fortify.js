@@ -74,6 +74,7 @@
     "@types/node": "^14.0.9",
     "@types/nodemailer": "^6.4.0",
     "@typescript-eslint/eslint-plugin": "^3.1.0",
+    "dotenv": "^8.2.0",
     "eslint": "^7.1.0",
     "eslint-config-airbnb-typescript": "^7.2.1",
     "eslint-plugin-import": "^2.20.2",
@@ -82,6 +83,7 @@
     "eslint-plugin-react-hooks": "^4.0.4",
     "husky": "^4.2.5",
     "jest": "^26.0.1",
+    "nodemailer": "^6.4.8",
     "rimraf": "^3.0.2",
     "rollup-plugin-terser": "^6.1.0",
     "ts-jest": "^26.1.0",
@@ -95,7 +97,6 @@
     "kleur": "^3.0.3",
     "mustache": "^4.0.1",
     "nanoid": "^3.1.9",
-    "nodemailer": "^6.4.8",
     "reflect-metadata": "^0.1.13",
     "winston": "^3.2.1"
   }

@@ -5,6 +5,12 @@ import { DIToken } from '../../../DIToken';
 import { HttpClient } from '../../http/HttpClient';
 import { Dispatcher } from '../../events/Dispatcher';
 
+export interface MailgunConfig {
+  // domain
+  // secret
+  // endpoint
+}
+
 export interface MailgunResponse {
 }
 
