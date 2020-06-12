@@ -7,8 +7,6 @@ export class FakeLogger implements Logger {
 
   public silent = false;
 
-  public transports = [];
-
   public error = jest.fn();
 
   public warn = jest.fn();
@@ -24,12 +22,4 @@ export class FakeLogger implements Logger {
   public silly = jest.fn();
 
   public log = jest.fn();
-
-  public add = jest.fn();
-
-  public remove = jest.fn();
-
-  public clear = jest.fn();
-
-  public close = jest.fn();
 }

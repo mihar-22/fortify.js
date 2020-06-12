@@ -22,6 +22,7 @@ export const LoggerModule = new AsyncContainerModule(async (bind) => {
       const logger = createLogger(loggerConfig);
 
       if (config?.env !== Env.Production) {
+        // @ts-ignore
         logger.add(createDefaultConsoleTransport());
       }
 

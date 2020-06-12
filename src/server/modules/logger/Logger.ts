@@ -1,5 +1,4 @@
 import winston, { LeveledLogMethod, LoggerOptions, LogMethod } from 'winston';
-import * as Transport from 'winston-transport';
 import { bold, yellow } from 'kleur';
 
 // From the highest priority (error) to the lowest (silly).
@@ -16,7 +15,6 @@ export enum LogLevel {
 export interface Logger {
   level: string
   silent: boolean
-  transports: Transport[]
   error: LeveledLogMethod;
   warn: LeveledLogMethod;
   info: LeveledLogMethod;
@@ -25,15 +23,11 @@ export interface Logger {
   debug: LeveledLogMethod;
   silly: LeveledLogMethod;
   log: LogMethod;
-  add(transport: Transport): Logger;
-  remove(transport: Transport): Logger;
-  clear(): Logger;
-  close(): Logger;
 }
 
 export type LoggerConfig = LoggerOptions;
 
-export const createLogger = (logger?: LoggerConfig): Logger => winston.createLogger(logger);
+export const createLogger = (config?: LoggerConfig): Logger => winston.createLogger(config);
 
 const { format } = winston;
 export const createDefaultConsoleTransport = () => new winston.transports.Console({
