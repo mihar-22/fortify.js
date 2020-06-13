@@ -1,6 +1,7 @@
 import Mail from 'nodemailer/lib/mailer';
 import nodemailer from 'nodemailer';
 import { SentMessageInfo } from 'nodemailer/lib/smtp-transport';
+import { SmtpConfig } from '../../MailConfig';
 
 export type SmtpResponse = SentMessageInfo;
 
@@ -11,13 +12,6 @@ export interface SmtpClient {
 export type SmtpClientProvider = () => Promise<SmtpClient>;
 
 export interface SmtpTestAccount {
-  username: string
-  password: string
-}
-
-export interface SmtpConfig {
-  host: string
-  port: number
   username: string
   password: string
 }

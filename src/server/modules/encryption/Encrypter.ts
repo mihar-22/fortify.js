@@ -18,11 +18,6 @@ export interface EncryptedPayload {
   mac: string
 }
 
-export interface EncryptionConfig {
-  key: string,
-  cipher?: CipherAlgorithm
-}
-
 export interface Encrypter {
   encrypt(value: any, shouldSerialize: boolean): string
   decrypt(payload: string, shouldDeserialize: boolean): any

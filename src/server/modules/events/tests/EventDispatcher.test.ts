@@ -1,47 +1,45 @@
-import { Container } from 'inversify';
-import { EventsModule } from '../EventsModule';
 import { Dispatcher } from '../Dispatcher';
 import { DIToken } from '../../../DIToken';
 import { Config, Env } from '../../../Config';
 import { FakeDispatcher } from '../FakeDispatcher';
 import { Event } from '../Event';
-import { EventDispatcher } from '../EventDispatcher';
-import { LoggerModule } from '../../logger/LoggerModule';
 import { Logger, LogLevel } from '../../logger/Logger';
+import { App } from '../../../App';
+import { bootstrap } from '../../../bootstrap';
+import { LoggerModule } from '../../logger/LoggerModule';
+import { EventDispatcher } from '../EventDispatcher';
+import { EventsModule } from '../EventsModule';
 
 describe('Events', () => {
   describe('EventDispatcher', () => {
-    let container: Container;
+    let app: App;
     let logger: Logger;
     let dispatcher: Dispatcher;
-
-    const expectedEvent = new Event('EVENT_CODE', 'Description', 1);
     let receivedEvents: Event<number>[] = [];
+    const expectedEvent = new Event('EVENT_CODE', 'Description', 1);
+    const getDispatcher = () => app.get<Dispatcher>(DIToken.EventDispatcher);
+    const resolveDispatcher = () => app.resolve<Dispatcher>(EventDispatcher);
 
-    const getDispatcherFromContainer = () => container.get<Dispatcher>(DIToken.EventDispatcher);
-    const resolveDispatcherFromContainer = () => container.resolve(EventDispatcher);
-
-    const loadModule = async (config: Config = { env: Env.Testing }) => {
-      container = new Container();
-      container.bind(DIToken.Config).toConstantValue(config);
-      await container.loadAsync(LoggerModule, EventsModule);
-      dispatcher = resolveDispatcherFromContainer();
-      logger = container.get<Logger>(DIToken.Logger);
+    const boot = async (config?: Config) => {
+      app = await bootstrap([LoggerModule, EventsModule], config, true);
+      logger = app.get<Logger>(DIToken.Logger);
+      dispatcher = resolveDispatcher();
     };
 
     beforeEach(async () => {
       receivedEvents = [];
-      await loadModule();
+      await boot({ env: Env.Testing });
     });
 
-    test('dispatcher is singleton scoped', () => {
-      const dispatcherA = getDispatcherFromContainer();
-      const dispatcherB = getDispatcherFromContainer();
+    test('dispatcher is singleton scoped', async () => {
+      await boot();
+      const dispatcherA = getDispatcher();
+      const dispatcherB = getDispatcher();
       expect(dispatcherA).toBe(dispatcherB);
     });
 
     test('fake dispatcher is resolved in testing env', async () => {
-      const fakeDispatcher = getDispatcherFromContainer();
+      const fakeDispatcher = getDispatcher();
       expect(fakeDispatcher).toBeInstanceOf(FakeDispatcher);
     });
 

@@ -1,22 +1,28 @@
-import { AsyncContainerModule } from 'inversify';
 import { DIToken } from '../../DIToken';
 import { Dispatcher } from './Dispatcher';
 import { EventDispatcher } from './EventDispatcher';
-import { Config, Env } from '../../Config';
 import { FakeDispatcher } from './FakeDispatcher';
+import { ModuleProvider } from '../../support/ModuleProvider';
+import { Module } from '../Module';
+import { App } from '../../App';
 
-export const EventsModule = new AsyncContainerModule(async (bind) => {
-  bind<Dispatcher>(DIToken.FakeDispatcher)
-    .toDynamicValue(() => new FakeDispatcher())
-    .inSingletonScope();
+export const EventsModule: ModuleProvider<undefined> = {
+  module: Module.Events,
 
-  bind<Dispatcher>(DIToken.EventDispatcher)
-    .toDynamicValue(({ container }) => {
-      const config = container.get<Config>(DIToken.Config);
+  register: (app: App) => {
+    app
+      .bind<Dispatcher>(DIToken.EventDispatcher)
+      .toDynamicValue(() => app.resolve(EventDispatcher))
+      .inSingletonScope();
+  },
 
-      return (config?.env === Env.Testing)
-        ? container.get(DIToken.FakeDispatcher)
-        : container.resolve(EventDispatcher);
-    })
-    .inSingletonScope();
-});
+  registerTestingEnv: (app: App) => {
+    app
+      .bind<Dispatcher>(DIToken.FakeDispatcher)
+      .toConstantValue(new FakeDispatcher());
+
+    app
+      .rebind<Dispatcher>(DIToken.EventDispatcher)
+      .toConstantValue(app.get(DIToken.FakeDispatcher));
+  },
+};

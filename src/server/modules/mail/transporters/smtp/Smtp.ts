@@ -1,11 +1,10 @@
 import { inject, injectable } from 'inversify';
-import { Mail, MailSenderFactory } from '../Mailer';
-import { DIToken } from '../../../DIToken';
-import { getPreviewUrl, SmtpClientProvider, SmtpResponse } from '../SmtpClient';
-import { AbstractMailTransporter } from './AbstractMailTransporter';
-import { Dispatcher } from '../../events/Dispatcher';
-import { MailTemplateBuilder } from '../MailTemplateBuilder';
-import { MailEvent, MailEventCode } from '../MailEvent';
+import { Mail, MailSenderFactory } from '../../Mailer';
+import { DIToken } from '../../../../DIToken';
+import { getPreviewUrl, SmtpClientProvider, SmtpResponse } from './SmtpClient';
+import { AbstractMailTransporter } from '../AbstractMailTransporter';
+import { Dispatcher } from '../../../events/Dispatcher';
+import { MailEvent, MailEventCode } from '../../MailEvent';
 
 @injectable()
 export class Smtp extends AbstractMailTransporter<SmtpResponse> {
@@ -20,12 +19,8 @@ export class Smtp extends AbstractMailTransporter<SmtpResponse> {
     this.clientProvider = clientProvider;
   }
 
-  public async sendMail(mail: Mail<any>): Promise<SmtpResponse> {
+  public async sendMail(mail: Mail<any>, html?: string): Promise<SmtpResponse> {
     const client = await this.clientProvider();
-
-    const html = mail.template
-      ? (await MailTemplateBuilder.build(mail.template, mail.data))
-      : undefined;
 
     const response = await client.sendMail({
       from: this.sender(),

@@ -1,18 +1,18 @@
-import { Container } from 'inversify';
 import { MailModule } from '../../MailModule';
 import { Mailer } from '../../Mailer';
 import { DIToken } from '../../../../DIToken';
 import { FakeDispatcher } from '../../../events/FakeDispatcher';
-import { Config, Env } from '../../../../Config';
-import { FakeSmtpClient } from '../../FakeSmtpClient';
+import { Env } from '../../../../Config';
+import { FakeSmtpClient, Smtp } from '../../transporters';
 import { EventsModule } from '../../../events/EventsModule';
-import { Smtp } from '../../transporters';
 import { MailEvent, MailEventCode } from '../../MailEvent';
+import { App } from '../../../../App';
+import { bootstrap } from '../../../../bootstrap';
 
 describe('Mail', () => {
   describe('Transporters', () => {
     describe('Smtp', () => {
-      let container: Container;
+      let app: App;
       let mailer: Mailer;
       let events: FakeDispatcher;
       let smtpClient: FakeSmtpClient;
@@ -22,12 +22,10 @@ describe('Mail', () => {
       const template = require.resolve('../fixtures/dummy-template.html');
 
       beforeEach(async () => {
-        container = new Container();
-        container.bind<Config>(DIToken.Config).toConstantValue({ env: Env.Testing });
-        await container.loadAsync(EventsModule, MailModule);
-        mailer = container.resolve(Smtp);
-        events = container.get(DIToken.EventDispatcher);
-        smtpClient = await container.get<any>(DIToken.SmtpClientProvider)();
+        app = await bootstrap([EventsModule, MailModule], { env: Env.Testing }, true);
+        mailer = app.resolve(Smtp);
+        events = app.get(DIToken.EventDispatcher);
+        smtpClient = await app.get<any>(DIToken.SmtpClientProvider)();
       });
 
       test('sends raw text', async () => {

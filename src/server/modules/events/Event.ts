@@ -47,5 +47,5 @@ export type EventCallbackRecord<
   EventCodeEnum extends keyof any,
   EventPayloadRecordType extends EventPayloadRecord<EventCodeEnum>
 > = {
-  [P in EventCodeEnum]: EventCallback<Event<EventPayloadRecordType[P]>>
+  [P in EventCodeEnum]?: EventCallback<Event<EventPayloadRecordType[P]>>
 };

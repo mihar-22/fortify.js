@@ -1,32 +1,34 @@
-import { AsyncContainerModule } from 'inversify';
-import { createDefaultConsoleTransport, createLogger, Logger } from './Logger';
+import {
+  createDefaultConsoleTransport, createLogger, Logger, LoggerConfig,
+} from './Logger';
 import { DIToken } from '../../DIToken';
-import { Config, Env } from '../../Config';
 import { Module } from '../Module';
 import { FakeLogger } from './FakeLogger';
+import { ModuleProvider } from '../../support/ModuleProvider';
+import { App } from '../../App';
 
-export const LoggerModule = new AsyncContainerModule(async (bind) => {
-  bind<Logger>(DIToken.FakeLogger)
-    .toDynamicValue(() => new FakeLogger())
-    .inSingletonScope();
+export const LoggerModule: ModuleProvider<LoggerConfig> = {
+  module: Module.Logger,
 
-  bind<Logger>(DIToken.Logger)
-    .toDynamicValue(({ container }) => {
-      const config = container.get<Config>(DIToken.Config);
+  register: (app: App) => {
+    const loggerConfig = app.getConfig(Module.Logger);
 
-      if (config?.env === Env.Testing) {
-        return container.get(DIToken.FakeLogger);
-      }
+    app.bind<Logger>(DIToken.Logger)
+      .toDynamicValue(() => {
+        const logger = createLogger(loggerConfig);
 
-      const loggerConfig = config?.[Module.Logger];
-      const logger = createLogger(loggerConfig);
+        if (!app.isProductionEnv) {
+          // @ts-ignore
+          logger.add(createDefaultConsoleTransport());
+        }
 
-      if (config?.env !== Env.Production) {
-        // @ts-ignore
-        logger.add(createDefaultConsoleTransport());
-      }
+        return logger;
+      })
+      .inSingletonScope();
+  },
 
-      return logger;
-    })
-    .inSingletonScope();
-});
+  registerTestingEnv: (app: App) => {
+    app.bind<Logger>(DIToken.FakeLogger).toConstantValue(new FakeLogger());
+    app.rebind<Logger>(DIToken.Logger).toConstantValue(app.get(DIToken.FakeLogger));
+  },
+};

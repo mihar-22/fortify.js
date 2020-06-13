@@ -14,7 +14,8 @@ module.exports = {
     "js"
   ],
   setupFiles: [
-    './src/server/support/testing/bootstrapTestEnv.ts'
+    'reflect-metadata',
+    'dotenv/config'
   ],
   coveragePathIgnorePatterns: [
     "/node_modules",

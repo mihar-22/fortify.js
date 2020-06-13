@@ -1,93 +1,117 @@
-import { AsyncContainerModule } from 'inversify';
-import { DIToken } from '../../DIToken';
-import { Config, Env } from '../../Config';
 import { Module } from '../Module';
+import { App } from '../../App';
 import {
-  Mailer, MailerConstructor, MailSenderFactory, MailTransporter,
+  createSmtpTestAccount,
+  createSmtpTransport,
+  FakeSmtpClient,
+  Mailgun,
+  SendGrid,
+  Smtp,
+  SmtpClient,
+  SmtpClientProvider,
+} from './transporters';
+import { configToken, DIToken } from '../../DIToken';
+import {
+  Mailer, MailerConstructor, MailSenderFactory, MailTransporter, MailTransporterFactory,
 } from './Mailer';
-import { Mailgun, SendGrid, Smtp } from './transporters';
-import {
-  createSmtpTestAccount, createSmtpTransport, SmtpClient, SmtpClientProvider,
-} from './SmtpClient';
-import { MailErrorCode, MailError } from './MailError';
-import { FakeSmtpClient } from './FakeSmtpClient';
 import { FakeMailer } from './FakeMailer';
+import { MailConfig, MailConfigError } from './MailConfig';
+import { ModuleProvider } from '../../support/ModuleProvider';
 
-export const MailModule = new AsyncContainerModule(async (bind) => {
-  bind<SmtpClient>(DIToken.FakeSmtpClient)
-    .toDynamicValue(() => new FakeSmtpClient())
-    .inSingletonScope();
+export const MailModule: ModuleProvider<MailConfig> = {
+  module: Module.Mail,
 
-  bind<SmtpClientProvider>(DIToken.SmtpClientProvider).toProvider<SmtpClient>(
-    ({ container }) => async () => {
-      const config = container.get<Config>(DIToken.Config);
+  defaults: () => ({
+    transporter: MailTransporter.Smtp,
+    // @TODO: insert app name and domain here.
+    from: {
+      name: 'Test App',
+      address: 'no-reply@localhost.com',
+    },
+  }),
 
-      if (config?.env === Env.Testing) {
-        return container.get(DIToken.FakeSmtpClient);
-      }
+  configValidation: (app: App) => {
+    const mailConfig = app.getConfig(Module.Mail);
+    const transporter = mailConfig!.transporter!;
 
-      const mailConfig = config?.[Module.Mail] ?? {};
-      let smtpConfig = mailConfig!.smtp;
+    if (app.isProductionEnv && !app.configPathExists(Module.Mail, transporter)) {
+      return {
+        code: MailConfigError.MissingTransporterConfig,
+        message: `The mail transporter [${transporter}] was selected but no configuration was found.`,
+        path: transporter,
+      };
+    }
 
-      if (config?.env === Env.Production && !smtpConfig) {
-        throw MailError[MailErrorCode.MissingSmtpConfig]();
-      }
+    if (app.isProductionEnv && mailConfig!.from!.address.includes('localhost')) {
+      return {
+        code: MailConfigError.MissingMailFrom,
+        message: 'Mail cannot be sent without the from field being set.',
+        path: 'from',
+      };
+    }
 
+    return undefined;
+  },
+
+  dependencies: (app: App) => {
+    const transporter = app.getConfig(Module.Mail)?.transporter;
+    return (transporter === MailTransporter.Smtp) ? ['nodemailer'] : [];
+  },
+
+  register: (app: App) => {
+    const mailConfig = app.getConfig(Module.Mail);
+
+    app
+      .bind(configToken(mailConfig!.transporter!))
+      .toConstantValue(mailConfig![mailConfig!.transporter!] ?? {});
+
+    app
+      .bind<SmtpClientProvider>(DIToken.SmtpClientProvider)
+      .toProvider<SmtpClient>(() => async () => {
+      const smtpConfig = mailConfig?.[MailTransporter.Smtp];
       if (!smtpConfig) {
         const testAccount = await createSmtpTestAccount();
-
-        smtpConfig = {
+        return createSmtpTransport({
           host: 'smtp.ethereal.email',
           port: 587,
           username: testAccount.username,
           password: testAccount.password,
-        };
-
-        mailConfig.smtp = smtpConfig;
-        config[Module.Mail] = mailConfig;
+        });
       }
+      return createSmtpTransport(smtpConfig);
+    });
 
-      return createSmtpTransport(smtpConfig!);
-    },
-  );
+    app
+      .bind<MailSenderFactory>(DIToken.MailSenderFactory)
+      .toFactory<string>(() => () => `${mailConfig!.from!.name} <${mailConfig!.from!.address}>`);
 
-  bind<MailSenderFactory>(DIToken.MailSenderFactory).toFactory<string>(({ container }) => {
-    const config = container.get<Config>(DIToken.Config);
-
-    return () => {
-      const mailConfig = config?.[Module.Mail];
-
-      if (config?.env === Env.Production && !mailConfig?.from) {
-        throw MailError[MailErrorCode.MissingFromConfig]();
-      }
-
-      // @TODO: insert app name and domain here.
-      if (!mailConfig?.from) { return 'Test App <no-reply@localhost.com>'; }
-
-      return `${mailConfig?.from?.name} <${mailConfig?.from?.address}>`;
-    };
-  });
-
-  bind<Mailer>(DIToken.FakeMailer)
-    .toDynamicValue(() => new FakeMailer())
-    .inSingletonScope();
-
-  bind<Mailer>(DIToken.Mailer)
-    .toDynamicValue(({ container }) => {
-      const config = container.get<Config>(DIToken.Config);
-
-      if (config?.env === Env.Testing) {
-        return container.get(DIToken.FakeMailer);
-      }
-
+    app
+      .bind<MailTransporterFactory>(DIToken.MailTransporterFactory)
+      .toFactory<Mailer>(() => (transporter: MailTransporter) => {
       const transporters: Record<MailTransporter, MailerConstructor> = {
         [MailTransporter.Smtp]: Smtp,
         [MailTransporter.Mailgun]: Mailgun,
         [MailTransporter.SendGird]: SendGrid,
       };
 
-      const transporter = config?.[Module.Mail]?.transporter ?? MailTransporter.Smtp;
-      return container.resolve<Mailer>(transporters[transporter]);
-    })
-    .inSingletonScope();
-});
+      return app.resolve<Mailer>(transporters[transporter]);
+    });
+
+    app
+      .bind<Mailer>(DIToken.Mailer)
+      .toDynamicValue(() => app
+        .get<MailTransporterFactory>(DIToken.MailTransporterFactory)(mailConfig!.transporter!))
+      .inSingletonScope();
+  },
+
+  registerTestingEnv: (app: App) => {
+    app.bind<SmtpClient>(DIToken.FakeSmtpClient).toConstantValue(new FakeSmtpClient());
+    app.bind<Mailer>(DIToken.FakeMailer).toConstantValue(new FakeMailer());
+
+    app
+      .rebind<SmtpClientProvider>(DIToken.SmtpClientProvider)
+      .toConstantValue(() => Promise.resolve(app.get(DIToken.FakeSmtpClient)));
+
+    app.rebind<Mailer>(DIToken.Mailer).toConstantValue(app.get(DIToken.FakeMailer));
+  },
+};

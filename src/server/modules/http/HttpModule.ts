@@ -1,10 +1,16 @@
-import { AsyncContainerModule } from 'inversify';
 import Axios from 'axios';
-import { DIToken } from '../../DIToken';
+import { ModuleProvider } from '../../support/ModuleProvider';
+import { Module } from '../Module';
+import { App } from '../../App';
 import { HttpClient } from './HttpClient';
+import { DIToken } from '../../DIToken';
 
-export const HttpModule = new AsyncContainerModule(async (bind) => {
-  bind<HttpClient>(DIToken.HttpClient)
-    .toDynamicValue(() => Axios)
-    .inSingletonScope();
-});
+export const HttpModule: ModuleProvider<undefined> = {
+  module: Module.Http,
+
+  register: (app: App) => {
+    app.bind<HttpClient>(DIToken.HttpClient)
+      .toDynamicValue(() => Axios)
+      .inSingletonScope();
+  },
+};

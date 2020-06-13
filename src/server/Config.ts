@@ -1,9 +1,8 @@
-import { AsyncContainerModule } from 'inversify';
-import { MailConfig } from './modules/mail/Mailer';
+import { MailConfig } from './modules/mail/MailConfig';
 import { SessionConfig } from './modules/session/Session';
-import { EncryptionConfig } from './modules/encryption/Encrypter';
 import { Module } from './modules/Module';
 import { LoggerConfig } from './modules/logger/Logger';
+import { EncryptionConfig } from './modules/encryption/EncryptionConfig';
 
 export enum Env {
   Testing = 'testing',
@@ -14,11 +13,8 @@ export enum Env {
 export interface Config {
   [id: string]: string | Record<string, any> | undefined
   env?: Env,
-  modules?: AsyncContainerModule[],
   [Module.Logger]?: LoggerConfig,
   [Module.Mail]?: MailConfig,
   [Module.Session]?: SessionConfig,
   [Module.Encryption]?: EncryptionConfig,
-  // @Todo: Join all server events.
-  // [Module.Events]?: EventsConfig,
 }

@@ -4,26 +4,26 @@ import { AbstractMailTransporter } from './AbstractMailTransporter';
 import { DIToken } from '../../../DIToken';
 import { HttpClient } from '../../http/HttpClient';
 import { Dispatcher } from '../../events/Dispatcher';
-
-export interface MailgunConfig {
-  // domain
-  // secret
-  // endpoint
-}
+import { MailgunConfig } from '../MailConfig';
 
 export interface MailgunResponse {
+
 }
 
 @injectable()
 export class Mailgun extends AbstractMailTransporter<MailgunResponse> {
+  protected readonly config: MailgunConfig;
+
   protected readonly httpClient: HttpClient;
 
   constructor(
-  @inject(DIToken.HttpClient) httpClient: HttpClient,
+  @inject(DIToken.MailgunConfig) config: MailgunConfig,
+    @inject(DIToken.HttpClient) httpClient: HttpClient,
     @inject(DIToken.EventDispatcher) events: Dispatcher,
     @inject(DIToken.MailSenderFactory) sender: MailSenderFactory,
   ) {
     super(events, sender);
+    this.config = config;
     this.httpClient = httpClient;
   }
 

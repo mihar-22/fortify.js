@@ -1,20 +1,24 @@
 import { Module } from './modules/Module';
+import { MailTransporter } from './modules/mail/Mailer';
 
-const fake = (module: string) => `${module}Fake`;
+export const fakeToken = (module: string) => `${module}Fake`;
+export const configToken = (name: string) => `${name}Config`;
 
 export const DIToken = Object.freeze({
-  Env: 'env',
   Config: 'config',
   Encrypter: Module.Encryption,
-  FakeEncrypter: fake(Module.Encryption),
+  FakeEncrypter: fakeToken(Module.Encryption),
   EventDispatcher: Module.Events,
-  FakeDispatcher: fake(Module.Events),
+  FakeDispatcher: fakeToken(Module.Events),
   Logger: Module.Logger,
-  FakeLogger: fake(Module.Logger),
+  FakeLogger: fakeToken(Module.Logger),
   Mailer: Module.Mail,
-  FakeMailer: fake(Module.Mail),
+  MailgunConfig: configToken(MailTransporter.Mailgun),
+  SendGridConfig: configToken(MailTransporter.SendGird),
+  MailTransporterFactory: 'mailTransporterFactory',
+  FakeMailer: fakeToken(Module.Mail),
   MailSenderFactory: 'mailSenderFactory',
   HttpClient: 'httpClient',
   SmtpClientProvider: 'smtpClientProvider',
-  FakeSmtpClient: fake('smtpClient'),
+  FakeSmtpClient: fakeToken('smtpClient'),
 });

@@ -1,4 +1,4 @@
-import { MailTemplateBuilder } from '../MailTemplateBuilder';
+import { MailTemplateRenderer } from '../MailTemplateRenderer';
 import { MailErrorCode } from '../MailError';
 
 describe('Mail', () => {
@@ -8,23 +8,23 @@ describe('Mail', () => {
     const data = { firstName: 'John', lastName: 'Doe' };
 
     test('should parse text template correctly', async () => {
-      const txt = await MailTemplateBuilder.build(txtTemplate, data);
+      const txt = await MailTemplateRenderer.render(txtTemplate, data);
       expect(txt).toContain(`${data.firstName} ${data.lastName}`);
     });
 
     test('should parse html template correctly', async () => {
-      const html = await MailTemplateBuilder.build(htmlTemplate, data);
+      const html = await MailTemplateRenderer.render(htmlTemplate, data);
       expect(html).toContain(`<div>${data.firstName} ${data.lastName}</div>`);
     });
 
     test('should throw error given template file is missing', async () => {
-      await expect(() => MailTemplateBuilder.build('bad.path'))
+      await expect(() => MailTemplateRenderer.render('bad.path'))
         .rejects
         .toThrow(MailErrorCode.CouldNotBuildTemplate);
     });
 
     test('should throw error given template but no data object', async () => {
-      await expect(() => MailTemplateBuilder.build(txtTemplate))
+      await expect(() => MailTemplateRenderer.render(txtTemplate))
         .rejects
         .toThrow(MailErrorCode.CouldNotBuildTemplate);
     });

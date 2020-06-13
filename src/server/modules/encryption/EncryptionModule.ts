@@ -1,40 +1,60 @@
-import { AsyncContainerModule } from 'inversify';
-import { DIToken } from '../../DIToken';
-import { Config, Env } from '../../Config';
+import { ModuleProvider } from '../../support/ModuleProvider';
+import { CipherAlgorithm, Encrypter } from './Encrypter';
 import { Module } from '../Module';
 import { CryptoEncrypter } from './CryptoEncrypter';
-import { CipherAlgorithm, Encrypter } from './Encrypter';
-import { EncryptionError, EncryptionErrorCode } from './EncryptionError';
+import { App } from '../../App';
+import { DIToken } from '../../DIToken';
 import { FakeEncrypter } from './FakeEncrypter';
+import { EncryptionConfig, EncryptionConfigError } from './EncryptionConfig';
 
-export const EncryptionModule = new AsyncContainerModule(async (bind) => {
-  bind<Encrypter>(DIToken.FakeEncrypter)
-    .toDynamicValue(() => new FakeEncrypter())
-    .inSingletonScope();
+export const EncryptionModule: ModuleProvider<EncryptionConfig> = {
+  module: Module.Encryption,
 
-  bind<Encrypter>(DIToken.Encrypter)
-    .toDynamicValue(({ container }) => {
-      const config = container.get<Config>(DIToken.Config);
+  defaults: () => ({
+    key: Buffer.from('s'.repeat(32)).toString('base64'),
+    cipher: CipherAlgorithm.AES256CBC,
+  }),
 
-      if (config?.env === Env.Testing) {
-        return container.get(DIToken.FakeEncrypter);
-      }
+  configValidation: (app: App) => {
+    const encryptionConfig = app.getConfig(Module.Encryption)!;
+    const { key, cipher } = encryptionConfig;
 
-      const encryptConfig = config?.[Module.Encryption];
-      let { key, cipher } = encryptConfig ?? {};
+    const isBadProductionKey = !key
+      || key.length === 0
+      || key === Buffer.from('s'.repeat(32)).toString('base64');
 
-      if (config?.env === Env.Production && (!key || key.length === 0)) {
-        throw EncryptionError[EncryptionErrorCode.MissingKey]();
-      } else {
-        cipher = cipher ?? CipherAlgorithm.AES256CBC;
-        key = key ?? CryptoEncrypter.generateKey(cipher);
-      }
+    if (app.isProductionEnv && isBadProductionKey) {
+      return {
+        code: EncryptionConfigError.MissingEncryptionKey,
+        message: 'Your application is vulnerable because no encryption key has been specified.',
+        path: 'key',
+      };
+    }
 
-      if (!CryptoEncrypter.supported(key, cipher)) {
-        throw EncryptionError[EncryptionErrorCode.UnsupportedCipherAndKeyPair]();
-      }
+    if (!CryptoEncrypter.supported(key!, cipher!)) {
+      return {
+        code: EncryptionConfigError.UnsupportedCipherAndKeyPair,
+        message: 'The only supported ciphers are AES-128-CBC and AES-256-CBC with the correct key lengths.',
+      };
+    }
 
-      return new CryptoEncrypter(key, cipher);
-    })
-    .inSingletonScope();
-});
+    return undefined;
+  },
+
+  register: (app: App) => {
+    const encryptionConfig = app.getConfig(Module.Encryption)!;
+
+    app
+      .bind<Encrypter>(DIToken.Encrypter)
+      .toDynamicValue(() => {
+        const { key, cipher } = encryptionConfig;
+        return new CryptoEncrypter(key, cipher);
+      })
+      .inSingletonScope();
+  },
+
+  registerTestingEnv: (app: App) => {
+    app.bind<Encrypter>(DIToken.FakeEncrypter).toConstantValue(new FakeEncrypter());
+    app.rebind<Encrypter>(DIToken.Encrypter).toConstantValue(app.get(DIToken.FakeEncrypter));
+  },
+};

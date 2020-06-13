@@ -1,29 +1,92 @@
-import { Container, ContainerModule } from 'inversify';
-import { Config, Env } from './Config';
-import { DIToken } from './DIToken';
-import { coreModules } from './modules';
+import { readFileSync, existsSync } from 'fs';
+import { Config } from './Config';
+import { ConfigurationError, DependencyMissingError } from './support/errors';
+import { App } from './App';
+import { mergeObjDeep } from '../utils';
+import { ModuleProvider } from './support/ModuleProvider';
 
-let hasBootstrapped = false;
-let bootstrapping: Promise<void> | undefined;
+interface Pkg {
+  name?: string
+  dependencies?: Record<string, string>
+  devDependencies?: Record<string, string>
+}
 
-const coreDependencies = (config?: Config) => new ContainerModule((bind) => {
-  bind(DIToken.Config).toConstantValue(config);
-  bind<Env>(DIToken.Env).toConstantValue(config?.env ?? Env.Development);
-});
+let cachedApp: App;
+let hasBooted = false;
+let booting: Promise<void[]>;
 
-export async function bootstrap(container: Container, config?: Config) {
-  if (hasBootstrapped) { return; }
+export async function bootstrap(
+  modules: ModuleProvider<any>[],
+  config?: Config,
+  fresh = false,
+): Promise<App> {
+  if (hasBooted && !fresh) { return cachedApp; }
 
-  if (bootstrapping) {
-    await bootstrapping;
-    return;
+  if (booting && !fresh) {
+    await booting;
+    return cachedApp;
   }
 
-  container.load(coreDependencies(config));
-  const userModules = config?.modules ?? [];
-  bootstrapping = container.loadAsync(...[...coreModules, ...userModules]);
+  const app = new App(config ?? {});
 
-  await bootstrapping;
-  hasBootstrapped = true;
-  bootstrapping = undefined;
+  // 1. Initialize each module config with defaults.
+  modules.forEach((Module) => {
+    app.setConfig(
+      Module.module,
+      mergeObjDeep(Module.defaults?.(app) ?? {}, app.getConfig(Module.module) ?? {}),
+    );
+  });
+
+  // 2. Validate each module config.
+  modules.forEach((Module) => {
+    const invalidConfiguration = Module.configValidation?.(app);
+
+    if (invalidConfiguration) {
+      const invalidPath = `config.${Module.module}`
+        + `${invalidConfiguration.path ? `.${invalidConfiguration.path}` : ''}`;
+
+      throw new ConfigurationError(
+        invalidConfiguration.code,
+        invalidConfiguration.message,
+        invalidPath,
+        Module.module,
+      );
+    }
+  });
+
+  // 3. Ensure all module dependencies have been installed.
+  const pkgPath = `${process.cwd()}/package.json`;
+  const pkg: Pkg = existsSync(pkgPath) ? JSON.parse(readFileSync(pkgPath).toString('utf-8')) : {};
+
+  modules.forEach((Module) => {
+    const dependencies = Module.dependencies?.(app);
+
+    dependencies?.forEach((dependency) => {
+      const hasDep = Object.prototype.hasOwnProperty.call(pkg.dependencies ?? {}, dependency);
+      const isHomePkg = pkg.name === '@mihar-22/serverless-auth';
+      const hasDevDep = (
+        isHomePkg && Object.prototype.hasOwnProperty.call(pkg.devDependencies ?? {}, dependency)
+      );
+      if (!hasDep && !hasDevDep) {
+        throw new DependencyMissingError(dependency, Module.module, isHomePkg);
+      }
+    });
+  });
+
+  // 4. Register all module bindings.
+  modules.forEach((Module) => { Module.register(app); });
+
+  // 5. If testing environment, register all test bindings.
+  if (app.isTestingEnv) {
+    modules.forEach((Module) => { Module.registerTestingEnv?.(app); });
+  }
+
+  // 6. Boot all modules.
+  booting = Promise.all(modules.map((Module) => Module.boot?.(app)));
+
+  await booting;
+  hasBooted = true;
+  cachedApp = app;
+
+  return app;
 }

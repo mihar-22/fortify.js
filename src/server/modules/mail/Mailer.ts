@@ -1,5 +1,3 @@
-import { SmtpConfig } from './SmtpClient';
-
 export enum MailTransporter {
   Smtp = 'smtp',
   SendGird = 'sendGrid',
@@ -11,22 +9,10 @@ export interface Mail<T extends object | undefined> {
   subject: string,
   text?: string
   template?: string
-  remoteTemplate?: boolean
   data?: T
 }
 
 export type MailSenderFactory = () => string;
-
-export interface MailFrom {
-  name: string
-  address: string
-}
-
-export interface MailConfig {
-  from?: MailFrom,
-  transporter?: MailTransporter
-  smtp?: SmtpConfig
-}
 
 export interface Mailer {
   send(mail: Mail<any>): Promise<any>
@@ -35,3 +21,5 @@ export interface Mailer {
 export interface MailerConstructor {
   new(...args: any[]): Mailer
 }
+
+export type MailTransporterFactory = (transporter: MailTransporter) => Mailer;

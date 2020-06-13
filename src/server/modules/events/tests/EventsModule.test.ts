@@ -1,34 +1,35 @@
-import { Container } from 'inversify';
 import { DIToken } from '../../../DIToken';
 import { Dispatcher } from '../Dispatcher';
 import { Config, Env } from '../../../Config';
 import { EventsModule } from '../EventsModule';
 import { LoggerModule } from '../../logger/LoggerModule';
 import { FakeDispatcher } from '../FakeDispatcher';
+import { App } from '../../../App';
+import { bootstrap } from '../../../bootstrap';
+import { EventDispatcher } from '../EventDispatcher';
 
 describe('Events', () => {
   describe('Module', () => {
-    let container: Container;
+    let app: App;
 
-    const getDispatcherFromContainer = () => container.get<Dispatcher>(DIToken.EventDispatcher);
+    const getDispatcher = () => app.get<Dispatcher>(DIToken.EventDispatcher);
 
-    const loadModule = async (config?: Config) => {
-      container = new Container();
-      container.bind(DIToken.Config).toConstantValue(config ?? {});
-      await container.loadAsync(LoggerModule, EventsModule);
+    const boot = async (config?: Config) => {
+      app = await bootstrap([LoggerModule, EventsModule], config, true);
     };
 
-    beforeEach(() => loadModule());
+    beforeEach(() => boot());
 
     test('dispatcher is singleton scoped', () => {
-      const dispatcherA = getDispatcherFromContainer();
-      const dispatcherB = getDispatcherFromContainer();
+      const dispatcherA = getDispatcher();
+      const dispatcherB = getDispatcher();
       expect(dispatcherA).toBe(dispatcherB);
+      expect(dispatcherA).toBeInstanceOf(EventDispatcher);
     });
 
     test('fake dispatcher is resolved in testing env', async () => {
-      await loadModule({ env: Env.Testing });
-      const dispatcher = getDispatcherFromContainer();
+      await boot({ env: Env.Testing });
+      const dispatcher = getDispatcher();
       expect(dispatcher).toBeInstanceOf(FakeDispatcher);
     });
   });

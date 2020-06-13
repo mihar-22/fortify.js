@@ -1,5 +1,11 @@
-import { AsyncContainerModule } from 'inversify';
+import { ModuleProvider } from '../../support/ModuleProvider';
+import { Module } from '../Module';
+import { App } from '../../App';
 
-export const AuthModule = new AsyncContainerModule(async () => {
-  // ...
-});
+export const AuthModule: ModuleProvider<undefined> = {
+  module: Module.Auth,
+
+  register: (app: App) => {
+    // ...
+  },
+};

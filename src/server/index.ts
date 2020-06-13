@@ -1,13 +1,12 @@
 import 'reflect-metadata';
-import { Container } from 'inversify';
 import { Config } from './Config';
 import { bootstrap } from './bootstrap';
+import { coreModules } from './modules';
+import { ModuleProvider } from './support/ModuleProvider';
 
-const container = new Container();
-
-export default async function serverlessAuth(config?: Config) {
-  await bootstrap(container, config);
-  // router can be Koa or Apollo graphql.
-  // const router = (resolve router);
-  // return router.handler;
+export default async function auth(
+  config?: Config,
+  modules?: ModuleProvider<any>[],
+) {
+  const app = await bootstrap([...coreModules, ...(modules ?? [])], config);
 }
