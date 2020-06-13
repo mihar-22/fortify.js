@@ -18,6 +18,9 @@
   "engines": {
     "node": ">= 10"
   },
+  "bin": {
+    "key": "./scripts/generateKey.js"
+  },
   "keywords": [
     "firebase",
     "session",
@@ -46,7 +49,8 @@
     "react"
   ],
   "files": [
-    "dist"
+    "dist",
+    "scripts"
   ],
   "scripts": {
     "prebuild": "rimraf dist",
