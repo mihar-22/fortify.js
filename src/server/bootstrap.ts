@@ -1,9 +1,9 @@
 import { readFileSync, existsSync } from 'fs';
 import { Config } from './Config';
-import { ConfigurationError, DependencyMissingError } from './support/errors';
+import { ConfigurationError, DependenciesMissingError } from './support/errors';
 import { App } from './App';
 import { mergeObjDeep } from '../utils';
-import { ModuleProvider } from './support/ModuleProvider';
+import { Dependencies, ModuleProvider } from './support/ModuleProvider';
 
 interface Pkg {
   name?: string
@@ -50,6 +50,7 @@ export async function bootstrap(
         invalidConfiguration.message,
         invalidPath,
         Module.module,
+        invalidConfiguration.link,
       );
     }
   });
@@ -57,20 +58,21 @@ export async function bootstrap(
   // 3. Ensure all module dependencies have been installed.
   const pkgPath = `${process.cwd()}/package.json`;
   const pkg: Pkg = existsSync(pkgPath) ? JSON.parse(readFileSync(pkgPath).toString('utf-8')) : {};
+  const isHomePkg = pkg.name === '@mihar-22/serverless-auth';
 
   modules.forEach((Module) => {
+    const missingDeps: Dependencies[] = [];
     const dependencies = Module.dependencies?.(app);
-
     dependencies?.forEach((dependency) => {
       const hasDep = Object.prototype.hasOwnProperty.call(pkg.dependencies ?? {}, dependency);
-      const isHomePkg = pkg.name === '@mihar-22/serverless-auth';
       const hasDevDep = (
         isHomePkg && Object.prototype.hasOwnProperty.call(pkg.devDependencies ?? {}, dependency)
       );
-      if (!hasDep && !hasDevDep) {
-        throw new DependencyMissingError(dependency, Module.module, isHomePkg);
-      }
+      if (!hasDep && !hasDevDep) { missingDeps.push(dependency as any); }
     });
+    if (missingDeps.length > 0) {
+      throw new DependenciesMissingError(missingDeps, Module.module, isHomePkg);
+    }
   });
 
   // 4. Register all module bindings.

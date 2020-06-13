@@ -2,7 +2,7 @@ import { inject, injectable } from 'inversify';
 import { Dispatcher, RemoveListenerCallback } from './Dispatcher';
 import { Event, EventCallback, EventCode } from './Event';
 import { DIToken } from '../../DIToken';
-import { Logger, LogLevel } from '../logger/Logger';
+import { Logger } from '../logger/Logger';
 
 @injectable()
 export class EventDispatcher implements Dispatcher {
@@ -19,11 +19,10 @@ export class EventDispatcher implements Dispatcher {
   }
 
   private log(event: Event<any>): void {
-    // @ts-ignore
     this.logger[event.logLevel]({
       label: event.code,
       message: event.description,
-      ctx: (this.logger.level === LogLevel.Debug) ? event.payload : {},
+      data: event.payload,
     });
   }
 

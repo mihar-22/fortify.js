@@ -8,17 +8,21 @@ export class ConfigurationError extends Error implements ServerError {
 
   public configPath: string;
 
-  constructor(code: string, message: string, configPath: string, module: string) {
+  public link?: string;
+
+  constructor(code: string, message: string, configPath: string, module: string, link?: string) {
     super(undefined);
 
     this.code = code;
     this.configPath = configPath;
     this.module = module;
+    this.link = link;
     this.stack = undefined;
 
     this.message = `${bold('Code:')} ${bold().red(this.code)}\n\n`
       + `${bold('Module:')} ${module.toUpperCase()}\n\n`
       + `${bold('Config Path:')} ${yellow(configPath)}\n\n`
-      + `${bold('Message:')} ${message}`;
+      + `${bold('Message:')} ${message}`
+      + `${link ? `\n\n${bold('Link:')} ${link}` : ''}`;
   }
 }

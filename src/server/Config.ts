@@ -1,7 +1,7 @@
 import { MailConfig } from './modules/mail/MailConfig';
 import { SessionConfig } from './modules/session/Session';
 import { Module } from './modules/Module';
-import { LoggerConfig } from './modules/logger/Logger';
+import { LoggerConfig } from './modules/logger/LoggerConfig';
 import { EncryptionConfig } from './modules/encryption/EncryptionConfig';
 
 export enum Env {

@@ -1,28 +1,29 @@
 import { bold, cyan } from 'kleur';
 import { existsSync } from 'fs';
 import { ServerError } from './ServerError';
+import { Dependencies } from '../ModuleProvider';
 
-export class DependencyMissingError extends Error implements ServerError {
+export class DependenciesMissingError extends Error implements ServerError {
   public code: string;
 
   public module: string;
 
-  public dependency: string;
+  public dependencies: Dependencies[];
 
-  constructor(dependency: string, module: string, isDevDep: boolean) {
+  constructor(dependencies: Dependencies[], module: string, isDevDep: boolean) {
     super(undefined);
 
     this.module = module;
-    this.dependency = dependency;
+    this.dependencies = dependencies;
     this.stack = undefined;
-    this.code = 'MISSING_DEPENDENCY';
+    this.code = 'MISSING_DEPENDENCIES';
     this.message = 'A required dependency has not been installed.';
 
     const usingYarn = existsSync(`${process.cwd()}/yarn.lock`);
 
     const runCommand = usingYarn
-      ? `yarn add ${dependency} ${isDevDep ? '-D' : ''}`
-      : `npm install ${dependency} ${isDevDep ? '--save-dev' : ''}`;
+      ? `yarn add ${dependencies.join(' ')} ${isDevDep ? '-D' : ''}`
+      : `npm install ${dependencies.join(' ')} ${isDevDep ? '--save-dev' : ''}`;
 
     this.message = `${bold('Code:')} ${bold().red(this.code)}\n\n`
       + `${bold('Module:')} ${module.toUpperCase()}\n\n`

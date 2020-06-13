@@ -1,11 +1,13 @@
 import { injectable } from 'inversify';
-import { Logger } from './Logger';
+import { Logger, LogLevel } from './Logger';
 
 @injectable()
 export class FakeLogger implements Logger {
-  public level = 'debug';
+  public level = LogLevel.Debug;
 
-  public silent = false;
+  public silent = jest.fn();
+
+  public fatal = jest.fn();
 
   public error = jest.fn();
 
@@ -13,13 +15,9 @@ export class FakeLogger implements Logger {
 
   public info = jest.fn();
 
-  public http = jest.fn();
-
-  public verbose = jest.fn();
-
   public debug = jest.fn();
 
-  public silly = jest.fn();
+  public trace = jest.fn();
 
-  public log = jest.fn();
+  public addDefaultTransporter = jest.fn();
 }

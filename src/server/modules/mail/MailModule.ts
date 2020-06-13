@@ -15,7 +15,7 @@ import {
   Mailer, MailerConstructor, MailSenderFactory, MailTransporter, MailTransporterFactory,
 } from './Mailer';
 import { FakeMailer } from './FakeMailer';
-import { MailConfig, MailConfigError } from './MailConfig';
+import { MailConfig, MailConfigError, MailConfigErrorCode } from './MailConfig';
 import { ModuleProvider } from '../../support/ModuleProvider';
 
 export const MailModule: ModuleProvider<MailConfig> = {
@@ -35,19 +35,11 @@ export const MailModule: ModuleProvider<MailConfig> = {
     const transporter = mailConfig!.transporter!;
 
     if (app.isProductionEnv && !app.configPathExists(Module.Mail, transporter)) {
-      return {
-        code: MailConfigError.MissingTransporterConfig,
-        message: `The mail transporter [${transporter}] was selected but no configuration was found.`,
-        path: transporter,
-      };
+      return MailConfigError[MailConfigErrorCode.MissingTransporterConfig](transporter);
     }
 
     if (app.isProductionEnv && mailConfig!.from!.address.includes('localhost')) {
-      return {
-        code: MailConfigError.MissingMailFrom,
-        message: 'Mail cannot be sent without the from field being set.',
-        path: 'from',
-      };
+      return MailConfigError[MailConfigErrorCode.MissingMailFrom];
     }
 
     return undefined;

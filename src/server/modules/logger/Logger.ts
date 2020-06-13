@@ -1,42 +1,78 @@
-import winston, { LeveledLogMethod, LoggerOptions, LogMethod } from 'winston';
-import { bold, yellow } from 'kleur';
+import kleur from 'kleur';
+import dayjs from 'dayjs';
 
-// From the highest priority (error) to the lowest (silly).
+export enum LogDriver {
+  Pino = 'pino',
+  Winston = 'winston'
+}
+
 export enum LogLevel {
+  Silent = 'silent',
+  Fatal = 'fatal',
   Error = 'error',
-  Warn = ' warn',
+  Warn = 'warn',
   Info = 'info',
-  Http = 'http',
-  Verbose = 'verbose',
   Debug = 'debug',
-  Silly = 'silly',
+  Trace = 'trace'
+}
+
+export interface Log {
+  label?: string
+  message: string
+  data?: object
 }
 
 export interface Logger {
-  level: string
-  silent: boolean
-  error: LeveledLogMethod;
-  warn: LeveledLogMethod;
-  info: LeveledLogMethod;
-  http: LeveledLogMethod;
-  verbose: LeveledLogMethod;
-  debug: LeveledLogMethod;
-  silly: LeveledLogMethod;
-  log: LogMethod;
+  level: LogLevel
+  silent: (log?: Log) => void
+  fatal: (log: Log) => void
+  error: (log: Log) => void
+  warn: (log: Log) => void
+  info: (log: Log) => void
+  debug: (log: Log) => void
+  trace: (log: Log) => void
+  addDefaultTransporter?: () => void
 }
 
-export type LoggerConfig = LoggerOptions;
+export type LogDriverFactory = (driver: LogDriver) => Logger;
 
-export const createLogger = (config?: LoggerConfig): Logger => winston.createLogger(config);
+export interface LoggerConstructor<ConfigType> {
+  new(level: LogLevel, config?: ConfigType, prettify?: boolean): Logger
+}
 
-const { format } = winston;
-export const createDefaultConsoleTransport = () => new winston.transports.Console({
-  format: winston.format.combine(
-    format.colorize(),
-    format.timestamp({ format: 'YYYY-MM-DD hh:mm:ss.SSS' }),
-    format.printf(({
-      timestamp, level, label, message, ctx,
-    }) => `${yellow(timestamp)} [${bold(label)}] ${level}: ${message}`
-      + `${(ctx && Object.keys(ctx).length > 0) ? `\n\n${JSON.stringify(ctx, null, 2)}` : ''}`),
-  ),
-});
+export const NumericLogLevel: Record<number, string> = {
+  10: 'trace',
+  20: 'debug',
+  30: 'info',
+  40: 'warn',
+  50: 'error',
+  60: 'fatal',
+};
+
+export const LogColor: Record<LogLevel, string> = {
+  [LogLevel.Silent]: 'white',
+  [LogLevel.Fatal]: 'red',
+  [LogLevel.Error]: 'red',
+  [LogLevel.Warn]: 'yellow',
+  [LogLevel.Info]: 'cyan',
+  [LogLevel.Debug]: 'magenta',
+  [LogLevel.Trace]: 'grey',
+};
+
+export const formatLog = (
+  level: LogLevel,
+  message: string,
+  label?: string,
+  data?: object,
+  verbose?: boolean,
+): string => {
+  // @ts-ignore
+  let levelF = `${kleur[LogColor[level]](level.toUpperCase())}`;
+  if (level === LogLevel.Fatal) { levelF = kleur.bold(levelF); }
+  const timestampF = kleur.yellow(dayjs().format('HH:mm:ss.SSS'));
+  const labelF = label ? ` [${kleur.bold(label.toUpperCase())}]` : '';
+  const dataF = (verbose && data && Object.keys(data).length > 0)
+    ? `\n\n${JSON.stringify(data, null, 2)}\n\n`
+    : '\n';
+  return `${timestampF}${labelF} ${levelF}: ${message}${dataF}`;
+};

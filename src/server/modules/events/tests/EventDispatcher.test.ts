@@ -48,17 +48,7 @@ describe('Events', () => {
       expect(logger.debug).toHaveBeenCalledWith({
         label: expectedEvent.code,
         message: expectedEvent.description,
-        ctx: expectedEvent.payload,
-      });
-    });
-
-    test('event payload should not be logged if logger level is less than debug', () => {
-      logger.level = LogLevel.Verbose;
-      dispatcher.dispatch(expectedEvent);
-      expect(logger.debug).toHaveBeenCalledWith({
-        label: expectedEvent.code,
-        message: expectedEvent.description,
-        ctx: {},
+        data: expectedEvent.payload,
       });
     });
 

@@ -29,7 +29,21 @@ export interface MailConfig {
   [MailTransporter.SendGird]?: SendGridConfig
 }
 
-export enum MailConfigError {
+export enum MailConfigErrorCode {
   MissingTransporterConfig = 'MISSING_TRANSPORTER_CONFIG',
   MissingMailFrom = 'MISSING_MAIL_FROM'
 }
+
+export const MailConfigError = {
+  [MailConfigErrorCode.MissingTransporterConfig]: (transporter: MailTransporter) => ({
+    code: MailConfigErrorCode.MissingTransporterConfig,
+    message: `The mail transporter [${transporter}] was selected but no configuration was found.`,
+    path: transporter,
+  }),
+
+  [MailConfigErrorCode.MissingMailFrom]: {
+    code: MailConfigErrorCode.MissingMailFrom,
+    message: 'Mail cannot be sent without the from field being set.',
+    path: 'from',
+  },
+};

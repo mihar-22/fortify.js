@@ -1,52 +1,41 @@
-import { Container } from 'inversify';
-import { Config, Env } from '../../../Config';
+import { Config } from '../../../Config';
 import { LoggerModule } from '../LoggerModule';
 import { DIToken } from '../../../DIToken';
-import { Logger } from '../Logger';
+import { LogDriver, Logger } from '../Logger';
 import { Module } from '../../Module';
+import { App } from '../../../App';
+import { bootstrap } from '../../../bootstrap';
+import { Pino, Winston } from '../drivers';
 
 describe('Logger', () => {
   describe('Module', () => {
-    let container: Container;
+    let app: App;
 
-    const getLoggerFromContainer = () => container.get<Logger>(DIToken.Logger);
+    const getLogger = () => app.get<Logger>(DIToken.Logger);
 
-    const loadModule = async (config?: Config) => {
-      container = new Container();
-      container.bind(DIToken.Config).toConstantValue(config ?? {});
-      await container.loadAsync(LoggerModule);
+    const boot = async (config?: Config) => {
+      app = await bootstrap([LoggerModule], config, true);
     };
 
+    beforeEach(() => boot());
+
     test('logger is singleton scoped', async () => {
-      await loadModule();
-      const loggerA = getLoggerFromContainer();
-      const loggerB = getLoggerFromContainer();
+      await boot();
+      const loggerA = getLogger();
+      const loggerB = getLogger();
       expect(loggerA).toBe(loggerB);
     });
 
-    test('can resolve logger from container', async () => {
-      await loadModule();
-      const logger = getLoggerFromContainer();
-      expect(logger).toBeDefined();
-      expect((logger.transports[0] as any).name).toBe('console');
+    test('can resolve winston logger from container', async () => {
+      await boot({ [Module.Logger]: { driver: LogDriver.Winston } });
+      const logger = getLogger();
+      expect(logger).toBeInstanceOf(Winston);
     });
 
-    test('does not use default transport in production', async () => {
-      await loadModule({ env: Env.Production });
-      const logger = getLoggerFromContainer();
-      expect(logger).toBeDefined();
-      expect(logger.transports[0]).toBeUndefined();
-    });
-
-    test('logger config is passed to constructor', async () => {
-      await loadModule({
-        [Module.Logger]: {
-          silent: true,
-        },
-      });
-      const logger = getLoggerFromContainer();
-      expect(logger).toBeDefined();
-      expect(logger.silent).toBeTruthy();
+    test('can resolve pino logger from container', async () => {
+      await boot({ [Module.Logger]: { driver: LogDriver.Pino } });
+      const logger = getLogger();
+      expect(logger).toBeInstanceOf(Pino);
     });
   });
 });

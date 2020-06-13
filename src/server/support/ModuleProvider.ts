@@ -5,6 +5,7 @@ export interface InvalidConfiguration {
   code: string
   message: string
   path?: string
+  link?: string
 }
 
 export type Dependencies = string[];
