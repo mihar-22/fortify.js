@@ -6,22 +6,30 @@ import {
 import { isRegExp, isString } from '../../../utils';
 
 @injectable()
-export class EventDispatcher<
-  EventRecordType = any,
-  E extends keyof EventRecordType = keyof EventRecordType
-> implements Dispatcher<EventRecordType> {
-  private readonly listeners: Record<EventCode, EventCallback<E, EventRecordType[E]>[]> = {};
+export class EventDispatcher<EventRecordType = any> implements Dispatcher<EventRecordType> {
+  private readonly listeners: Record<
+  EventCode,
+  EventCallback<any, EventRecordType[any]>[]
+  > = {};
 
   private matcherListeners: {
     matcher: EventMatcher,
-    cb: EventCallback<E, EventRecordType[E]>
+    cb: EventCallback<any, EventRecordType[any]>
   }[] = [];
 
-  private globalListeners: EventCallback<E, PayloadType<EventRecordType[E]>>[] = [];
+  private globalListeners: EventCallback<
+  any,
+  PayloadType<EventRecordType[any]>
+  >[] = [];
 
-  private queue: Record<EventCode, Event<E, PayloadType<EventRecordType[E]>>[] | undefined> = {};
+  private queue: Record<
+  EventCode,
+  Event<any, PayloadType<EventRecordType[any]>
+  >[] | undefined> = {};
 
-  public dispatch(event: Event<E, PayloadType<EventRecordType[E]>>): void {
+  public dispatch<E extends keyof EventRecordType>(
+    event: Event<E, PayloadType<EventRecordType[E]>>,
+  ): void {
     // eslint-disable-next-line no-param-reassign
     event.firedAt = new Date();
     const e = (event.code as EventCode);
@@ -33,7 +41,7 @@ export class EventDispatcher<
     });
   }
 
-  public flush(eventCode: E): void {
+  public flush<E extends keyof EventRecordType>(eventCode: E): void {
     this.queue[eventCode as EventCode]?.forEach((event) => { this.dispatch(event); });
   }
 
@@ -41,7 +49,7 @@ export class EventDispatcher<
     this.queue = {};
   }
 
-  public listen(
+  public listen<E extends keyof EventRecordType>(
     eventCode: E,
     cb: EventCallback<E, PayloadType<EventRecordType[E]>>,
   ): RemoveListenerCallback {
@@ -53,7 +61,7 @@ export class EventDispatcher<
     };
   }
 
-  public listenTo(
+  public listenTo<E extends keyof EventRecordType>(
     matcher: EventMatcher,
     cb: EventCallback<E, PayloadType<EventRecordType[E]>>,
   ): RemoveListenerCallback {
@@ -64,7 +72,7 @@ export class EventDispatcher<
     };
   }
 
-  public listenToAll(
+  public listenToAll<E extends keyof EventRecordType>(
     cb: EventCallback<E, PayloadType<EventRecordType[E]>>,
   ): RemoveListenerCallback {
     this.globalListeners.push(cb);
@@ -73,7 +81,7 @@ export class EventDispatcher<
     };
   }
 
-  public push(
+  public push<E extends keyof EventRecordType>(
     event: Event<E, PayloadType<PayloadType<EventRecordType[E]>>>,
   ): void {
     const e = (event.code as EventCode);
