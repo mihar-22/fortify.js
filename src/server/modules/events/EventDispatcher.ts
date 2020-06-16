@@ -6,29 +6,31 @@ import {
 import { isRegExp, isString } from '../../../utils';
 
 @injectable()
-export class EventDispatcher<EventRecordType = any> implements Dispatcher<EventRecordType> {
+export class EventDispatcher<
+  EventPayloadRecordType = any
+> implements Dispatcher<EventPayloadRecordType> {
   private readonly listeners: Record<
   EventCode,
-  EventCallback<any, EventRecordType[any]>[]
+  EventCallback<any, EventPayloadRecordType[any]>[]
   > = {};
 
   private matcherListeners: {
     matcher: EventMatcher,
-    cb: EventCallback<any, EventRecordType[any]>
+    cb: EventCallback<any, EventPayloadRecordType[any]>
   }[] = [];
 
   private globalListeners: EventCallback<
   any,
-  PayloadType<EventRecordType[any]>
+  PayloadType<EventPayloadRecordType[any]>
   >[] = [];
 
   private queue: Record<
   EventCode,
-  Event<any, PayloadType<EventRecordType[any]>
+  Event<any, PayloadType<EventPayloadRecordType[any]>
   >[] | undefined> = {};
 
-  public dispatch<E extends keyof EventRecordType>(
-    event: Event<E, PayloadType<EventRecordType[E]>>,
+  public dispatch<E extends keyof EventPayloadRecordType>(
+    event: Event<E, PayloadType<EventPayloadRecordType[E]>>,
   ): void {
     // eslint-disable-next-line no-param-reassign
     event.firedAt = new Date();
@@ -41,7 +43,7 @@ export class EventDispatcher<EventRecordType = any> implements Dispatcher<EventR
     });
   }
 
-  public flush<E extends keyof EventRecordType>(eventCode: E): void {
+  public flush<E extends keyof EventPayloadRecordType>(eventCode: E): void {
     this.queue[eventCode as EventCode]?.forEach((event) => { this.dispatch(event); });
   }
 
@@ -49,9 +51,9 @@ export class EventDispatcher<EventRecordType = any> implements Dispatcher<EventR
     this.queue = {};
   }
 
-  public listen<E extends keyof EventRecordType>(
+  public listen<E extends keyof EventPayloadRecordType>(
     eventCode: E,
-    cb: EventCallback<E, PayloadType<EventRecordType[E]>>,
+    cb: EventCallback<E, PayloadType<EventPayloadRecordType[E]>>,
   ): RemoveListenerCallback {
     const e = (eventCode as EventCode);
     if (!this.listeners[e]) { this.listeners[e] = []; }
@@ -61,9 +63,9 @@ export class EventDispatcher<EventRecordType = any> implements Dispatcher<EventR
     };
   }
 
-  public listenTo<E extends keyof EventRecordType>(
+  public listenTo<E extends keyof EventPayloadRecordType>(
     matcher: EventMatcher,
-    cb: EventCallback<E, PayloadType<EventRecordType[E]>>,
+    cb: EventCallback<E, PayloadType<EventPayloadRecordType[E]>>,
   ): RemoveListenerCallback {
     const listener = { matcher, cb };
     this.matcherListeners.push(listener);
@@ -72,8 +74,8 @@ export class EventDispatcher<EventRecordType = any> implements Dispatcher<EventR
     };
   }
 
-  public listenToAll<E extends keyof EventRecordType>(
-    cb: EventCallback<E, PayloadType<EventRecordType[E]>>,
+  public listenToAll<E extends keyof EventPayloadRecordType>(
+    cb: EventCallback<E, PayloadType<EventPayloadRecordType[E]>>,
   ): RemoveListenerCallback {
     this.globalListeners.push(cb);
     return () => {
@@ -81,8 +83,8 @@ export class EventDispatcher<EventRecordType = any> implements Dispatcher<EventR
     };
   }
 
-  public push<E extends keyof EventRecordType>(
-    event: Event<E, PayloadType<PayloadType<EventRecordType[E]>>>,
+  public push<E extends keyof EventPayloadRecordType>(
+    event: Event<E, PayloadType<PayloadType<EventPayloadRecordType[E]>>>,
   ): void {
     const e = (event.code as EventCode);
     if (!this.queue[e]) { this.queue[e] = []; }
