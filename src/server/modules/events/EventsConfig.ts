@@ -1,10 +1,13 @@
 import { EventMatcher } from './Event';
-import { Listener } from './Dispatcher';
+import { MailEventDispatcher } from '../mail/MailEvent';
 
 export type LogEventsOption = boolean | EventMatcher | EventMatcher[];
 
+// @TODO: connect all module event types here.
+export type GlobalEventDispatcher = MailEventDispatcher<any, any>;
+export type GlobalEventsListener = Pick<GlobalEventDispatcher, 'listen' | 'listenTo' | 'listenToAll'>;
+
 export interface EventsConfig {
   logEvents?: LogEventsOption
-  // @TODO: connect all event types here.
-  tap?: (events: Listener<any>) => void
+  tap?: (events: GlobalEventsListener) => void
 }
