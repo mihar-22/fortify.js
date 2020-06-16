@@ -1,14 +1,35 @@
 import Mail from 'nodemailer/lib/mailer';
-import nodemailer from 'nodemailer';
-import { SentMessageInfo } from 'nodemailer/lib/smtp-transport';
-import { SmtpConfig } from '../../MailConfig';
+import nodemailer, { SentMessageInfo } from 'nodemailer';
+import { MailResponse } from '../../Mail';
 
 export const Nodemailer = Mail;
 
-export type SmtpResponse = SentMessageInfo;
+export interface SmtpEnvelope {
+  from: string,
+  to: string[]
+}
+
+export interface SmtpResponse extends MailResponse {
+  messageId?: string
+  accepted?: string[]
+  rejected?: string[]
+  envelope?: SmtpEnvelope
+  envelopeTime?: number
+  messageTime?: number
+  messageSize?: number
+  message?: string
+  errors?: string[]
+}
 
 export interface SmtpClient {
   sendMail(mailOptions: Mail.Options): Promise<SmtpResponse>;
+}
+
+export interface SmtpConfig {
+  host: string
+  port: number
+  username: string
+  password: string
 }
 
 export type SmtpClientFactory = (config: SmtpConfig) => SmtpClient;
@@ -18,7 +39,9 @@ export interface SmtpTestAccount {
   password: string
 }
 
-export const getPreviewUrl = (response: SmtpResponse) => nodemailer.getTestMessageUrl(response);
+export const getPreviewUrl = (response: SmtpResponse) => nodemailer.getTestMessageUrl(
+  response as SentMessageInfo,
+);
 
 export const createSmtpTestAccount = async (): Promise<SmtpTestAccount> => {
   const { user, pass } = await nodemailer.createTestAccount();

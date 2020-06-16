@@ -1,15 +1,26 @@
 import { inject, injectable } from 'inversify';
 import { URLSearchParams } from 'url';
-import { Mail } from '../Mailer';
 import { AbstractMailTransporter } from './AbstractMailTransporter';
 import { DIToken } from '../../../DIToken';
 import { HttpClient } from '../../http/HttpClient';
 import { Dispatcher } from '../../events/Dispatcher';
-import { MailgunConfig, MailgunRegion } from '../MailConfig';
+import { Mail, MailResponse } from '../Mail';
 
-export interface MailgunResponse {
+export enum MailgunRegion {
+  US = 'us',
+  EU = 'eu'
+}
+
+export interface MailgunConfig {
+  domain: string
+  apiKey: string
+  region?: MailgunRegion
+}
+
+export interface MailgunResponse extends MailResponse {
   id?: string
   message: string
+  errors?: string[]
 }
 
 @injectable()
@@ -49,10 +60,15 @@ export class Mailgun extends AbstractMailTransporter<MailgunConfig, MailgunRespo
       );
 
       const textRes = await response.text();
-      if (!textRes.startsWith('{')) { return { message: textRes }; }
-      return JSON.parse(textRes) as MailgunResponse;
+      const isJson = textRes.startsWith('{');
+      const jsonRes = isJson ? (JSON.parse(textRes) as MailgunResponse) : { message: textRes };
+      return { ...jsonRes, success: response.ok };
     } catch (err) {
-      return { message: 'Internal Mailgun server error' };
+      return {
+        message: 'Failed to send mail with Mailgun.',
+        success: false,
+        errors: [err.message],
+      };
     }
   }
 }

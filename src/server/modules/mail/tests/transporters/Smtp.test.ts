@@ -1,13 +1,13 @@
 import { MailModule } from '../../MailModule';
 import { DIToken } from '../../../../DIToken';
-import { Env } from '../../../../Config';
+import { Config, Env } from '../../../../Config';
 import { FakeSmtpClient, Smtp } from '../../transporters';
 import { EventsModule } from '../../../events/EventsModule';
 import { App } from '../../../../App';
 import { bootstrap } from '../../../../bootstrap';
-import { MailTransporter, MailTransporterFactory } from '../../Mailer';
-import { Module } from '../../../Module';
 import { LoggerModule } from '../../../logger/LoggerModule';
+import { MailTransporter } from '../../Mail';
+import { MailTransporterFactory } from '../../Mailer';
 
 describe('Mail', () => {
   describe('Transporters', () => {
@@ -31,31 +31,36 @@ describe('Mail', () => {
         },
       };
 
-      beforeEach(async () => {
-        app = await bootstrap([LoggerModule, EventsModule, MailModule], {
-          env: Env.Testing,
-          [Module.Mail]: {
-            sandbox: false,
-          },
-        }, true);
-
+      const boot = async (config?: Config) => {
+        app = await bootstrap([LoggerModule, EventsModule, MailModule], config, true);
         mailer = app.get<MailTransporterFactory>(
           DIToken.MailTransporterFactory,
         )(MailTransporter.Smtp) as Smtp;
+      };
 
+      beforeEach(async () => {
+        await boot({ env: Env.Testing });
         smtpClient = await app.get<() => FakeSmtpClient>(DIToken.SmtpClientFactory)();
       });
 
       test('sends mail', async () => {
-        await mailer.send(mail);
+        smtpClient.sendMail.mockReturnValueOnce({});
+        await mailer.sendMail(mail);
         expect(smtpClient.sendMail).toHaveBeenCalledWith({
           subject: mail.subject,
           to: mail.to,
           text: mail.text,
-          html: '<div>John Doe</div>',
           from: mailSender,
         });
       });
+
+      // test('sends mail e2e', async () => {
+      //   mailer.useSandbox(true);
+      //   await boot({ env: Env.Development });
+      //   const response = await mailer.sendMail(mail);
+      //   console.log(response);
+      //   expect(response).toBeDefined();
+      // });
     });
   });
 });

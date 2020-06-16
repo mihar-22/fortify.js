@@ -1,16 +1,15 @@
 import { bold, cyan } from 'kleur';
 import { existsSync } from 'fs';
 import { ServerError } from './ServerError';
-import { Dependencies } from '../ModuleProvider';
 
 export class DependenciesMissingError extends Error implements ServerError {
   public code: string;
 
   public module: string;
 
-  public dependencies: Dependencies[];
+  public dependencies: string[];
 
-  constructor(dependencies: Dependencies[], module: string, isDevDep: boolean) {
+  constructor(dependencies: string[], module: string, isDevDep: boolean) {
     super(undefined);
 
     this.module = module;

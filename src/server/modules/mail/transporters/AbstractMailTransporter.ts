@@ -1,14 +1,15 @@
 import { injectable } from 'inversify';
 import { Dispatcher } from '../../events/Dispatcher';
-import { Mail, Mailer } from '../Mailer';
+import { Mailer } from '../Mailer';
 import { MailEvent, MailEventDispatcher } from '../MailEvent';
 import { MailTemplateRenderer } from '../MailTemplateRenderer';
 import { Event } from '../../events/Event';
+import { Mail, MailResponse } from '../Mail';
 
 @injectable()
 export abstract class AbstractMailTransporter<
   ConfigType,
-  ResponseType
+  ResponseType extends MailResponse
 > implements Mailer<ConfigType> {
   protected config?: ConfigType;
 
@@ -42,18 +43,26 @@ export abstract class AbstractMailTransporter<
       : undefined;
 
     this.events.dispatch(new Event(
-      MailEvent.MailSending,
+      MailEvent.Sending,
       `Mail [${mail.subject}] -> SENDING -> [${mail.to}]`,
       { mail },
     ));
 
     const response = await this.sendMail(mail, html);
 
-    this.events.dispatch(new Event(
-      MailEvent.MailSent,
-      `Mail [${mail.subject}] -> SENT -> [${mail.to}]`,
-      { mail, response },
-    ));
+    if (response.success) {
+      this.events.dispatch(new Event(
+        MailEvent.Sent,
+        `Mail [${mail.subject}] -> SENT -> [${mail.to}]`,
+        { mail, response },
+      ));
+    } else {
+      this.events.dispatch(new Event(
+        MailEvent.Failed,
+        `Mail [${mail.subject}] -> FAILED -> [${mail.to}]`,
+        { mail, response },
+      ));
+    }
 
     return response;
   }

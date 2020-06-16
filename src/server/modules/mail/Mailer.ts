@@ -1,18 +1,4 @@
-import { PayloadType } from '../events/Dispatcher';
-
-export enum MailTransporter {
-  Smtp = 'smtp',
-  SendGird = 'sendGrid',
-  Mailgun = 'mailgun'
-}
-
-export interface Mail<T> {
-  to: string,
-  subject: string,
-  text?: string
-  template?: string
-  data: PayloadType<T>
-}
+import { Mail, MailTransporter } from './Mail';
 
 export interface Mailer<ConfigType> {
   send(mail: Mail<any>): Promise<any>

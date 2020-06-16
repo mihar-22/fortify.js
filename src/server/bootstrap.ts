@@ -3,7 +3,7 @@ import { Config } from './Config';
 import { ConfigurationError, DependenciesMissingError } from './support/errors';
 import { App } from './App';
 import { mergeObjDeep } from '../utils';
-import { Dependencies, ModuleProvider } from './support/ModuleProvider';
+import { ModuleProvider } from './support/ModuleProvider';
 
 interface Pkg {
   name?: string
@@ -61,14 +61,14 @@ export async function bootstrap(
   const isHomePkg = pkg.name === '@mihar-22/serverless-auth';
 
   modules.forEach((Module) => {
-    const missingDeps: Dependencies[] = [];
+    const missingDeps: string[] = [];
     const dependencies = Module.dependencies?.(app);
     dependencies?.forEach((dependency) => {
       const hasDep = Object.prototype.hasOwnProperty.call(pkg.dependencies ?? {}, dependency);
       const hasDevDep = (
         isHomePkg && Object.prototype.hasOwnProperty.call(pkg.devDependencies ?? {}, dependency)
       );
-      if (!hasDep && !hasDevDep) { missingDeps.push(dependency as any); }
+      if (!hasDep && !hasDevDep) { missingDeps.push(dependency); }
     });
     if (missingDeps.length > 0) {
       throw new DependenciesMissingError(missingDeps, Module.module, isHomePkg);

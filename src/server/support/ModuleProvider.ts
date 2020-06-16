@@ -8,13 +8,11 @@ export interface InvalidConfiguration {
   link?: string
 }
 
-export type Dependencies = string[];
-
 export interface ModuleProvider<ConfigType> {
   module: Module;
   defaults?: (app: App) => ConfigType;
   configValidation?: (app: App) => InvalidConfiguration | undefined;
-  dependencies?: (app: App) => Dependencies;
+  dependencies?: (app: App) => string[];
   register: (app: App) => void
   registerTestingEnv?: (app: App) => void
   boot?: (app: App) => Promise<void>

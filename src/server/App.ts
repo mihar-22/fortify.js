@@ -53,8 +53,8 @@ export class App {
     const curr = path;
     // @ts-ignore
     // eslint-disable-next-line no-cond-assign,no-empty
-    while (curr.length && (obj = obj[curr.shift()])) {}
-    return curr.length === 0;
+    while (curr.length && obj && (obj = obj[curr.shift()])) {}
+    return (curr.length === 0) && !!obj;
   }
 
   public getConfig<T extends Module>(module: T): Config[T] {

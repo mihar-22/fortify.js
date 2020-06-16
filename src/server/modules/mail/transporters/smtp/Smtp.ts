@@ -1,19 +1,19 @@
 import { inject, injectable } from 'inversify';
-import { Mail } from '../../Mailer';
 import { DIToken } from '../../../../DIToken';
 import {
   createSmtpTestAccount,
   getPreviewUrl,
   SmtpClient,
   SmtpClientFactory,
+  SmtpConfig,
   SmtpResponse,
 } from './SmtpClient';
 import { AbstractMailTransporter } from '../AbstractMailTransporter';
 import { Dispatcher } from '../../../events/Dispatcher';
 import { MailEvent } from '../../MailEvent';
-import { SmtpConfig } from '../../MailConfig';
 import { LogLevel } from '../../../logger/Logger';
 import { Event } from '../../../events/Event';
+import { Mail } from '../../Mail';
 
 @injectable()
 export class Smtp extends AbstractMailTransporter<SmtpConfig, SmtpResponse> {
@@ -47,25 +47,32 @@ export class Smtp extends AbstractMailTransporter<SmtpConfig, SmtpResponse> {
   public async sendMail(mail: Mail<any>, html?: string): Promise<SmtpResponse> {
     if (!this.client) { this.client = await this.buildClient(); }
 
-    const response = await this.client!.sendMail({
-      from: this.sender,
-      to: mail.to,
-      subject: mail.subject,
-      text: mail.text,
-      html,
-    });
+    try {
+      const response = await this.client!.sendMail({
+        from: this.sender,
+        to: mail.to,
+        subject: mail.subject,
+        text: mail.text,
+        html,
+      });
 
-    const previewUrl = getPreviewUrl(response);
+      const previewUrl = getPreviewUrl(response);
+      if (previewUrl) {
+        this.events.dispatch(new Event(
+          MailEvent.PreviewCreated,
+          `Generated mail [${mail.subject}] preview: ${previewUrl}`,
+          { previewUrl, mail },
+          LogLevel.Info,
+        ));
+      }
 
-    if (previewUrl) {
-      this.events.dispatch(new Event(
-        MailEvent.MailPreviewCreated,
-        `Generated mail [${mail.subject}] preview: ${previewUrl}`,
-        { previewUrl, mail },
-        LogLevel.Info,
-      ));
+      return { ...response, success: !!(response?.accepted?.length) };
+    } catch (err) {
+      return {
+        message: 'Failed to send mail with SMTP.',
+        success: false,
+        errors: [err.message],
+      };
     }
-
-    return response;
   }
 }

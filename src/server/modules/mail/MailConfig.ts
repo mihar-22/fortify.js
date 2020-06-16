@@ -1,29 +1,9 @@
-import { MailTransporter } from './Mailer';
+import { MailgunConfig, SendGridConfig, SmtpConfig } from './transporters';
+import { MailTransporter } from './Mail';
 
 export interface MailFrom {
   name: string
   address: string
-}
-
-export enum MailgunRegion {
-  US = 'us',
-  EU = 'eu'
-}
-
-export interface MailgunConfig {
-  domain: string
-  apiKey: string
-  region?: MailgunRegion
-}
-
-export interface SendGridConfig {
-}
-
-export interface SmtpConfig {
-  host: string
-  port: number
-  username: string
-  password: string
 }
 
 export interface MailConfig {

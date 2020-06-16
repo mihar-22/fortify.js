@@ -6,23 +6,24 @@ import {
   SendGrid,
   Smtp,
   SmtpClient,
-  SmtpClientFactory,
+  SmtpClientFactory, SmtpConfig,
 } from './transporters';
 import { DIToken } from '../../DIToken';
 import {
-  Mailer, MailerConstructor, MailTransporter, MailTransporterFactory,
+  Mailer, MailerConstructor, MailTransporterFactory,
 } from './Mailer';
 import { FakeMailer } from './FakeMailer';
-import { MailConfig, SmtpConfig } from './MailConfig';
+import { MailConfig } from './MailConfig';
 import { ModuleProvider } from '../../support/ModuleProvider';
 import { MailError } from './MailError';
+import { MailTransporter } from './Mail';
 
 export const MailModule: ModuleProvider<MailConfig> = {
   module: Module.Mail,
 
   defaults: (app: App) => ({
     transporter: MailTransporter.Smtp,
-    sandbox: !app.isProductionEnv,
+    sandbox: app.isDevelopmentEnv,
     allowSandboxInProduction: false,
     // @TODO: insert app name and domain here.
     from: {

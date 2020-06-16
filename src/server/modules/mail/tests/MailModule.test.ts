@@ -4,11 +4,14 @@ import { Config, Env } from '../../../Config';
 import { EventsModule } from '../../events/EventsModule';
 import { FakeSmtpClient, Nodemailer, SmtpClientFactory } from '../transporters';
 import { MailModule } from '../MailModule';
-import { Mailer, MailTransporter, MailTransporterFactory } from '../Mailer';
+import { Mailer, MailTransporterFactory } from '../Mailer';
 import { FakeMailer } from '../FakeMailer';
 import { HttpModule } from '../../http/HttpModule';
 import { App } from '../../../App';
 import { bootstrap } from '../../../bootstrap';
+import { MailError } from '../MailError';
+import { Module } from '../../Module';
+import { MailTransporter } from '../Mail';
 
 describe('Mail', () => {
   describe('Module', () => {
@@ -46,7 +49,15 @@ describe('Mail', () => {
 
     test('resolves all transporters', async () => {
       await Promise.all(Object.values(MailTransporter).map(async (transporter) => {
-        const cApp = await boot({ mail: { transporter } });
+        const cApp = await boot({
+          mail: {
+            transporter,
+            [MailTransporter.Smtp]: {} as any,
+            [MailTransporter.SendGird]: {} as any,
+            [MailTransporter.Mailgun]: {} as any,
+          },
+        });
+
         const mailer = cApp.get<Mailer<any>>(DIToken.Mailer);
         const { constructor } = cApp
           .get<MailTransporterFactory>(DIToken.MailTransporterFactory)(transporter);
@@ -54,22 +65,60 @@ describe('Mail', () => {
       }));
     });
 
-    // Checking defaults.
-    // test('resolves fake sender in development/testing', async () => {
-    //   const fakeSender = 'Test App <no-reply@localhost.com>';
-    //   await boot({ env: Env.Development });
-    //   const devSenderFactory = app.get<MailSenderFactory>(DIToken.MailSenderFactory);
-    //   expect(devSenderFactory()).toBe(fakeSender);
-    //   await boot({ env: Env.Testing });
-    //   const testSenderFactory = app.get<MailSenderFactory>(DIToken.MailSenderFactory);
-    //   expect(testSenderFactory()).toBe(fakeSender);
-    // });
+    test('should throw if sandbox is enabled in production', async () => {
+      await expect(async () => {
+        await boot({ env: Env.Production, [Module.Mail]: { sandbox: true } });
+      }).rejects.toThrow(MailError.SandboxEnabledInProduction);
+    });
 
-    // THROW CHECKS -> DEP + TRANSPORTER CONFIG
-    // test('should throw in production if smtp config is missing', async () => {
-    //   await loadModule(({ env: Env.Production }));
-    //   const smtpClientProvider = container.get<SmtpClientProvider>(DIToken.SmtpClientProvider);
-    //   await expect(smtpClientProvider()).rejects.toThrow(MailErrorCode.MissingSmtpConfig);
-    // });
+    test('should throw if transporter config is missing', async () => {
+      await expect(async () => {
+        await boot({
+          env: Env.Production,
+          [Module.Mail]: {
+            transporter: MailTransporter.Mailgun,
+          },
+        });
+      }).rejects.toThrow(MailError.MissingTransporterConfig);
+    });
+
+    test('should throw if sandbox is disabled and smtp config missing', async () => {
+      await expect(async () => {
+        await boot({
+          env: Env.Development,
+          [Module.Mail]: {
+            transporter: MailTransporter.Smtp,
+            sandbox: false,
+          },
+        });
+      }).rejects.toThrow(MailError.MissingSmtpConfig);
+    });
+
+    test('should throw if mail from is missing in production', async () => {
+      await expect(async () => {
+        await boot({
+          env: Env.Production,
+          [Module.Mail]: {
+            transporter: MailTransporter.Smtp,
+            smtp: {} as any,
+          },
+        });
+      }).rejects.toThrow(MailError.MissingMailFrom);
+    });
+
+    test('returns correct smtp dependencies', async () => {
+      await boot({ [Module.Mail]: { transporter: MailTransporter.Smtp } });
+      expect(MailModule.dependencies!(app)).toEqual(['nodemailer']);
+    });
+
+    test('returns correct dependencies if not smtp', async () => {
+      await boot({
+        [Module.Mail]: {
+          transporter: MailTransporter.Mailgun,
+          [MailTransporter.Mailgun]: {} as any,
+        },
+      });
+      expect(MailModule.dependencies!(app)).toEqual([]);
+    });
   });
 });
