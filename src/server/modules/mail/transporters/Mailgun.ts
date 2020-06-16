@@ -1,33 +1,58 @@
 import { inject, injectable } from 'inversify';
-import { Mail, MailSenderFactory } from '../Mailer';
+import { URLSearchParams } from 'url';
+import { Mail } from '../Mailer';
 import { AbstractMailTransporter } from './AbstractMailTransporter';
 import { DIToken } from '../../../DIToken';
 import { HttpClient } from '../../http/HttpClient';
 import { Dispatcher } from '../../events/Dispatcher';
-import { MailgunConfig } from '../MailConfig';
+import { MailgunConfig, MailgunRegion } from '../MailConfig';
 
 export interface MailgunResponse {
-
+  id?: string
+  message: string
 }
 
 @injectable()
-export class Mailgun extends AbstractMailTransporter<MailgunResponse> {
-  protected readonly config: MailgunConfig;
-
+export class Mailgun extends AbstractMailTransporter<MailgunConfig, MailgunResponse> {
   protected readonly httpClient: HttpClient;
 
   constructor(
-  @inject(DIToken.MailgunConfig) config: MailgunConfig,
-    @inject(DIToken.HttpClient) httpClient: HttpClient,
+  @inject(DIToken.HttpClient) httpClient: HttpClient,
     @inject(DIToken.EventDispatcher) events: Dispatcher,
-    @inject(DIToken.MailSenderFactory) sender: MailSenderFactory,
   ) {
-    super(events, sender);
-    this.config = config;
+    super(events);
     this.httpClient = httpClient;
   }
 
-  public async sendMail(mail: Mail<any>): Promise<MailgunResponse> {
-    return Promise.resolve(mail);
+  private getBaseUrl(): string {
+    const region = this.config!.region ?? MailgunRegion.US;
+    return (region === MailgunRegion.US) ? 'api.mailgun.net' : 'api.eu.mailgun.net';
+  }
+
+  public async sendMail(mail: Mail<any>, html?: string): Promise<MailgunResponse> {
+    try {
+      const response = await this.httpClient(
+        `https://${this.getBaseUrl()}/v3/${this.config!.domain}/messages`, {
+          method: 'POST',
+          body: new URLSearchParams({
+            from: this.sender,
+            to: mail.to,
+            subject: mail.subject,
+            text: mail.text ?? '',
+            html: html ?? '',
+            'o:testmode': this.sandbox ? 'yes' : 'no',
+          }),
+          headers: {
+            Authorization: `Basic ${Buffer.from(`api:${this.config!.apiKey}`).toString('base64')}`,
+          },
+        },
+      );
+
+      const textRes = await response.text();
+      if (!textRes.startsWith('{')) { return { message: textRes }; }
+      return JSON.parse(textRes) as MailgunResponse;
+    } catch (err) {
+      return { message: 'Internal Mailgun server error' };
+    }
   }
 }

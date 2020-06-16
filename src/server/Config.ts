@@ -3,6 +3,7 @@ import { SessionConfig } from './modules/session/Session';
 import { Module } from './modules/Module';
 import { LoggerConfig } from './modules/logger/LoggerConfig';
 import { EncryptionConfig } from './modules/encryption/EncryptionConfig';
+import { EventsConfig } from './modules/events/EventsConfig';
 
 export enum Env {
   Testing = 'testing',
@@ -17,4 +18,5 @@ export interface Config {
   [Module.Mail]?: MailConfig,
   [Module.Session]?: SessionConfig,
   [Module.Encryption]?: EncryptionConfig,
+  [Module.Events]?: EventsConfig
 }

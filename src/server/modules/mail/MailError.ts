@@ -1,19 +1,7 @@
-import { RuntimeError } from '../../support/errors';
-import { Module } from '../Module';
-
-export enum MailErrorCode {
+export enum MailError {
   CouldNotBuildTemplate = 'COULD_NOT_BUILD_TEMPLATE',
+  MissingTransporterConfig = 'MISSING_TRANSPORTER_CONFIG',
+  SandboxEnabledInProduction = 'SANDBOX_IN_PRODUCTION',
+  MissingSmtpConfig = 'MISSING_SMTP_CONFIG',
+  MissingMailFrom = 'MISSING_MAIL_FROM'
 }
-
-export const MailError = {
-  [MailErrorCode.CouldNotBuildTemplate]: (template?: string, reference?: Error) => new RuntimeError(
-    MailErrorCode.CouldNotBuildTemplate,
-    `Could not build mail template [${template}]`,
-    Module.Mail,
-    reference,
-    [
-      'The template file may have not been created.',
-      'The template contains data that was not included in `mail.data`.',
-    ],
-  ),
-};

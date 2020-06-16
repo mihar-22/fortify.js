@@ -1,3 +1,8 @@
-import Axios from 'axios';
+import fetch from 'node-fetch';
 
-export type HttpClient = typeof Axios;
+export type HttpClient = (
+  url: fetch.RequestInfo,
+  init?: fetch.RequestInit
+) => Promise<fetch.Response>;
+
+export const buildHttpClient: () => HttpClient = () => fetch;

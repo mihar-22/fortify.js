@@ -9,6 +9,8 @@ export const getConstructor = (input: any) => (
   !isNullOrUndefined(input) ? input.constructor : undefined
 );
 
+export const isRegExp = (input: any) => getConstructor(input) === RegExp;
+
 export const isString = (input: any) => getConstructor(input) === String;
 
 export const isObject = (input: any) => getConstructor(input) === Object;

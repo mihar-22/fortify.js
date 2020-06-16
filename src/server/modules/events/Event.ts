@@ -1,24 +1,29 @@
 import { LogLevel } from '../logger/Logger';
+import { isRegExp, isString } from '../../../utils';
 
 export type EventCode = string;
 
-export class Event<PayloadType> {
-  public code: EventCode;
+export type EventMatcher = EventCode | RegExp;
+
+export const isEventMatcher = (input: any) => isString(input) || isRegExp(input);
+
+export class Event<EventCodeValue, PayloadType> {
+  public code: EventCodeValue;
 
   public firedAt?: Date;
 
   public queuedAt?: Date;
 
-  public payload?: PayloadType;
+  public payload: PayloadType;
 
   public description: string;
 
   public logLevel: LogLevel;
 
   constructor(
-    code: EventCode,
+    code: EventCodeValue,
     description: string,
-    payload?: PayloadType,
+    payload: PayloadType,
     logLevel?: LogLevel,
   ) {
     this.code = code;
@@ -28,24 +33,6 @@ export class Event<PayloadType> {
   }
 }
 
-export type EventPayloadRecord<EventCodeEnum extends keyof any> = {
-  [P in EventCodeEnum]: object
-};
-
-export type EventBuilder<PayloadType> = (payload?: PayloadType) => Event<PayloadType>;
-
-export type EventBuilderRecord<
-  EventCodeEnum extends keyof any,
-  EventPayloadRecordType extends EventPayloadRecord<EventCodeEnum>,
-> = {
-  [P in keyof EventPayloadRecordType]: EventBuilder<EventPayloadRecordType[P]>;
-};
-
-export type EventCallback<PayloadType> = (event: Event<PayloadType>) => void;
-
-export type EventCallbackRecord<
-  EventCodeEnum extends keyof any,
-  EventPayloadRecordType extends EventPayloadRecord<EventCodeEnum>
-> = {
-  [P in EventCodeEnum]?: EventCallback<Event<EventPayloadRecordType[P]>>
-};
+export type EventCallback<EventCodeValue, PayloadType> = (
+  event: Event<EventCodeValue, PayloadType>
+) => void;

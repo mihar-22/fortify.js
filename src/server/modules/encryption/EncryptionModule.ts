@@ -5,7 +5,8 @@ import { CryptoEncrypter } from './CryptoEncrypter';
 import { App } from '../../App';
 import { DIToken } from '../../DIToken';
 import { FakeEncrypter } from './FakeEncrypter';
-import { EncryptionConfig, EncryptionConfigError } from './EncryptionConfig';
+import { EncryptionConfig } from './EncryptionConfig';
+import { EncryptionError } from './EncryptionError';
 
 export const EncryptionModule: ModuleProvider<EncryptionConfig> = {
   module: Module.Encryption,
@@ -25,7 +26,7 @@ export const EncryptionModule: ModuleProvider<EncryptionConfig> = {
 
     if (app.isProductionEnv && isBadProductionKey) {
       return {
-        code: EncryptionConfigError.MissingEncryptionKey,
+        code: EncryptionError.MissingEncryptionKey,
         message: 'Your application is vulnerable because no encryption key has been specified.',
         path: 'key',
       };
@@ -33,7 +34,7 @@ export const EncryptionModule: ModuleProvider<EncryptionConfig> = {
 
     if (!CryptoEncrypter.supported(key!, cipher!)) {
       return {
-        code: EncryptionConfigError.UnsupportedCipherAndKeyPair,
+        code: EncryptionError.UnsupportedCipherAndKeyPair,
         message: 'The only supported ciphers are AES-128-CBC and AES-256-CBC with the correct key lengths.',
       };
     }

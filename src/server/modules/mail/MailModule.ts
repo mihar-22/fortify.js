@@ -1,28 +1,29 @@
 import { Module } from '../Module';
 import { App } from '../../App';
 import {
-  createSmtpTestAccount,
-  createSmtpTransport,
-  FakeSmtpClient,
+  createSmtpTransport, FakeSmtpClient,
   Mailgun,
   SendGrid,
   Smtp,
   SmtpClient,
-  SmtpClientProvider,
+  SmtpClientFactory,
 } from './transporters';
-import { configToken, DIToken } from '../../DIToken';
+import { DIToken } from '../../DIToken';
 import {
-  Mailer, MailerConstructor, MailSenderFactory, MailTransporter, MailTransporterFactory,
+  Mailer, MailerConstructor, MailTransporter, MailTransporterFactory,
 } from './Mailer';
 import { FakeMailer } from './FakeMailer';
-import { MailConfig, MailConfigError, MailConfigErrorCode } from './MailConfig';
+import { MailConfig, SmtpConfig } from './MailConfig';
 import { ModuleProvider } from '../../support/ModuleProvider';
+import { MailError } from './MailError';
 
 export const MailModule: ModuleProvider<MailConfig> = {
   module: Module.Mail,
 
-  defaults: () => ({
+  defaults: (app: App) => ({
     transporter: MailTransporter.Smtp,
+    sandbox: !app.isProductionEnv,
+    allowSandboxInProduction: false,
     // @TODO: insert app name and domain here.
     from: {
       name: 'Test App',
@@ -31,79 +32,90 @@ export const MailModule: ModuleProvider<MailConfig> = {
   }),
 
   configValidation: (app: App) => {
-    const mailConfig = app.getConfig(Module.Mail);
-    const transporter = mailConfig!.transporter!;
+    const mailConfig = app.getConfig(Module.Mail)!;
+    const transporter = mailConfig.transporter!;
+    const isSmtpTransport = transporter === MailTransporter.Smtp;
 
-    if (app.isProductionEnv && !app.configPathExists(Module.Mail, transporter)) {
-      return MailConfigError[MailConfigErrorCode.MissingTransporterConfig](transporter);
+    if (app.isProductionEnv && !mailConfig.allowSandboxInProduction && mailConfig.sandbox) {
+      return {
+        code: MailError.SandboxEnabledInProduction,
+        message: 'Sandbox mode has been enabled in production, if you want to allow this then set '
+          + '`config.mail.allowSandboxInProduction` to `true`',
+        path: 'sandbox',
+      };
     }
 
-    if (app.isProductionEnv && mailConfig!.from!.address.includes('localhost')) {
-      return MailConfigError[MailConfigErrorCode.MissingMailFrom];
+    if (!isSmtpTransport && !app.configPathExists(Module.Mail, transporter)) {
+      return {
+        code: MailError.MissingTransporterConfig,
+        message: `The mail transporter [${transporter}] was selected but no configuration was found.`,
+        path: transporter,
+      };
+    }
+
+    if (!app.isTestingEnv && isSmtpTransport && !mailConfig.sandbox && !mailConfig[transporter]) {
+      return {
+        code: MailError.MissingSmtpConfig,
+        message: 'Sandbox mode has been disabled and no SMTP configuration was found.',
+        path: MailTransporter.Smtp,
+      };
+    }
+
+    if (app.isProductionEnv && mailConfig.from!.address.includes('localhost')) {
+      return {
+        code: MailError.MissingMailFrom,
+        message: 'Mail cannot be sent without the from field being set.',
+        path: 'from',
+      };
     }
 
     return undefined;
   },
 
   dependencies: (app: App) => {
-    const transporter = app.getConfig(Module.Mail)?.transporter;
+    const { transporter } = app.getConfig(Module.Mail)!;
     return (transporter === MailTransporter.Smtp) ? ['nodemailer'] : [];
   },
 
   register: (app: App) => {
-    const mailConfig = app.getConfig(Module.Mail);
+    const mailConfig = app.getConfig(Module.Mail)!;
 
     app
-      .bind(configToken(mailConfig!.transporter!))
-      .toConstantValue(mailConfig![mailConfig!.transporter!] ?? {});
-
-    app
-      .bind<SmtpClientProvider>(DIToken.SmtpClientProvider)
-      .toProvider<SmtpClient>(() => async () => {
-      const smtpConfig = mailConfig?.[MailTransporter.Smtp];
-      if (!smtpConfig) {
-        const testAccount = await createSmtpTestAccount();
-        return createSmtpTransport({
-          host: 'smtp.ethereal.email',
-          port: 587,
-          username: testAccount.username,
-          password: testAccount.password,
-        });
-      }
-      return createSmtpTransport(smtpConfig);
-    });
-
-    app
-      .bind<MailSenderFactory>(DIToken.MailSenderFactory)
-      .toFactory<string>(() => () => `${mailConfig!.from!.name} <${mailConfig!.from!.address}>`);
+      .bind<SmtpClientFactory>(DIToken.SmtpClientFactory)
+      .toFactory<SmtpClient>(() => (config: SmtpConfig) => createSmtpTransport(config));
 
     app
       .bind<MailTransporterFactory>(DIToken.MailTransporterFactory)
-      .toFactory<Mailer>(() => (transporter: MailTransporter) => {
+      .toFactory<Mailer<any>>(() => (transporter: MailTransporter) => {
       const transporters: Record<MailTransporter, MailerConstructor> = {
         [MailTransporter.Smtp]: Smtp,
         [MailTransporter.Mailgun]: Mailgun,
         [MailTransporter.SendGird]: SendGrid,
       };
 
-      return app.resolve<Mailer>(transporters[transporter]);
+      const mailer = app.resolve<Mailer<any>>(transporters[transporter]);
+      mailer.useSandbox(mailConfig.sandbox!);
+      mailer.setConfig(mailConfig[transporter]);
+      mailer.setSender(`${mailConfig.from!.name} <${mailConfig.from!.address}>`);
+
+      return mailer;
     });
 
     app
-      .bind<Mailer>(DIToken.Mailer)
+      .bind<Mailer<any>>(DIToken.Mailer)
       .toDynamicValue(() => app
         .get<MailTransporterFactory>(DIToken.MailTransporterFactory)(mailConfig!.transporter!))
       .inSingletonScope();
   },
 
   registerTestingEnv: (app: App) => {
-    app.bind<SmtpClient>(DIToken.FakeSmtpClient).toConstantValue(new FakeSmtpClient());
-    app.bind<Mailer>(DIToken.FakeMailer).toConstantValue(new FakeMailer());
+    app.bind<FakeSmtpClient>(DIToken.FakeSmtpClient).toConstantValue(new FakeSmtpClient());
 
     app
-      .rebind<SmtpClientProvider>(DIToken.SmtpClientProvider)
-      .toConstantValue(() => Promise.resolve(app.get(DIToken.FakeSmtpClient)));
+      .rebind<SmtpClientFactory>(DIToken.SmtpClientFactory)
+      .toConstantValue(() => app.get(DIToken.FakeSmtpClient));
 
-    app.rebind<Mailer>(DIToken.Mailer).toConstantValue(app.get(DIToken.FakeMailer));
+    app.bind<Mailer<any>>(DIToken.FakeMailer).toConstantValue(new FakeMailer());
+    app.rebind<Mailer<any>>(DIToken.Mailer).toConstantValue(app.get(DIToken.FakeMailer));
   },
 };

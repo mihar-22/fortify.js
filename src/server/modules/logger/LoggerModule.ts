@@ -1,13 +1,14 @@
 import { Module } from '../Module';
 import { ModuleProvider } from '../../support/ModuleProvider';
 import { App } from '../../App';
-import { LoggerConfig, LoggerConfigError, LoggerConfigErrorCode } from './LoggerConfig';
+import { LoggerConfig } from './LoggerConfig';
 import {
   LogDriver, LogDriverFactory, Logger, LoggerConstructor, LogLevel,
 } from './Logger';
 import { DIToken } from '../../DIToken';
 import { Pino, Winston } from './drivers';
 import { FakeLogger } from './FakeLogger';
+import { LoggerError } from './LoggerError';
 
 export const LoggerModule: ModuleProvider<LoggerConfig> = {
   module: Module.Logger,
@@ -29,7 +30,12 @@ export const LoggerModule: ModuleProvider<LoggerConfig> = {
       && !loggerConfig?.useDefaultTransporter
       && !(loggerConfig?.[LogDriver.Winston]?.transports)
     ) {
-      return LoggerConfigError[LoggerConfigErrorCode.MissingTransport](driver, 'transports');
+      return {
+        code: LoggerError.MissingTransport,
+        message: `The logger [${driver}] requires a transport to be set.`,
+        path: `${driver}.transports`,
+        link: 'https://github.com/winstonjs/winston#transports',
+      };
     }
 
     return undefined;

@@ -3,13 +3,15 @@ import nodemailer from 'nodemailer';
 import { SentMessageInfo } from 'nodemailer/lib/smtp-transport';
 import { SmtpConfig } from '../../MailConfig';
 
+export const Nodemailer = Mail;
+
 export type SmtpResponse = SentMessageInfo;
 
 export interface SmtpClient {
   sendMail(mailOptions: Mail.Options): Promise<SmtpResponse>;
 }
 
-export type SmtpClientProvider = () => Promise<SmtpClient>;
+export type SmtpClientFactory = (config: SmtpConfig) => SmtpClient;
 
 export interface SmtpTestAccount {
   username: string

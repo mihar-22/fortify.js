@@ -1,5 +1,5 @@
 import { MailTemplateRenderer } from '../MailTemplateRenderer';
-import { MailErrorCode } from '../MailError';
+import { MailError } from '../MailError';
 
 describe('Mail', () => {
   describe('MailTemplateBuilder', () => {
@@ -20,13 +20,13 @@ describe('Mail', () => {
     test('should throw error given template file is missing', async () => {
       await expect(() => MailTemplateRenderer.render('bad.path'))
         .rejects
-        .toThrow(MailErrorCode.CouldNotBuildTemplate);
+        .toThrow(MailError.CouldNotBuildTemplate);
     });
 
     test('should throw error given template but no data object', async () => {
       await expect(() => MailTemplateRenderer.render(txtTemplate))
         .rejects
-        .toThrow(MailErrorCode.CouldNotBuildTemplate);
+        .toThrow(MailError.CouldNotBuildTemplate);
     });
   });
 });

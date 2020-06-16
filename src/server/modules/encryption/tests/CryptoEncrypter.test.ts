@@ -1,7 +1,7 @@
 import { randomBytes } from 'crypto';
 import { CryptoEncrypter } from '../CryptoEncrypter';
 import { CipherAlgorithm } from '../Encrypter';
-import { EncryptionError, EncryptionErrorCode } from '../EncryptionError';
+import { EncryptionErrorBuilder, EncryptionError } from '../EncryptionError';
 import { EncryptionModule } from '../EncryptionModule';
 import { Config, Env } from '../../../Config';
 import { DIToken } from '../../../DIToken';
@@ -76,7 +76,7 @@ describe('Encryption', () => {
         const encrypter = getEncrypter();
         const payload = encrypter.encrypt('foo');
         encrypter.decrypt(payload.split('').sort(() => 0.5 - Math.random()).join(''));
-      }).toThrow(EncryptionError[EncryptionErrorCode.InvalidPayload]());
+      }).toThrow(EncryptionErrorBuilder[EncryptionError.InvalidPayload]());
     });
 
     test('should throw given invalid mac', async () => {
@@ -87,7 +87,7 @@ describe('Encryption', () => {
         const encrypterB = getEncrypter();
         expect(encrypterA).not.toBe(encrypterB);
         encrypterA.decrypt(encrypterB.encrypt('foo'));
-      }).rejects.toThrow(EncryptionError[EncryptionErrorCode.InvalidMac]());
+      }).rejects.toThrow(EncryptionErrorBuilder[EncryptionError.InvalidMac]());
     });
 
     test('should throw when iv is too long', () => {
@@ -99,7 +99,7 @@ describe('Encryption', () => {
         data.value = data.value.slice(1);
         const modifiedPayload = Buffer.from(JSON.stringify(data), 'utf-8').toString('base64');
         encrypter.decrypt(modifiedPayload);
-      }).toThrow(EncryptionError[EncryptionErrorCode.InvalidPayload]());
+      }).toThrow(EncryptionErrorBuilder[EncryptionError.InvalidPayload]());
     });
   });
 });

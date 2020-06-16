@@ -1,29 +1,54 @@
 import { inject, injectable } from 'inversify';
-import { Mail, MailSenderFactory } from '../../Mailer';
+import { Mail } from '../../Mailer';
 import { DIToken } from '../../../../DIToken';
-import { getPreviewUrl, SmtpClientProvider, SmtpResponse } from './SmtpClient';
+import {
+  createSmtpTestAccount,
+  getPreviewUrl,
+  SmtpClient,
+  SmtpClientFactory,
+  SmtpResponse,
+} from './SmtpClient';
 import { AbstractMailTransporter } from '../AbstractMailTransporter';
 import { Dispatcher } from '../../../events/Dispatcher';
-import { MailEvent, MailEventCode } from '../../MailEvent';
+import { MailEvent } from '../../MailEvent';
+import { SmtpConfig } from '../../MailConfig';
+import { LogLevel } from '../../../logger/Logger';
+import { Event } from '../../../events/Event';
 
 @injectable()
-export class Smtp extends AbstractMailTransporter<SmtpResponse> {
-  protected readonly clientProvider: SmtpClientProvider;
+export class Smtp extends AbstractMailTransporter<SmtpConfig, SmtpResponse> {
+  protected client?: SmtpClient;
+
+  protected readonly clientFactory: SmtpClientFactory;
 
   constructor(
-  @inject(DIToken.SmtpClientProvider) clientProvider: SmtpClientProvider,
+  @inject(DIToken.SmtpClientFactory) clientFactory: SmtpClientFactory,
     @inject(DIToken.EventDispatcher) events: Dispatcher,
-    @inject(DIToken.MailSenderFactory) sender: MailSenderFactory,
   ) {
-    super(events, sender);
-    this.clientProvider = clientProvider;
+    super(events);
+    this.clientFactory = clientFactory;
+  }
+
+  private async buildSandboxClient() {
+    const testAccount = await createSmtpTestAccount();
+
+    return this.clientFactory({
+      host: 'smtp.ethereal.email',
+      port: 587,
+      username: testAccount.username,
+      password: testAccount.password,
+    });
+  }
+
+  private async buildClient() {
+    return this.sandbox ? this.buildSandboxClient() : this.clientFactory(this.config!);
   }
 
   public async sendMail(mail: Mail<any>, html?: string): Promise<SmtpResponse> {
-    const client = await this.clientProvider();
+    if (!this.client) { this.client = await this.buildClient(); }
 
-    const response = await client.sendMail({
-      from: this.sender(),
+    const response = await this.client!.sendMail({
+      from: this.sender,
       to: mail.to,
       subject: mail.subject,
       text: mail.text,
@@ -33,8 +58,12 @@ export class Smtp extends AbstractMailTransporter<SmtpResponse> {
     const previewUrl = getPreviewUrl(response);
 
     if (previewUrl) {
-      const previewCreatedEvent = MailEvent[MailEventCode.MailPreviewCreated];
-      this.events.dispatch(previewCreatedEvent(({ previewUrl, mail })));
+      this.events.dispatch(new Event(
+        MailEvent.MailPreviewCreated,
+        `Generated mail [${mail.subject}] preview: ${previewUrl}`,
+        { previewUrl, mail },
+        LogLevel.Info,
+      ));
     }
 
     return response;

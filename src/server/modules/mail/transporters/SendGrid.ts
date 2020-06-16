@@ -1,5 +1,5 @@
 import { inject, injectable } from 'inversify';
-import { Mail, MailSenderFactory } from '../Mailer';
+import { Mail } from '../Mailer';
 import { AbstractMailTransporter } from './AbstractMailTransporter';
 import { DIToken } from '../../../DIToken';
 import { Dispatcher } from '../../events/Dispatcher';
@@ -10,20 +10,20 @@ export interface SendGridResponse {
 }
 
 @injectable()
-export class SendGrid extends AbstractMailTransporter<SendGridResponse> {
-  protected readonly config: SendGridConfig;
-
+export class SendGrid extends AbstractMailTransporter<SendGridConfig, SendGridResponse> {
   protected readonly httpClient: HttpClient;
 
   constructor(
-  @inject(DIToken.SendGridConfig) config: SendGridConfig,
-    @inject(DIToken.HttpClient) httpClient: HttpClient,
+  @inject(DIToken.HttpClient) httpClient: HttpClient,
     @inject(DIToken.EventDispatcher) events: Dispatcher,
-    @inject(DIToken.MailSenderFactory) sender: MailSenderFactory,
   ) {
-    super(events, sender);
-    this.config = config;
+    super(events);
     this.httpClient = httpClient;
+  }
+
+  public configure(config: SendGridConfig, sandbox: boolean) {
+    this.config = config;
+    this.sandbox = sandbox;
   }
 
   public async sendMail(mail: Mail<any>): Promise<SendGridResponse> {

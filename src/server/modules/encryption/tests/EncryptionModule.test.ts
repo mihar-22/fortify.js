@@ -6,7 +6,7 @@ import { Module } from '../../Module';
 import { FakeEncrypter } from '../FakeEncrypter';
 import { App } from '../../../App';
 import { bootstrap } from '../../../bootstrap';
-import { EncryptionConfigError } from '../EncryptionConfig';
+import { EncryptionError } from '../EncryptionError';
 
 describe('Encryption', () => {
   describe('Module', () => {
@@ -33,7 +33,7 @@ describe('Encryption', () => {
 
     test('should throw when missing encryption key in production', () => expect(async () => {
       await boot({ env: Env.Production });
-    }).rejects.toThrow(EncryptionConfigError.MissingEncryptionKey));
+    }).rejects.toThrow(EncryptionError.MissingEncryptionKey));
 
     test('should throw given longer key length then supported by aes-128-cbc', () => expect(async () => {
       await boot({
@@ -43,7 +43,7 @@ describe('Encryption', () => {
           cipher: CipherAlgorithm.AES128CBC,
         },
       });
-    }).rejects.toThrow(EncryptionConfigError.UnsupportedCipherAndKeyPair));
+    }).rejects.toThrow(EncryptionError.UnsupportedCipherAndKeyPair));
 
     test('should throw given shorter key length then supported by aes-128-cbc', () => expect(async () => {
       await boot({
@@ -53,7 +53,7 @@ describe('Encryption', () => {
           cipher: CipherAlgorithm.AES128CBC,
         },
       });
-    }).rejects.toThrow(EncryptionConfigError.UnsupportedCipherAndKeyPair));
+    }).rejects.toThrow(EncryptionError.UnsupportedCipherAndKeyPair));
 
     test('should throw given shorter key length then supported by aes-256-cbc', () => expect(async () => {
       await boot({
@@ -63,7 +63,7 @@ describe('Encryption', () => {
           cipher: CipherAlgorithm.AES256CBC,
         },
       });
-    }).rejects.toThrow(EncryptionConfigError.UnsupportedCipherAndKeyPair));
+    }).rejects.toThrow(EncryptionError.UnsupportedCipherAndKeyPair));
 
     test('should throw given longer key length then supported by aes-256-cbc', () => expect(async () => {
       await boot({
@@ -73,6 +73,6 @@ describe('Encryption', () => {
           cipher: CipherAlgorithm.AES256CBC,
         },
       });
-    }).rejects.toThrow(EncryptionConfigError.UnsupportedCipherAndKeyPair));
+    }).rejects.toThrow(EncryptionError.UnsupportedCipherAndKeyPair));
   });
 });

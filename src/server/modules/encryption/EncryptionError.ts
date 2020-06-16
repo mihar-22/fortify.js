@@ -1,21 +1,23 @@
 import { HttpError } from '../../support/errors';
 import { Module } from '../Module';
 
-export enum EncryptionErrorCode {
+export enum EncryptionError {
   InvalidMac = 'INVALID_MAC',
   InvalidPayload = 'INVALID_PAYLOAD',
+  MissingEncryptionKey = 'MISSING_ENCRYPTION_KEY',
+  UnsupportedCipherAndKeyPair = 'UNSUPPORTED_CIPHER_AND_KEY_PAIR'
 }
 
-export const EncryptionError = {
-  [EncryptionErrorCode.InvalidMac]: () => new HttpError(
-    EncryptionErrorCode.InvalidMac,
+export const EncryptionErrorBuilder = {
+  [EncryptionError.InvalidMac]: () => new HttpError(
+    EncryptionError.InvalidMac,
     'The encrypted payload contains an invalid MAC, payload may have been tampered with.',
     Module.Encryption,
     422,
   ),
 
-  [EncryptionErrorCode.InvalidPayload]: () => new HttpError(
-    EncryptionErrorCode.InvalidPayload,
+  [EncryptionError.InvalidPayload]: () => new HttpError(
+    EncryptionError.InvalidPayload,
     'The encrypted payload is invalid.',
     Module.Encryption,
     422,

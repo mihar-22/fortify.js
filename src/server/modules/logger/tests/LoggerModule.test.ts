@@ -1,11 +1,14 @@
-import { Config } from '../../../Config';
+import { Config, Env } from '../../../Config';
 import { LoggerModule } from '../LoggerModule';
 import { DIToken } from '../../../DIToken';
-import { LogDriver, Logger } from '../Logger';
+import {
+  LogDriver, LogDriverFactory, Logger, LogLevel,
+} from '../Logger';
 import { Module } from '../../Module';
 import { App } from '../../../App';
 import { bootstrap } from '../../../bootstrap';
-import { Pino, Winston } from '../drivers';
+import { FakeLogger } from '../FakeLogger';
+import { LoggerError } from '../LoggerError';
 
 describe('Logger', () => {
   describe('Module', () => {
@@ -15,6 +18,7 @@ describe('Logger', () => {
 
     const boot = async (config?: Config) => {
       app = await bootstrap([LoggerModule], config, true);
+      return app;
     };
 
     beforeEach(() => boot());
@@ -26,16 +30,53 @@ describe('Logger', () => {
       expect(loggerA).toBe(loggerB);
     });
 
-    test('can resolve winston logger from container', async () => {
-      await boot({ [Module.Logger]: { driver: LogDriver.Winston } });
+    test('resolves fake logger in testing env', async () => {
+      await boot({ env: Env.Testing });
       const logger = getLogger();
-      expect(logger).toBeInstanceOf(Winston);
+      expect(logger).toBeInstanceOf(FakeLogger);
     });
 
-    test('can resolve pino logger from container', async () => {
+    test('resolves all drivers', async () => {
+      await Promise.all(Object.values(LogDriver).map(async (driver) => {
+        const cApp = await boot({ [Module.Logger]: { driver } });
+        const logger = cApp.get<Logger>(DIToken.Logger);
+        const { constructor } = cApp.get<LogDriverFactory>(DIToken.LogDriverFactory)(driver);
+        expect(logger).toBeInstanceOf(constructor);
+      }));
+    });
+
+    test('config should be passed down to respective driver', async () => {
+      await Promise.all(Object.values(LogDriver).map(async (driver) => {
+        const cApp = await boot({
+          [Module.Logger]: {
+            driver,
+            [driver]: { level: LogLevel.Fatal },
+          },
+        });
+        const logger = cApp.get<Logger>(DIToken.Logger);
+        expect(logger.level).toBe(LogLevel.Fatal);
+      }));
+    });
+
+    test('returns correct deps for winston', async () => {
+      await boot({ [Module.Logger]: { driver: LogDriver.Winston } });
+      expect(LoggerModule.dependencies!(app)).toEqual(['winston']);
+    });
+
+    test('returns correct deps for pino', async () => {
       await boot({ [Module.Logger]: { driver: LogDriver.Pino } });
-      const logger = getLogger();
-      expect(logger).toBeInstanceOf(Pino);
+      expect(LoggerModule.dependencies!(app)).toEqual(['pino']);
+    });
+
+    test('should throw configuration error if winston transport is missing', async () => {
+      await expect(async () => {
+        await boot({
+          [Module.Logger]: {
+            driver: LogDriver.Winston,
+            useDefaultTransporter: false,
+          },
+        });
+      }).rejects.toThrow(LoggerError.MissingTransport);
     });
   });
 });
