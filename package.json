@@ -1,6 +1,6 @@
 {
   "name": "fortify.js",
-  "description": "Customizable authentication microservice built for serverless architectures",
+  "description": "Customizable authentication microservice built for serverless architectures and SPAs.",
   "version": "1.0.0",
   "license": "MIT",
   "sideEffects": false,
