@@ -58,7 +58,7 @@ export async function bootstrap(
   // 3. Ensure all module dependencies have been installed.
   const pkgPath = `${process.cwd()}/package.json`;
   const pkg: Pkg = existsSync(pkgPath) ? JSON.parse(readFileSync(pkgPath).toString('utf-8')) : {};
-  const isHomePkg = pkg.name === '@mihar-22/serverless-auth';
+  const isHomePkg = pkg.name === 'fortify.js';
 
   modules.forEach((Module) => {
     const missingDeps: string[] = [];

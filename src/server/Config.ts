@@ -4,6 +4,8 @@ import { Module } from './modules/Module';
 import { LoggerConfig } from './modules/logger/LoggerConfig';
 import { EncryptionConfig } from './modules/encryption/EncryptionConfig';
 import { EventsConfig } from './modules/events/EventsConfig';
+import { DatabaseConfig } from './modules/database/DatabaseConfig';
+import { HttpConfig } from './modules/http/HttpConfig';
 
 export enum Env {
   Testing = 'testing',
@@ -13,10 +15,12 @@ export enum Env {
 
 export interface Config {
   [id: string]: string | Record<string, any> | undefined
-  env?: Env,
-  [Module.Logger]?: LoggerConfig,
-  [Module.Mail]?: MailConfig,
-  [Module.Session]?: SessionConfig,
-  [Module.Encryption]?: EncryptionConfig,
+  env?: Env
+  [Module.Logger]?: LoggerConfig
+  [Module.Mail]?: MailConfig
+  [Module.Http]?: HttpConfig
+  [Module.Session]?: SessionConfig
+  [Module.Encryption]?: EncryptionConfig
   [Module.Events]?: EventsConfig
+  [Module.Database]?: DatabaseConfig
 }

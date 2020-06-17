@@ -1,3 +1,5 @@
+/* eslint-disable import/order */
+
 import { Container, interfaces } from 'inversify';
 import { Config, Env } from './Config';
 import { Module } from './modules/Module';

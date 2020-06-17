@@ -1,5 +1,5 @@
 {
-  "name": "@mihar-22/serverless-auth",
+  "name": "fortify.js",
   "description": "Customizable authentication microservice built for serverless architectures",
   "version": "1.0.0",
   "license": "MIT",
@@ -23,21 +23,26 @@
   },
   "keywords": [
     "firebase",
-    "session",
     "aws",
     "lambda",
     "token",
+    "secure",
+    "session",
     "jwt",
     "auth",
+    "liteweight",
+    "featherweight",
     "authentication",
     "oauth2",
     "google",
     "facebook",
     "github",
-    "lite",
     "graphql",
     "apollo",
+    "polka",
     "koa",
+    "express",
+    "hapi",
     "microservice",
     "lightweight",
     "typescript",
@@ -46,7 +51,9 @@
     "netlify",
     "vercel",
     "now",
-    "react"
+    "react",
+    "preact",
+    "svelte"
   ],
   "files": [
     "dist",
@@ -55,7 +62,7 @@
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "yarn prebuild && tsc --module commonjs && rollup -c rollup.config.ts",
-    "lint": "eslint --ext .js,.ts,.tsx ./ --ignore-path .gitignore --fix",
+    "lint": "eslint --ext ./src/**/*{.js,.ts} --ignore-path .gitignore --fix",
     "test": "jest src --maxWorkers=1",
     "test:watch": "yarn test --watch",
     "test:coverage": "yarn test --coverage",
@@ -95,7 +102,6 @@
     "rollup-plugin-terser": "^6.1.0",
     "sqlite3": "^4.2.0",
     "ts-jest": "^26.1.0",
-    "typeorm": "^0.2.25",
     "typescript": "^3.9.3",
     "winston": "^3.2.1"
   },

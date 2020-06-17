@@ -4,8 +4,9 @@ import { App } from '../../App';
 import { buildHttpClient, HttpClient } from './HttpClient';
 import { DIToken } from '../../DIToken';
 import { buildFakeHttpClient } from './FakeHttpClient';
+import { HttpConfig } from './HttpConfig';
 
-export const HttpModule: ModuleProvider<undefined> = {
+export const HttpModule: ModuleProvider<HttpConfig> = {
   module: Module.Http,
 
   register: (app: App) => {
