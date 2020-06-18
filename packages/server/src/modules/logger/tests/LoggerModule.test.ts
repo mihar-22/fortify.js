@@ -16,38 +16,38 @@ describe('Logger', () => {
 
     const getLogger = () => app.get<Logger>(DIToken.Logger);
 
-    const boot = async (config?: Config) => {
-      app = await bootstrap([LoggerModule], config, true);
+    const boot = (config?: Config) => {
+      app = bootstrap([LoggerModule], config, true);
       return app;
     };
 
     beforeEach(() => boot());
 
-    test('logger is singleton scoped', async () => {
-      await boot();
+    test('logger is singleton scoped', () => {
+      boot();
       const loggerA = getLogger();
       const loggerB = getLogger();
       expect(loggerA).toBe(loggerB);
     });
 
-    test('resolves fake logger in testing env', async () => {
-      await boot({ env: Env.Testing });
+    test('resolves fake logger in testing env', () => {
+      boot({ env: Env.Testing });
       const logger = getLogger();
       expect(logger).toBeInstanceOf(FakeLogger);
     });
 
-    test('resolves all drivers', async () => {
-      await Promise.all(Object.values(LogDriver).map(async (driver) => {
-        const cApp = await boot({ [Module.Logger]: { driver } });
+    test('resolves all drivers', () => {
+      Object.values(LogDriver).forEach((driver) => {
+        const cApp = boot({ [Module.Logger]: { driver } });
         const logger = cApp.get<Logger>(DIToken.Logger);
         const { constructor } = cApp.get<LogDriverFactory>(DIToken.LogDriverFactory)(driver);
         expect(logger).toBeInstanceOf(constructor);
-      }));
+      });
     });
 
-    test('config should be passed down to respective driver', async () => {
-      await Promise.all(Object.values(LogDriver).map(async (driver) => {
-        const cApp = await boot({
+    test('config should be passed down to respective driver', () => {
+      Object.values(LogDriver).forEach((driver) => {
+        const cApp = boot({
           [Module.Logger]: {
             driver,
             [driver]: { level: LogLevel.Fatal },
@@ -55,28 +55,28 @@ describe('Logger', () => {
         });
         const logger = cApp.get<Logger>(DIToken.Logger);
         expect(logger.level).toBe(LogLevel.Fatal);
-      }));
+      });
     });
 
-    test('returns correct deps for winston', async () => {
-      await boot({ [Module.Logger]: { driver: LogDriver.Winston } });
+    test('returns correct deps for winston', () => {
+      boot({ [Module.Logger]: { driver: LogDriver.Winston } });
       expect(LoggerModule.dependencies!(app)).toEqual(['winston']);
     });
 
-    test('returns correct deps for pino', async () => {
-      await boot({ [Module.Logger]: { driver: LogDriver.Pino } });
+    test('returns correct deps for pino', () => {
+      boot({ [Module.Logger]: { driver: LogDriver.Pino } });
       expect(LoggerModule.dependencies!(app)).toEqual(['pino']);
     });
 
-    test('should throw configuration error if winston transport is missing', async () => {
-      await expect(async () => {
-        await boot({
+    test('should throw configuration error if winston transport is missing', () => {
+      expect(() => {
+        boot({
           [Module.Logger]: {
             driver: LogDriver.Winston,
             useDefaultTransporter: false,
           },
         });
-      }).rejects.toThrow(LoggerError.MissingTransport);
+      }).toThrow(LoggerError.MissingTransport);
     });
   });
 });

@@ -33,7 +33,7 @@ export const EventsModule: ModuleProvider<EventsConfig> = {
       .toConstantValue(app.get(DIToken.FakeDispatcher));
   },
 
-  boot: async (app: App) => {
+  boot: (app: App) => {
     const config = app.getConfig(Module.Events);
     const dispatcher = app.get<Dispatcher>(DIToken.EventDispatcher);
 

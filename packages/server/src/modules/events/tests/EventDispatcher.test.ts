@@ -18,24 +18,24 @@ describe('Events', () => {
     const getDispatcher = () => app.get<Dispatcher>(DIToken.EventDispatcher);
     const resolveDispatcher = () => app.resolve<Dispatcher>(EventDispatcher);
 
-    const boot = async (config?: Config) => {
-      app = await bootstrap([LoggerModule, EventsModule], config, true);
+    const boot = (config?: Config) => {
+      app = bootstrap([LoggerModule, EventsModule], config, true);
       dispatcher = resolveDispatcher();
     };
 
-    beforeEach(async () => {
+    beforeEach(() => {
       receivedEvents = [];
-      await boot({ env: Env.Testing });
+      boot({ env: Env.Testing });
     });
 
-    test('dispatcher is singleton scoped', async () => {
-      await boot();
+    test('dispatcher is singleton scoped', () => {
+      boot();
       const dispatcherA = getDispatcher();
       const dispatcherB = getDispatcher();
       expect(dispatcherA).toBe(dispatcherB);
     });
 
-    test('fake dispatcher is resolved in testing env', async () => {
+    test('fake dispatcher is resolved in testing env', () => {
       const fakeDispatcher = getDispatcher();
       expect(fakeDispatcher).toBeInstanceOf(FakeDispatcher);
     });

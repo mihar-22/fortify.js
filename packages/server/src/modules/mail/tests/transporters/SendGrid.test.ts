@@ -20,16 +20,16 @@ describe('Mail', () => {
       const mailRecipient = 'john_doe@localhost.com';
       const fakeConfig: SendGridConfig = { apiKey: 'secret' };
 
-      const boot = async (config?: Config) => {
-        app = await bootstrap(
+      const boot = (config?: Config) => {
+        app = bootstrap(
           [LoggerModule, HttpModule, EventsModule, MailModule],
           config,
           true,
         );
       };
 
-      beforeEach(async () => {
-        await boot({ env: Env.Testing });
+      beforeEach(() => {
+        boot({ env: Env.Testing });
         mailer = app.resolve(SendGrid);
         mailer.setConfig(fakeConfig);
         mailer.setSender(mailSender);
@@ -52,7 +52,7 @@ describe('Mail', () => {
       });
 
       // test('sends mail e2e', async () => {
-      //   await boot({ env: Env.Development });
+      //   boot({ env: Env.Development });
       //
       //   mailer = app.resolve(SendGrid);
       //   mailer.setConfig({ apiKey: process.env.SENDGRID_API_KEY! });

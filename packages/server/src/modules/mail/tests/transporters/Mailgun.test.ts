@@ -25,16 +25,16 @@ describe('Mail', () => {
         apiKey: 'secret',
       };
 
-      const boot = async (config?: Config) => {
-        app = await bootstrap(
+      const boot = (config?: Config) => {
+        app = bootstrap(
           [LoggerModule, HttpModule, EventsModule, MailModule],
           config,
           true,
         );
       };
 
-      beforeEach(async () => {
-        await boot({ env: Env.Testing });
+      beforeEach(() => {
+        boot({ env: Env.Testing });
         mailer = app.resolve(Mailgun);
         mailer.setConfig(fakeConfig);
         mailer.setSender(mailSender);
@@ -76,7 +76,7 @@ describe('Mail', () => {
       });
 
       // test('sends mail e2e', async () => {
-      //   await boot({ env: Env.Development });
+      //   boot({ env: Env.Development });
       //
       //   mailer = app.resolve(Mailgun);
       //   mailer.useSandbox(false);

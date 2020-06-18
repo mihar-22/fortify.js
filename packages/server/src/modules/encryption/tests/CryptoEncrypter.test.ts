@@ -13,8 +13,8 @@ describe('Encryption', () => {
   describe('CryptoEncrypter', () => {
     let app: App;
 
-    const boot = async (config?: Config) => {
-      app = await bootstrap([EncryptionModule], config, true);
+    const boot = (config?: Config) => {
+      app = bootstrap([EncryptionModule], config, true);
     };
 
     const getEncrypter = () => app.get<CryptoEncrypter>(DIToken.Encrypter);
@@ -36,8 +36,8 @@ describe('Encryption', () => {
       expect(encrypter.decryptString(payload)).toBe('foo');
     });
 
-    test('encryption using base64 encoded key works', async () => {
-      await boot({
+    test('encryption using base64 encoded key works', () => {
+      boot({
         env: Env.Development,
         [Module.Encryption]: {
           key: randomBytes(16).toString('base64'),
@@ -50,15 +50,15 @@ describe('Encryption', () => {
       expect(encrypter.decrypt(payload)).toBe('foo');
     });
 
-    test('payload length should be fixed', async () => {
+    test('payload length should be fixed', () => {
       const encrypter = getEncrypter();
       const lengths: number[] = [];
       Array(100).fill(0).forEach(() => { lengths.push(encrypter.encrypt('foo').length); });
       expect(Math.min(...lengths)).toBe(Math.max(...lengths));
     });
 
-    test('encryption works using aes-256-cbc', async () => {
-      await boot({
+    test('encryption works using aes-256-cbc', () => {
+      boot({
         env: Env.Development,
         [Module.Encryption]: {
           key: randomBytes(32).toString('base64'),
@@ -80,14 +80,14 @@ describe('Encryption', () => {
     });
 
     test('should throw given invalid mac', async () => {
-      await expect(async () => {
-        await boot({ [Module.Encryption]: { key: randomBytes(32).toString('base64') } });
+      await expect(() => {
+        boot({ [Module.Encryption]: { key: randomBytes(32).toString('base64') } });
         const encrypterA = getEncrypter();
-        await boot({ [Module.Encryption]: { key: randomBytes(32).toString('base64') } });
+        boot({ [Module.Encryption]: { key: randomBytes(32).toString('base64') } });
         const encrypterB = getEncrypter();
         expect(encrypterA).not.toBe(encrypterB);
         encrypterA.decrypt(encrypterB.encrypt('foo'));
-      }).rejects.toThrow(EncryptionErrorBuilder[EncryptionError.InvalidMac]());
+      }).toThrow(EncryptionErrorBuilder[EncryptionError.InvalidMac]());
     });
 
     test('should throw when iv is too long', () => {

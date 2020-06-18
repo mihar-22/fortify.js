@@ -14,8 +14,8 @@ describe('Events', () => {
 
     const getDispatcher = () => app.get<Dispatcher>(DIToken.EventDispatcher);
 
-    const boot = async (config?: Config) => {
-      app = await bootstrap([LoggerModule, EventsModule], config, true);
+    const boot = (config?: Config) => {
+      app = bootstrap([LoggerModule, EventsModule], config, true);
     };
 
     beforeEach(() => boot());
@@ -28,7 +28,7 @@ describe('Events', () => {
     });
 
     test('fake dispatcher is resolved in testing env', async () => {
-      await boot({ env: Env.Testing });
+      boot({ env: Env.Testing });
       const dispatcher = getDispatcher();
       expect(dispatcher).toBeInstanceOf(FakeDispatcher);
     });

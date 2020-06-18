@@ -31,16 +31,16 @@ describe('Mail', () => {
         },
       };
 
-      const boot = async (config?: Config) => {
-        app = await bootstrap([LoggerModule, EventsModule, MailModule], config, true);
+      const boot = (config?: Config) => {
+        app = bootstrap([LoggerModule, EventsModule, MailModule], config, true);
         mailer = app.get<MailTransporterFactory>(
           DIToken.MailTransporterFactory,
         )(MailTransporter.Smtp) as Smtp;
       };
 
-      beforeEach(async () => {
-        await boot({ env: Env.Testing });
-        smtpClient = await app.get<() => FakeSmtpClient>(DIToken.SmtpClientFactory)();
+      beforeEach(() => {
+        boot({ env: Env.Testing });
+        smtpClient = app.get<() => FakeSmtpClient>(DIToken.SmtpClientFactory)();
       });
 
       test('sends mail', async () => {
@@ -56,7 +56,7 @@ describe('Mail', () => {
 
       // test('sends mail e2e', async () => {
       //   mailer.useSandbox(true);
-      //   await boot({ env: Env.Development });
+      //   boot({ env: Env.Development });
       //   const response = await mailer.sendMail(mail);
       //   console.log(response);
       //   expect(response).toBeDefined();

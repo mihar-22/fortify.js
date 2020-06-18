@@ -6,11 +6,14 @@ import { ModuleProvider } from './support/ModuleProvider';
 
 // @TODO: Export -> DIToken | Config | {Module}Event | Generic Data Types
 
-export async function authServer(
+export function buildAuthServer(
   config?: Config,
   modules?: ModuleProvider<any>[],
 ) {
-  // Fetch config from post-initialization cache.
-  // Export middleware -> Fetch config from post-initialization cache.
-  const app = await bootstrap([...coreModules, ...(modules ?? [])], config);
+  const app = bootstrap([...coreModules, ...(modules ?? [])], config);
+
+  return {
+    // routes (catch all as well)
+    // middleware
+  };
 }

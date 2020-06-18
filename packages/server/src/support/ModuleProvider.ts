@@ -15,5 +15,5 @@ export interface ModuleProvider<ConfigType> {
   dependencies?: (app: App) => string[];
   register: (app: App) => void
   registerTestingEnv?: (app: App) => void
-  boot?: (app: App) => Promise<void>
+  boot?: (app: App) => void
 }

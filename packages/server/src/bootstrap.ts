@@ -12,20 +12,13 @@ interface Pkg {
 }
 
 let cachedApp: App;
-let hasBooted = false;
-let booting: Promise<void[]>;
 
-export async function bootstrap(
+export function bootstrap(
   modules: ModuleProvider<any>[],
   config?: Config,
   fresh = false,
-): Promise<App> {
-  if (hasBooted && !fresh) { return cachedApp; }
-
-  if (booting && !fresh) {
-    await booting;
-    return cachedApp;
-  }
+): App {
+  if (cachedApp && !fresh) { return cachedApp; }
 
   const app = new App(config ?? {});
   const skipChecks = config?.skipBootChecks ?? false;
@@ -85,11 +78,7 @@ export async function bootstrap(
   }
 
   // 6. Boot all modules.
-  booting = Promise.all(modules.map((Module) => Module.boot?.(app)));
-
-  await booting;
-  hasBooted = true;
-  cachedApp = app;
+  modules.map((Module) => Module.boot?.(app));
 
   return app;
 }
