@@ -1,4 +1,4 @@
-import winston, { Logger as WinstonLogger, LoggerOptions } from 'src/modules/logger/drivers/Winston';
+import winston, { Logger as WinstonLogger, LoggerOptions } from 'winston';
 import {
   formatLog, Log, Logger, LogLevel,
 } from '../Logger';

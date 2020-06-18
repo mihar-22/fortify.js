@@ -9,7 +9,7 @@ export class DependenciesMissingError extends Error implements ServerError {
 
   public dependencies: string[];
 
-  constructor(dependencies: string[], module: string, isDevDep: boolean) {
+  constructor(dependencies: string[], module: string, isDevDep = false) {
     super(undefined);
 
     this.module = module;

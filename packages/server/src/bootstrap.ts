@@ -60,21 +60,20 @@ export async function bootstrap(
     // 3. Ensure all module dependencies have been installed.
     const pkgPath = `${process.cwd()}/package.json`;
     const pkg: Pkg = existsSync(pkgPath) ? JSON.parse(readFileSync(pkgPath).toString('utf-8')) : {};
-    const isHomePkg = pkg.name === 'fortify.js';
-    modules.forEach((Module) => {
-      const missingDeps: string[] = [];
-      const dependencies = Module.dependencies?.(app);
-      dependencies?.forEach((dependency) => {
-        const hasDep = Object.prototype.hasOwnProperty.call(pkg.dependencies ?? {}, dependency);
-        const hasDevDep = (
-          isHomePkg && Object.prototype.hasOwnProperty.call(pkg.devDependencies ?? {}, dependency)
-        );
-        if (!hasDep && !hasDevDep) { missingDeps.push(dependency); }
+    const isHomePkg = pkg.name?.includes('fortify.js');
+    if (!isHomePkg) {
+      modules.forEach((Module) => {
+        const missingDeps: string[] = [];
+        const dependencies = Module.dependencies?.(app);
+        dependencies?.forEach((dependency) => {
+          const hasDep = Object.prototype.hasOwnProperty.call(pkg.dependencies ?? {}, dependency);
+          if (!hasDep) { missingDeps.push(dependency); }
+        });
+        if (missingDeps.length > 0) {
+          throw new DependenciesMissingError(missingDeps, Module.module);
+        }
       });
-      if (missingDeps.length > 0) {
-        throw new DependenciesMissingError(missingDeps, Module.module, isHomePkg);
-      }
-    });
+    }
   }
 
   // 4. Register all module bindings.
