@@ -1,11 +1,14 @@
 import { Module } from './modules/Module';
 
 export const fakeToken = (module: string) => `${module}Fake`;
-export const configToken = (name: string) => `${name}Config`;
 export const factoryToken = (name: string) => `${name}Factory`;
+export const clientToken = (name: string) => `${name}Client`;
+export const adapterToken = (name: string) => `${name}Adapter`;
+export const constructorToken = (name: string) => `${name}Constructor`;
 
 export const DIToken = Object.freeze({
   Config: 'config',
+  App: 'app',
   Encrypter: Module.Encryption,
   FakeEncrypter: fakeToken(Module.Encryption),
   EventDispatcher: Module.Events,
@@ -17,8 +20,12 @@ export const DIToken = Object.freeze({
   Mailer: Module.Mail,
   MailTransporterFactory: factoryToken('mailTransporter'),
   FakeMailer: fakeToken(Module.Mail),
-  HttpClient: 'httpClient',
-  FakeHttpClient: fakeToken('httpClient'),
-  SmtpClientFactory: factoryToken('smtpClient'),
-  FakeSmtpClient: fakeToken('smtpClient'),
+  HttpClient: clientToken('http'),
+  HttpRouter: 'httpRouter',
+  HttpAdapterFactory: factoryToken(adapterToken('http')),
+  HttpAdapterConstructor: constructorToken(adapterToken('http')),
+  HttpRouteHandlerFactory: factoryToken('httpRouteHandler'),
+  FakeHttpClient: fakeToken(clientToken('http')),
+  SmtpClientFactory: factoryToken(clientToken('smtp')),
+  FakeSmtpClient: fakeToken(clientToken('smtp')),
 });

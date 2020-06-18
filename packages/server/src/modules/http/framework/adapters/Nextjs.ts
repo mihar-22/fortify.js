@@ -1,12 +1,12 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import {
-  Cookies, Headers, HttpAdapter, Query, RequestMethod, RequestUrl, Response,
-} from './HttpAdapter';
-import { HttpMethod } from '../HttpMethod';
+  Cookies, Headers, Adapter, Query, RequestMethod, RequestUrl, Response,
+} from '../Adapter';
+import { HttpMethod } from '../../HttpMethod';
 
-export type NextjsRouteHandler = (req: NextApiRequest, res: NextApiResponse) => void;
+export type NextjsRouteHandler = (req: NextApiRequest, res: NextApiResponse) => Promise<void>;
 
-export class Nextjs implements HttpAdapter {
+export class Nextjs implements Adapter {
   private req: NextApiRequest;
 
   private res: NextApiResponse;
@@ -24,8 +24,13 @@ export class Nextjs implements HttpAdapter {
     return this.req.method?.toLowerCase() as HttpMethod;
   }
 
-  public body<InputType>(): InputType {
-    return this.req.body;
+  public body(): object {
+    try {
+      // If body is invalid it will throw.
+      return this.req.body;
+    } catch (e) {
+      return {};
+    }
   }
 
   public cookies(): Cookies {
@@ -40,11 +45,15 @@ export class Nextjs implements HttpAdapter {
     return this.req.headers;
   }
 
+  public setHeader(name: string, value: string | string[]): void {
+    this.res.setHeader(name, value);
+  }
+
   public setCookie(cookie: string | string[]): void {
     this.res.setHeader('Set-Cookie', cookie);
   }
 
-  public setResponse(response: Response): any {
-    this.res.status(response.status).json(response.data);
+  public setJsonResponse(response: Response): any {
+    this.res.status(response.statusCode).json(response);
   }
 }

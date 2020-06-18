@@ -1,4 +1,6 @@
 import { HttpMethod } from '../HttpMethod';
+import { HttpError } from '../HttpError';
+import { RouteHandle } from '../api/RouteHandle';
 
 export type Cookies= Record<string, string>;
 
@@ -11,17 +13,25 @@ export type RequestUrl = string | undefined;
 export type RequestMethod = HttpMethod | undefined;
 
 export interface Response {
-  status: number
-  data: object
+  statusCode: number
+  message?: string
+  data?: object
 }
 
-export interface HttpAdapter {
+export interface Adapter {
   url(): RequestUrl
-  body<InputType>(): InputType
+  body(): object | undefined
   method(): RequestMethod
   query(): Query
   headers(): Headers
   cookies(): Cookies
+  setHeader(name: string, value: string | string[]): void
   setCookie(cookie: string | string[]): void
-  setResponse(response: Response): any
+  setJsonResponse(response: Response | HttpError): any
+}
+
+export type AdapterFactory = (...args: any[]) => Adapter;
+
+export interface AdapterConstructor<RouteHandlerType extends RouteHandle> {
+  new(...args: Parameters<RouteHandlerType>): Adapter
 }

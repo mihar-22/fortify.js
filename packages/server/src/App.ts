@@ -19,6 +19,7 @@ export class App {
     this.config = config;
     this.env = config?.env ?? Env.Development;
     this.container = new Container();
+    this.container.bind<App>(DIToken.App).toConstantValue(this);
     this.container.bind<Config>(DIToken.Config).toConstantValue(config);
   }
 

@@ -1,8 +1,7 @@
 export interface HttpError {
   statusCode: number,
-  message: string,
+  message?: string,
   errors?: string[]
-  toJSON(): string
 }
 
 export type HttpErrors = { [error: string]: HttpError };

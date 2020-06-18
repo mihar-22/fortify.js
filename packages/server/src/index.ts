@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import { Config } from './Config';
+import { Config, Env } from './Config';
 import { bootstrap } from './bootstrap';
 import { coreModules } from './modules';
 import { ModuleProvider } from './support/ModuleProvider';
@@ -10,10 +10,13 @@ export function buildAuthServer(
   config?: Config,
   modules?: ModuleProvider<any>[],
 ) {
-  const app = bootstrap([...coreModules, ...(modules ?? [])], config);
+  try {
+    const app = bootstrap([...coreModules, ...(modules ?? [])], config);
 
-  return {
-    // routes (catch all as well)
-    // middleware
-  };
+    // @TODO: resolve and return router + routes + middleware.
+    return {};
+  } catch (e) {
+    const env = config?.env ?? Env.Development;
+    if (env !== Env.Production) { throw e; }
+  }
 }

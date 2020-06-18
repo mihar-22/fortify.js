@@ -1,4 +1,4 @@
-export enum HttpRoute {
+export enum ApiEndpoint {
   SignIn = 'signIn',
   SignOut = 'signOut',
   SignUp = 'signUp',
@@ -6,7 +6,6 @@ export enum HttpRoute {
   Csrf = 'csrf',
   Me = 'me',
   VerifyEmail = 'verifyEmail',
-  OAuth2 = 'oauth2',
+  OAuth2Redirect = 'oauth2Redirect',
   OAuth2Callback = 'oauth2Callback',
-  CatchAll = '*'
 }

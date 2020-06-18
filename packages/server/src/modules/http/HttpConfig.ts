@@ -1,5 +1,5 @@
-import { HttpFramework } from './HttpFramework';
+import { Framework } from './framework/Framework';
 
 export interface HttpConfig {
-  framework: HttpFramework
+  framework: Framework
 }

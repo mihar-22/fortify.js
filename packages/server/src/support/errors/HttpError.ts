@@ -20,17 +20,8 @@ export class HttpError extends Error implements IHttpError, ServerError {
     super(message);
     this.code = code;
     this.module = module;
+    this.stack = undefined;
     this.statusCode = statusCode;
     this.errors = errors;
-  }
-
-  public toJSON(): string {
-    return JSON.stringify({
-      code: this.code,
-      message: this.message,
-      module: this.module.toUpperCase(),
-      statusCode: this.statusCode,
-      errors: this.errors,
-    });
   }
 }
