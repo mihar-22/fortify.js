@@ -3,29 +3,23 @@
     "target": "es5",
     "allowJs": true,
     "skipLibCheck": true,
-    "sourceMap": true,
     "strict": true,
     "declaration": true,
     "esModuleInterop": true,
-    "module": "esnext",
     "moduleResolution": "node",
-    "jsx": "preserve",
-    "resolveJsonModule": true,
     "isolatedModules": true,
+    "outDir": "dist",
     "declarationDir": "dist/types",
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "outDir": "dist/lib",
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
-    "lib": ["dom", "esnext"],
     "types": [
       "@types/node",
-      "@types/jest",
-      "@types/nodemailer"
+      "@types/jest"
     ]
   },
   "include": [
-    "src"
+    "packages/*/src"
   ]
 }

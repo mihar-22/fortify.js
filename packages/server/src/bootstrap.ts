@@ -2,7 +2,7 @@ import { readFileSync, existsSync } from 'fs';
 import { Config } from './Config';
 import { ConfigurationError, DependenciesMissingError } from './support/errors';
 import { App } from './App';
-import { mergeObjDeep } from '../utils';
+import { mergeObjDeep } from './utils';
 import { ModuleProvider } from './support/ModuleProvider';
 
 interface Pkg {

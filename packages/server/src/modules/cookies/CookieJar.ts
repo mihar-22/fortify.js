@@ -1,4 +1,4 @@
-import CookieBuilder from 'cookie';
+import CookieBuilder from 'src/modules/cookies/Cookie';
 import { injectable } from 'inversify';
 import dayjs from 'dayjs';
 import { Cookie, CookieParams } from './Cookie';

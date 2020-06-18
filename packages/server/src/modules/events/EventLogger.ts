@@ -2,7 +2,7 @@ import { Dispatcher } from './Dispatcher';
 import { Event, EventMatcher, isEventMatcher } from './Event';
 import { Logger } from '../logger/Logger';
 import { LogEventsOption } from './EventsConfig';
-import { isArray } from '../../../utils';
+import { isArray } from '../../utils';
 
 export class EventLogger {
   public static log(

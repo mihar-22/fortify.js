@@ -1,5 +1,5 @@
 import { LogLevel } from '../logger/Logger';
-import { isRegExp, isString } from '../../../utils';
+import { isRegExp, isString } from '../../utils';
 
 export type EventCode = string;
 

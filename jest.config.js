@@ -18,8 +18,8 @@ module.exports = {
     'dotenv/config'
   ],
   coveragePathIgnorePatterns: [
-    "/node_modules",
-    "/tests"
+    '/node_modules',
+    '/packages/*/node_modules'
   ],
   coverageThreshold: {
     global: {
@@ -30,6 +30,6 @@ module.exports = {
     }
   },
   collectCoverageFrom: [
-    'src/**/*.{js,ts}'
+    '/packages/*/src/**/*.{js,ts}'
   ],
 };

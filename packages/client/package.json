@@ -1,0 +1,41 @@
+{
+  "name": "@fortify.js/client",
+  "description": "Authentication library and templates to connect with the fortify.js server.",
+  "version": "1.0.0",
+  "main": "dist/client.js",
+  "module": "dist/client.esm.js",
+  "unpkg": "dist/client.js",
+  "jsdelivr": "dist/client.js",
+  "sideEffects": false,
+  "license": "MIT",
+  "author": "Rahim Alwer <rahim_alwer@hotmail.com>",
+  "homepage": "https://github.com/mihar-22/fortify.js",
+  "repository": "https://github.com/mihar-22/fortify.js/tree/master/packages/client",
+  "bugs": {
+    "url": "https://github.com/mihar-22/fortify.js/issues"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": ""
+  },
+  "keywords": [
+    "fortify",
+    "fortify.js",
+    "client",
+    "auth",
+    "frontend",
+    "authorization",
+    "authentication",
+    "featherweight",
+    "lightweight",
+    "typescript",
+    "html5",
+    "javascript",
+    "react"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}

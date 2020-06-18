@@ -3,7 +3,7 @@ import { Dispatcher, PayloadType, RemoveListenerCallback } from './Dispatcher';
 import {
   Event, EventCallback, EventCode, EventMatcher,
 } from './Event';
-import { isRegExp, isString } from '../../../utils';
+import { isRegExp, isString } from '../../utils';
 
 @injectable()
 export class EventDispatcher<

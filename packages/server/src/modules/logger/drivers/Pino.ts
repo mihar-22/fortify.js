@@ -1,4 +1,4 @@
-import pino, { Logger as PinoLogger, LoggerOptions } from 'pino';
+import pino, { Logger as PinoLogger, LoggerOptions } from 'src/modules/logger/drivers/Pino';
 import {
   formatLog, Log, Logger, LogLevel, NumericLogLevel,
 } from '../Logger';

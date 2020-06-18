@@ -1,5 +1,5 @@
-import { Request } from '../../../../modules/http/Request';
-import { Response } from '../../../../modules/http/Response';
+import { Request } from '../../../http/Request';
+import { Response } from '../../../http/Response';
 
 export default (req: Request, res: Response) => {
   // extract email from route
