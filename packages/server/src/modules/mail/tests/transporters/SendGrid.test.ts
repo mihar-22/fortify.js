@@ -50,24 +50,6 @@ describe('Mail', () => {
 
         expect(response).toEqual(expectedResponse);
       });
-
-      // test('sends mail e2e', async () => {
-      //   boot({ env: Env.Development });
-      //
-      //   mailer = app.resolve(SendGrid);
-      //   mailer.setConfig({ apiKey: process.env.SENDGRID_API_KEY! });
-      //   mailer.useSandbox(false);
-      //   mailer.setSender(mailSender);
-      //
-      //   const response = await mailer.sendMail({
-      //     to: process.env.MAILGUN_AUTHORIZED_RECIPIENT!,
-      //     subject: 'Subject',
-      //     text: 'apples',
-      //   });
-      //
-      //   console.log(response);
-      //   expect(response).toBeDefined();
-      // });
     });
   });
 });

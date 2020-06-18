@@ -15,10 +15,12 @@
     "clean:node": "rimraf yarn.lock node_modules packages/*/node_modules",
     "clean:build": "rimraf packages/*/dist",
     "lint": "eslint --ext ./packages/*/src/**/*{.js,.ts} --ignore-path .gitignore --fix",
-    "test": "jest packages/*/src --maxWorkers=1",
+    "test": "jest packages\\/.+\\/src\\/\\(?!.+slow\\|.+int\\) --maxWorkers=1",
+    "test:integration": "jest packages/.+/src/.+\\.int --maxWorkers=1",
+    "test:slow": "jest packages/.+/src/.+\\.slow --maxWorkers=1",
     "test:watch": "yarn test --watch",
     "test:coverage": "yarn test --coverage",
-    "validate": "yarn build lint && yarn test && yarn build",
+    "validate": "yarn build lint && yarn test && yarn test:integration && yarn build",
     "release": "yarn validate && lerna publish --create-release github"
   },
   "commitlint": {

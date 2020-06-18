@@ -26,7 +26,9 @@ export class Router<
 
     const url = adapter.url();
 
-    console.log(url);
+    // ----
+    // Figure out how to handle routing + setup middleware.
+    // ----
 
     // resolve endpoint.
     // if no match -> throw RouteError.InvalidRoute

@@ -66,7 +66,7 @@ export class SendGrid extends AbstractMailTransporter<SendGridConfig, SendGridRe
         },
       );
 
-      const jsonRes = await response.json() as SendGridResponse;
+      const jsonRes = (!this.sandbox ? await response.json() : {}) as SendGridResponse;
       return { ...jsonRes, success: response.ok };
     } catch (err) {
       return {

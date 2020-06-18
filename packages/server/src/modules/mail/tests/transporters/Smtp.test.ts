@@ -53,14 +53,6 @@ describe('Mail', () => {
           from: mailSender,
         });
       });
-
-      // test('sends mail e2e', async () => {
-      //   mailer.useSandbox(true);
-      //   boot({ env: Env.Development });
-      //   const response = await mailer.sendMail(mail);
-      //   console.log(response);
-      //   expect(response).toBeDefined();
-      // });
     });
   });
 });

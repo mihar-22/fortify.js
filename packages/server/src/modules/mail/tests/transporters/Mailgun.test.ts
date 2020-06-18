@@ -74,28 +74,6 @@ describe('Mail', () => {
 
         expect(response).toEqual(expectedResponse);
       });
-
-      // test('sends mail e2e', async () => {
-      //   boot({ env: Env.Development });
-      //
-      //   mailer = app.resolve(Mailgun);
-      //   mailer.useSandbox(false);
-      //   mailer.setSender(mailSender);
-      //
-      //   mailer.setConfig({
-      //     domain: process.env.MAILGUN_DOMAIN!,
-      //     apiKey: process.env.MAILGUN_API_KEY!,
-      //   });
-      //
-      //   const response = await mailer.sendMail({
-      //     to: process.env.MAILGUN_AUTHORIZED_RECIPIENT!,
-      //     subject: 'Subject',
-      //     text: 'apples',
-      //   });
-      //
-      //   console.log(response);
-      //   expect(response).toBeDefined();
-      // });
     });
   });
 });

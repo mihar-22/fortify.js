@@ -12,10 +12,10 @@ yarn.lock
 .vs
 *.log
 *.cache
-packages/server/.env
+.env
 lerna-debug.log
 packages/*/node_modules
 packages/*/lib
 packages/*/*.log
 packages/*/dist
-packages/*/.env
+.env
