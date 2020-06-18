@@ -14,7 +14,7 @@
     "build": "lerna run build",
     "clean:node": "rimraf yarn.lock node_modules packages/*/node_modules",
     "clean:build": "rimraf packages/*/dist",
-    "lint": "eslint --ext ./packages/*/src/**/*{.js,.ts} ./ --ignore-path .gitignore --fix",
+    "lint": "eslint --ext ./packages/*/src/**/*{.js,.ts} --ignore-path .gitignore --fix",
     "test": "jest packages/*/src --maxWorkers=1",
     "test:watch": "yarn test --watch",
     "test:coverage": "yarn test --coverage",
