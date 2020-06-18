@@ -10,6 +10,7 @@ export const DIToken = Object.freeze({
   FakeEncrypter: fakeToken(Module.Encryption),
   EventDispatcher: Module.Events,
   FakeDispatcher: fakeToken(Module.Events),
+  Cookies: Module.Cookies,
   Logger: Module.Logger,
   FakeLogger: fakeToken(Module.Logger),
   LogDriverFactory: factoryToken('logDriver'),

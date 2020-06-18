@@ -5,9 +5,14 @@ import { buildHttpClient, HttpClient } from './HttpClient';
 import { DIToken } from '../../DIToken';
 import { buildFakeHttpClient } from './FakeHttpClient';
 import { HttpConfig } from './HttpConfig';
+import { HttpFramework } from './HttpFramework';
 
 export const HttpModule: ModuleProvider<HttpConfig> = {
   module: Module.Http,
+
+  defaults: () => ({
+    framework: HttpFramework.Node,
+  }),
 
   register: (app: App) => {
     app.bind<HttpClient>(DIToken.HttpClient)

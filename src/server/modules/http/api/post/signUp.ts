@@ -1,7 +1,6 @@
-import { Request } from '../../../../modules/http/Request';
-import { Response } from '../../../../modules/http/Response';
+import { HttpAdapter } from '../../adapters/HttpAdapter';
 
-export default (req: Request, res: Response) => {
+export default (adapter: HttpAdapter) => {
   // extract data from route
   // validate
   // call signUp on auth manager

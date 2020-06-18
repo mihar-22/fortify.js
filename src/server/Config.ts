@@ -14,8 +14,9 @@ export enum Env {
 }
 
 export interface Config {
-  [id: string]: string | Record<string, any> | undefined
+  [id: string]: any
   env?: Env
+  skipBootChecks?: boolean
   [Module.Logger]?: LoggerConfig
   [Module.Mail]?: MailConfig
   [Module.Http]?: HttpConfig

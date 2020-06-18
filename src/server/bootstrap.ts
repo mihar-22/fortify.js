@@ -28,52 +28,54 @@ export async function bootstrap(
   }
 
   const app = new App(config ?? {});
+  const skipChecks = config?.skipBootChecks ?? false;
 
-  // 1. Initialize each module config with defaults.
-  modules.forEach((Module) => {
-    app.setConfig(
-      Module.module,
-      mergeObjDeep(Module.defaults?.(app) ?? {}, app.getConfig(Module.module) ?? {}),
-    );
-  });
-
-  // 2. Validate each module config.
-  modules.forEach((Module) => {
-    const invalidConfiguration = Module.configValidation?.(app);
-
-    if (invalidConfiguration) {
-      const invalidPath = `config.${Module.module}`
-        + `${invalidConfiguration.path ? `.${invalidConfiguration.path}` : ''}`;
-
-      throw new ConfigurationError(
-        invalidConfiguration.code,
-        invalidConfiguration.message,
-        invalidPath,
+  if (!skipChecks) {
+    // 1. Initialize each module config with defaults.
+    modules.forEach((Module) => {
+      app.setConfig(
         Module.module,
-        invalidConfiguration.link,
+        mergeObjDeep(Module.defaults?.(app) ?? {}, app.getConfig(Module.module) ?? {}),
       );
-    }
-  });
-
-  // 3. Ensure all module dependencies have been installed.
-  const pkgPath = `${process.cwd()}/package.json`;
-  const pkg: Pkg = existsSync(pkgPath) ? JSON.parse(readFileSync(pkgPath).toString('utf-8')) : {};
-  const isHomePkg = pkg.name === 'fortify.js';
-
-  modules.forEach((Module) => {
-    const missingDeps: string[] = [];
-    const dependencies = Module.dependencies?.(app);
-    dependencies?.forEach((dependency) => {
-      const hasDep = Object.prototype.hasOwnProperty.call(pkg.dependencies ?? {}, dependency);
-      const hasDevDep = (
-        isHomePkg && Object.prototype.hasOwnProperty.call(pkg.devDependencies ?? {}, dependency)
-      );
-      if (!hasDep && !hasDevDep) { missingDeps.push(dependency); }
     });
-    if (missingDeps.length > 0) {
-      throw new DependenciesMissingError(missingDeps, Module.module, isHomePkg);
-    }
-  });
+
+    // 2. Validate each module config.
+    modules.forEach((Module) => {
+      const invalidConfiguration = Module.configValidation?.(app);
+
+      if (invalidConfiguration) {
+        const invalidPath = `config.${Module.module}`
+          + `${invalidConfiguration.path ? `.${invalidConfiguration.path}` : ''}`;
+
+        throw new ConfigurationError(
+          invalidConfiguration.code,
+          invalidConfiguration.message,
+          invalidPath,
+          Module.module,
+          invalidConfiguration.link,
+        );
+      }
+    });
+
+    // 3. Ensure all module dependencies have been installed.
+    const pkgPath = `${process.cwd()}/package.json`;
+    const pkg: Pkg = existsSync(pkgPath) ? JSON.parse(readFileSync(pkgPath).toString('utf-8')) : {};
+    const isHomePkg = pkg.name === 'fortify.js';
+    modules.forEach((Module) => {
+      const missingDeps: string[] = [];
+      const dependencies = Module.dependencies?.(app);
+      dependencies?.forEach((dependency) => {
+        const hasDep = Object.prototype.hasOwnProperty.call(pkg.dependencies ?? {}, dependency);
+        const hasDevDep = (
+          isHomePkg && Object.prototype.hasOwnProperty.call(pkg.devDependencies ?? {}, dependency)
+        );
+        if (!hasDep && !hasDevDep) { missingDeps.push(dependency); }
+      });
+      if (missingDeps.length > 0) {
+        throw new DependenciesMissingError(missingDeps, Module.module, isHomePkg);
+      }
+    });
+  }
 
   // 4. Register all module bindings.
   modules.forEach((Module) => { Module.register(app); });
