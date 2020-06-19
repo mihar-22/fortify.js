@@ -1,4 +1,4 @@
-import CookieBuilder from 'src/modules/cookies/Cookie';
+import CookieBuilder from 'cookie';
 import dayjs from 'dayjs';
 
 export type CookiePrefix ='__Host-' | '__Secure-' | undefined;

@@ -1,6 +1,6 @@
 export interface HttpError {
-  statusCode: number,
-  message?: string,
+  message?: string
+  code?: string
   errors?: string[]
 }
 

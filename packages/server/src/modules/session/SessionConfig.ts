@@ -1,4 +1,4 @@
-import { CookieSameSite } from '../cookies/Cookie';
+import { CookieSameSite } from '../http/cookies/Cookie';
 
 // @TODO: Not sure about this config yet...
 export interface SessionConfig {

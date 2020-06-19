@@ -6,6 +6,8 @@ export interface LoggerConfig {
   prettify?: boolean
   driver?: LogDriver
   useDefaultTransporter?: boolean
+  // @see https://github.com/pinojs/pino/blob/master/docs/api.md#options-object
   [LogDriver.Pino]?: PinoConfig
+  // @see https://github.com/winstonjs/winston
   [LogDriver.Winston]?: WinstonConfig
 }

@@ -24,4 +24,21 @@ export class HttpError extends Error implements IHttpError, ServerError {
     this.statusCode = statusCode;
     this.errors = errors;
   }
+
+  public toLog(): any {
+    return {
+      code: this.code,
+      module: this.module,
+      statusCode: this.statusCode,
+      errors: this.errors ?? [],
+    };
+  }
+
+  public toResponse(): IHttpError {
+    return {
+      code: this.code,
+      message: this.message,
+      errors: this.errors,
+    };
+  }
 }

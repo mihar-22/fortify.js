@@ -11,6 +11,8 @@
     "yarn": ">= 1 < 2"
   },
   "scripts": {
+    "client": "yarn workspace @fortify.js/client",
+    "server": "yarn workspace @fortify.js/server",
     "build": "lerna run build",
     "clean:node": "rimraf yarn.lock node_modules packages/*/node_modules",
     "clean:build": "rimraf packages/*/dist",

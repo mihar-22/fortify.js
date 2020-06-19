@@ -30,12 +30,13 @@
   "devDependencies": {
     "@firebase/auth-types": "^0.10.1",
     "@types/cookie": "^0.4.0",
+    "@types/cors": "^2.8.6",
     "@types/mustache": "^4.0.1",
     "@types/nodemailer": "^6.4.0",
     "@types/pino": "^6.0.1",
+    "@types/trouter": "^3.1.0",
     "dotenv": "^8.2.0",
     "fetch-mock": "^9.10.1",
-    "next": "^9.4.4",
     "nodemailer": "^6.4.8",
     "pino": "^6.3.2",
     "sqlite3": "^4.2.0",
@@ -44,6 +45,7 @@
   },
   "dependencies": {
     "cookie": "^0.4.1",
+    "cors": "^2.8.5",
     "dayjs": "^1.8.28",
     "hash-equals": "^0.0.3",
     "inversify": "^5.0.1",
@@ -51,7 +53,10 @@
     "mustache": "^4.0.1",
     "nanoid": "^3.1.9",
     "node-fetch": "^3.0.0-beta.7",
-    "reflect-metadata": "^0.1.13"
+    "proxy-addr": "^2.0.6",
+    "rate-limiter-flexible": "^2.1.7",
+    "reflect-metadata": "^0.1.13",
+    "trouter": "^3.1.0"
   },
   "keywords": [
     "fortify",

@@ -1,3 +1,4 @@
+import { RateLimiterMemory } from 'rate-limiter-flexible';
 import { ModuleProvider } from '../../support/ModuleProvider';
 import { Module } from '../Module';
 import { App } from '../../App';
@@ -5,18 +6,17 @@ import { buildHttpClient, HttpClient } from './HttpClient';
 import { DIToken } from '../../DIToken';
 import { buildFakeHttpClient } from './FakeHttpClient';
 import { HttpConfig } from './HttpConfig';
-import { Framework, FrameworkAdapter } from './framework/Framework';
-import { AdapterConstructor, AdapterFactory } from './framework/Adapter';
-import { RouteHandlerFactory } from './api/RouteHandler';
-import { ApiEndpoint } from './api/ApiEndpoint';
-import { Routes } from './api/Routes';
-import { Router } from './api/Router';
+import { CookieJar } from './cookies/CookieJar';
 
 export const HttpModule: ModuleProvider<HttpConfig> = {
   module: Module.Http,
 
   defaults: () => ({
-    framework: Framework.Nextjs,
+    rateLimiter: new RateLimiterMemory({
+      keyPrefix: 'fortify',
+      points: 100, // 100 requests
+      duration: 60, // per 60s by IP
+    }),
   }),
 
   register: (app: App) => {
@@ -27,24 +27,11 @@ export const HttpModule: ModuleProvider<HttpConfig> = {
       .inSingletonScope();
 
     app
-      .bind<AdapterConstructor<any>>(DIToken.HttpAdapterConstructor)
-      .toDynamicValue(() => FrameworkAdapter[config!.framework!])
-      .inSingletonScope();
+      .bind<CookieJar>(DIToken.Cookies)
+      .toDynamicValue(() => app.resolve(CookieJar))
+      .inRequestScope();
 
-    app
-      .bind<AdapterFactory>(DIToken.HttpAdapterFactory)
-      .toFactory(() => (
-        ...args: any[]
-      ) => new (app.get<AdapterConstructor<any>>(DIToken.HttpAdapterConstructor))(...args));
-
-    app
-      .bind<RouteHandlerFactory>(DIToken.HttpRouteHandlerFactory)
-      .toFactory(() => (endpoint: ApiEndpoint) => new Routes[endpoint](app.get<App>(DIToken.App)));
-
-    app
-      .bind<Router<any>>(DIToken.HttpRouter)
-      .toDynamicValue(() => app.resolve(Router))
-      .inSingletonScope();
+    // @TODO: Bind server (routes/router).
 
     // @TODO: Bind middleware.
   },

@@ -13,10 +13,9 @@ export function buildAuthServer(
   try {
     const app = bootstrap([...coreModules, ...(modules ?? [])], config);
 
-    // @TODO: resolve and return router + routes + middleware.
+    // @TODO: resolve and return server(router/routes) + middleware.
     return {};
   } catch (e) {
-    const env = config?.env ?? Env.Development;
-    if (env !== Env.Production) { throw e; }
+    if (config?.env !== Env.Production) { throw e; }
   }
 }
