@@ -59,6 +59,16 @@ export const LogColor: Record<LogLevel, string> = {
   [LogLevel.Trace]: 'grey',
 };
 
+export const LevelEmoji: Record<LogLevel, string> = {
+  [LogLevel.Silent]: '👻',
+  [LogLevel.Fatal]: '💀',
+  [LogLevel.Error]: '🚨',
+  [LogLevel.Warn]: '⚠️',
+  [LogLevel.Info]: '✨',
+  [LogLevel.Debug]: '🐛',
+  [LogLevel.Trace]: '🔍',
+};
+
 export const formatLog = (
   level: LogLevel,
   message: string,
@@ -74,5 +84,5 @@ export const formatLog = (
   const dataF = (verbose && data && Object.keys(data).length > 0)
     ? `\n\n${JSON.stringify(data, null, 2)}\n\n`
     : '\n';
-  return `${timestampF}${labelF} ${levelF}: ${message}${dataF}`;
+  return ` ${LevelEmoji[level]} ${timestampF}${labelF} ${levelF}: ${message}${dataF}`;
 };

@@ -9,6 +9,7 @@ module.exports = {
   extends: ['airbnb-typescript'],
   rules: {
     'no-console': 'off',
+    'global-require': 'off',
     'react/jsx-props-no-spreading': 'off',
     'default-case': 'off',
     'import/prefer-default-export': 'off',

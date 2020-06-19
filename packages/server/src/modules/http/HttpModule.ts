@@ -6,7 +6,6 @@ import { buildHttpClient, HttpClient } from './HttpClient';
 import { DIToken } from '../../DIToken';
 import { buildFakeHttpClient } from './FakeHttpClient';
 import { HttpConfig } from './HttpConfig';
-import { CookieJar } from './cookies/CookieJar';
 
 export const HttpModule: ModuleProvider<HttpConfig> = {
   module: Module.Http,
@@ -25,11 +24,6 @@ export const HttpModule: ModuleProvider<HttpConfig> = {
     app.bind<HttpClient>(DIToken.HttpClient)
       .toDynamicValue(buildHttpClient)
       .inSingletonScope();
-
-    app
-      .bind<CookieJar>(DIToken.Cookies)
-      .toDynamicValue(() => app.resolve(CookieJar))
-      .inRequestScope();
 
     // @TODO: Bind server (routes/router).
 

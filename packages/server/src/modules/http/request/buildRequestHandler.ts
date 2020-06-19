@@ -12,26 +12,15 @@ import { DIToken } from '../../../DIToken';
 import { HttpEvent, HttpEventDispatcher } from '../HttpEvent';
 import { Event } from '../../events/Event';
 import { LogLevel } from '../../logger/Logger';
-import { isObject } from '../../../utils';
+import {
+  parseBody,
+  parseCookies,
+  parseQuery,
+  runConnectMiddleware,
+  sendJsonResponse, setLazyProp,
+} from './requestUtils';
 
 const proxyaddr = require('proxy-addr');
-
-const writeJsonResponse = (res: ServerResponse, statusCode: number, body?: object) => {
-  res.statusCode = statusCode;
-  res.setHeader('Content-Type', 'application/json');
-  res.end(JSON.stringify(body ?? {}));
-};
-
-const runConnectMiddleware = <ResultType>(
-  req: IncomingMessage,
-  res: ServerResponse,
-  fn: (req: any, res: any, cb: (result: ResultType) => void) => void,
-): Promise<ResultType> => new Promise((resolve, reject) => {
-    fn(req, res, (result) => {
-      if (result instanceof Error) { return reject(result); }
-      return resolve(result);
-    });
-  });
 
 export const buildRequestHandler = (
   app: App,
@@ -48,88 +37,85 @@ export const buildRequestHandler = (
     const route = router.find(req.method as any, req.url!);
     const requestHandler = route.handlers?.[0];
     const { path } = routes.find((r) => r.handler === requestHandler)!;
+    const ip = proxyaddr(req, trustedProxies);
 
-    if (!requestHandler) {
-      writeJsonResponse(
-        res,
-        404,
-        new HttpError(
+    try {
+      if (httpConfig?.cors) {
+        await runConnectMiddleware(req, res, cors(httpConfig.cors));
+      }
+
+      if (!requestHandler) {
+        throw new HttpError(
           'INVALID_ROUTE',
           'No handler wants to take your request :(.',
           Module.Http,
           404,
-        ).toResponse(),
-      );
+        );
+      }
 
-      return;
-    }
-
-    if (httpConfig?.cors) { await runConnectMiddleware(req, res, cors(httpConfig.cors)); }
-
-    const ip = proxyaddr(req, trustedProxies);
-
-    try {
-      // @TODO: implement unique rate limiting per route.
-      const limiterRes = await httpConfig!.rateLimiter!.consume(ip!);
-      res.setHeader('Retry-After', limiterRes.msBeforeNext / 1000);
-      res.setHeader('X-RateLimit-Limit', 100);
-      res.setHeader('X-RateLimit-Remaining', limiterRes.remainingPoints);
-      res.setHeader('X-RateLimit-Reset', dayjs().add(limiterRes.msBeforeNext, 'ms').toString());
-    } catch (e) {
-      writeJsonResponse(
-        res,
-        429,
-        new HttpError(
+      try {
+        // @TODO: implement unique rate limiting per route.
+        const limiterRes = await httpConfig!.rateLimiter!.consume(ip!);
+        res.setHeader('Retry-After', limiterRes.msBeforeNext / 1000);
+        res.setHeader('X-RateLimit-Limit', 100);
+        res.setHeader('X-RateLimit-Remaining', limiterRes.remainingPoints);
+        res.setHeader('X-RateLimit-Reset', dayjs().add(limiterRes.msBeforeNext, 'ms').toString());
+      } catch (e) {
+        throw new HttpError(
           'TOO_MANY_REQUESTS',
           'Too many requests in a short period.',
           Module.Http,
           429,
-        ).toResponse(),
-      );
+        );
+      }
 
-      return;
-    }
+      const fortifyReq = req as FortifyRequest;
+      fortifyReq.ip = ip;
+      fortifyReq.app = app;
+      fortifyReq.params = route.params;
+      fortifyReq.body = await parseBody(req, '1mb');
+      setLazyProp(fortifyReq, 'cookies', () => parseCookies(req));
+      setLazyProp(fortifyReq, 'query', () => parseQuery(req));
 
-    const fortifyReq = req as FortifyRequest;
-    fortifyReq.ip = ip;
-    fortifyReq.app = app;
-    fortifyReq.params = route.params;
+      const fortifyRes = res as FortifyResponse;
+      fortifyRes.status = (statusCode: number) => {
+        fortifyRes.statusCode = statusCode;
+        return fortifyRes;
+      };
+      fortifyRes.json = (data: any) => sendJsonResponse(res, data);
 
-    // bodyparser + cookieparser + parse query
+      dispatcher.dispatch(new Event(
+        HttpEvent.HttpRequest,
+        `${ip} --> ${req.method} --> ${path}`,
+        {
+          params: fortifyReq.params,
+          cookies: fortifyReq.cookies,
+          query: fortifyReq.query,
+          body: fortifyReq.body,
+        },
+        LogLevel.Info,
+      ));
 
-    // These might have already been parsed by the serverless provider.
-    fortifyReq.body = isObject((req as any).body) ? (req as any).body : {};
-    fortifyReq.cookies = isObject((req as any).cookies) ? (req as any).cookies : {};
-    fortifyReq.query = isObject((req as any).query) ? (req as any).query : {};
-
-    const fortifyRes = res as FortifyResponse;
-    // status(code) -> return this
-    // json (response: any)
-
-    dispatcher.dispatch(new Event(
-      HttpEvent.HttpRequest,
-      `${ip} --> ${req.method} --> ${path}`,
-      {
-        ip,
-        params: fortifyReq.params,
-        cookies: fortifyReq.cookies,
-        query: fortifyReq.query,
-        body: fortifyReq.body,
-      },
-      LogLevel.Debug,
-    ));
-
-    try {
       await requestHandler(fortifyReq, fortifyRes);
+
+      dispatcher.dispatch(new Event(
+        HttpEvent.HttpResponse,
+        `${ip} <-- ${req.method} ${res.statusCode} <-- ${path}`,
+        undefined,
+        LogLevel.Info,
+      ));
+
+      fortifyRes.end();
     } catch (e) {
       if (e instanceof HttpError) {
         dispatcher.dispatch(new Event(
           HttpEvent.HttpError,
           `${ip} --> ${req.method} --> ${path}: ${e.message}`,
           e.toLog(),
-          LogLevel.Debug,
+          LogLevel.Warn,
         ));
-        writeJsonResponse(res, e.statusCode, e.toResponse());
+        res.statusCode = e.statusCode;
+        sendJsonResponse(res, e.toResponse());
         return;
       }
 

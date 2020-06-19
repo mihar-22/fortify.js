@@ -1,5 +1,4 @@
 import { IncomingMessage, ServerResponse } from 'http';
-import { Cookie } from '../cookies/Cookie';
 import { App } from '../../../App';
 
 export enum HttpMethod {
@@ -11,7 +10,7 @@ export enum HttpMethod {
 
 export type Query = Record<string, string | string[]>;
 
-export type Cookies = Record<string, Cookie>;
+export type Cookies = Record<string, string>;
 
 export type Params = Record<string, string>;
 
@@ -31,7 +30,7 @@ export interface FortifyRequest<BodyType = any> extends IncomingMessage {
   params: Params;
 }
 
-export type FortifyResponse<ResponseType = any> = ServerResponse & {
+export type FortifyResponse<DataType = any> = ServerResponse & {
   status: (statusCode: number) => FortifyResponse
-  json: (response: ResponseType) => void
+  json: (data: DataType) => void
 };

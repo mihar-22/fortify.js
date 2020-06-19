@@ -1,5 +1,7 @@
 import CookieBuilder from 'cookie';
 import dayjs from 'dayjs';
+import { ServerResponse } from 'http';
+import { Cookies } from '../request/Request';
 
 export type CookiePrefix ='__Host-' | '__Secure-' | undefined;
 
@@ -56,8 +58,8 @@ export class Cookie {
     return dayjs(this.expires).isAfter(dayjs().subtract(5, 'minute'));
   }
 
-  public serialize(): string {
-    return CookieBuilder.serialize(
+  public attach(res: ServerResponse): void {
+    res.setHeader('Set-Cookie', CookieBuilder.serialize(
       (this.prefix && !this.name.startsWith('__')) ? `${this.prefix}${this.name}` : this.name,
       this.value,
       {
@@ -69,6 +71,29 @@ export class Cookie {
         secure: this.secure,
         sameSite: this.sameSite,
       },
+    ));
+  }
+
+  public static make(params: CookieParams & { minutes?: number }): Cookie {
+    const expires = params.expires ?? (
+      params.minutes
+        ? dayjs().add(params.minutes, 'minute').toDate()
+        : undefined
     );
+
+    return new Cookie({
+      ...params,
+      // Secure cookies by default.
+      expires,
+      path: params.path ?? '/',
+      secure: params.secure ?? true,
+      prefix: params.prefix ?? '__Host-',
+      sameSite: params.sameSite ?? 'strict',
+      httpOnly: params.httpOnly ?? true,
+    });
+  }
+
+  public static parse(cookies: string): Cookies {
+    return CookieBuilder.parse(cookies);
   }
 }
