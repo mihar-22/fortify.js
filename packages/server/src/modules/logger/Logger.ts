@@ -49,7 +49,7 @@ export const NumericLogLevel: Record<number, string> = {
   60: 'fatal',
 };
 
-export const LogColor: Record<LogLevel, string> = {
+export const LogLevelColor: Record<LogLevel, string> = {
   [LogLevel.Silent]: 'white',
   [LogLevel.Fatal]: 'red',
   [LogLevel.Error]: 'red',
@@ -59,7 +59,7 @@ export const LogColor: Record<LogLevel, string> = {
   [LogLevel.Trace]: 'grey',
 };
 
-export const LevelEmoji: Record<LogLevel, string> = {
+export const LogLevelEmoji: Record<LogLevel, string> = {
   [LogLevel.Silent]: '👻',
   [LogLevel.Fatal]: '💀',
   [LogLevel.Error]: '🚨',
@@ -77,12 +77,12 @@ export const formatLog = (
   verbose?: boolean,
 ): string => {
   // @ts-ignore
-  let levelF = `${kleur[LogColor[level]](level.toUpperCase())}`;
+  let levelF = `${kleur[LogLevelColor[level]](level.toUpperCase())}`;
   if (level === LogLevel.Fatal) { levelF = kleur.bold(levelF); }
   const timestampF = kleur.yellow(dayjs().format('HH:mm:ss.SSS'));
   const labelF = label ? ` [${kleur.bold(label.toUpperCase())}]` : '';
   const dataF = (verbose && data && Object.keys(data).length > 0)
     ? `\n\n${JSON.stringify(data, null, 2)}\n\n`
     : '\n';
-  return ` ${LevelEmoji[level]} ${timestampF}${labelF} ${levelF}: ${message}${dataF}`;
+  return ` ${LogLevelEmoji[level]} ${timestampF}${labelF} ${levelF}: ${message}${dataF}`;
 };

@@ -19,8 +19,6 @@ export const HttpModule: ModuleProvider<HttpConfig> = {
   }),
 
   register: (app: App) => {
-    const config = app.getConfig(Module.Http);
-
     app.bind<HttpClient>(DIToken.HttpClient)
       .toDynamicValue(buildHttpClient)
       .inSingletonScope();

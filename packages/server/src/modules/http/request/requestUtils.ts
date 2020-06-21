@@ -4,9 +4,7 @@ import { URL } from 'url';
 import qs from 'querystring';
 import { HttpError } from '../../../support/errors';
 import { Module } from '../../Module';
-import {
-  Cookies, FortifyRequest, Params, Query,
-} from './Request';
+import { Cookies, FortifyRequest, Query } from './Request';
 import { isArray, isObject } from '../../../utils';
 import { Cookie } from '../cookies/Cookie';
 

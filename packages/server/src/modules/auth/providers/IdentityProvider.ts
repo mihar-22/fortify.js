@@ -1,3 +1,6 @@
+export interface IdentityProvider {
+}
+
 // import { Request } from '../../http/Request';
 // import { Response } from '../../http/Response';
 // import User from '../../../../shared/User';

@@ -110,12 +110,13 @@ export const buildRequestHandler = (
       if (e instanceof HttpError) {
         dispatcher.dispatch(new Event(
           HttpEvent.HttpError,
-          `${ip} --> ${req.method} --> ${path}: ${e.message}`,
+          `${ip} <-- ${req.method} ${e.statusCode} <-- ${path}: ${e.message}`,
           e.toLog(),
           LogLevel.Warn,
         ));
         res.statusCode = e.statusCode;
         sendJsonResponse(res, e.toResponse());
+        res.end();
         return;
       }
 
@@ -125,6 +126,8 @@ export const buildRequestHandler = (
         e,
         LogLevel.Error,
       ));
+
+      res.end();
 
       // If not in production forward error to the dev.
       if (!app.isProductionEnv) { throw e; }
