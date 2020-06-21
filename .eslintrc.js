@@ -1,8 +1,5 @@
 module.exports = {
   root: true,
-  globals: {
-    testContainer: true
-  },
   parserOptions: {
     project: 'tsconfig.json',
   },
