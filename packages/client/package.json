@@ -1,6 +1,6 @@
 {
   "name": "@fortify.js/client",
-  "description": "Authentication library and templates to connect with the fortify.js server.",
+  "description": "Client-side authentication library for Fortify.js.",
   "version": "1.0.0",
   "main": "dist/client.js",
   "module": "dist/client.esm.js",
@@ -25,6 +25,10 @@
     "fortify.js",
     "client",
     "auth",
+    "ssr",
+    "ssg",
+    "spa",
+    "jamstack",
     "frontend",
     "authorization",
     "authentication",

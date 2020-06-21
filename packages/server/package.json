@@ -1,6 +1,6 @@
 {
   "name": "@fortify.js/server",
-  "description": "Production ready authentication microservice built for serverless architectures.",
+  "description": "Authentication API built for serverless architectures.",
   "version": "1.0.0",
   "license": "MIT",
   "main": "dist/server.js",
@@ -67,8 +67,10 @@
     "backend",
     "secure",
     "session",
+    "self-hosted",
     "jwt",
     "auth",
+    "jamstack",
     "authorization",
     "authentication",
     "oauth2",
