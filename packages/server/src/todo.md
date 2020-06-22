@@ -1,7 +1,3 @@
-// Setup foundation for http/api routes.
-// Bind http routes.
-// Export the routes.
-// Make all third-party deps lazy throughout app.
 // Write tests for HTTP module.
 // Database module.
 // Test the database module.

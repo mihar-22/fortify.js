@@ -1,5 +1,5 @@
 import Mail from 'nodemailer/lib/mailer';
-import nodemailer, { SentMessageInfo } from 'nodemailer';
+import { SentMessageInfo } from 'nodemailer';
 import { MailResponse } from '../../Mail';
 
 export const Nodemailer = Mail;
@@ -39,21 +39,22 @@ export interface SmtpTestAccount {
   password: string
 }
 
-export const getPreviewUrl = (response: SmtpResponse) => nodemailer.getTestMessageUrl(
+export const getPreviewUrl = (response: SmtpResponse) => require('nodemailer').getTestMessageUrl(
   response as SentMessageInfo,
 );
 
 export const createSmtpTestAccount = async (): Promise<SmtpTestAccount> => {
-  const { user, pass } = await nodemailer.createTestAccount();
+  const { user, pass } = await require('nodemailer').createTestAccount();
   return { username: user, password: pass };
 };
 
-export const createSmtpTransport = (config: SmtpConfig): SmtpClient => nodemailer.createTransport({
-  host: config.host,
-  port: config.port,
-  secure: config.port === 465,
-  auth: {
-    user: config.username,
-    pass: config.password,
-  },
-});
+export const createSmtpTransport = (config: SmtpConfig): SmtpClient => require('nodemailer')
+  .createTransport({
+    host: config.host,
+    port: config.port,
+    secure: config.port === 465,
+    auth: {
+      user: config.username,
+      pass: config.password,
+    },
+  });

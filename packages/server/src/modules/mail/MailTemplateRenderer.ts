@@ -1,6 +1,5 @@
 import { readFile } from 'fs';
 import { promisify } from 'util';
-import Mustache from 'mustache';
 import { MailError } from './MailError';
 import { RuntimeError } from '../../support/errors';
 import { Module } from '../Module';
@@ -9,7 +8,7 @@ export class MailTemplateRenderer {
   public static async render(template: string, data?: any): Promise<string> {
     try {
       const fileContent = await promisify(readFile)(template);
-      return Mustache.render(fileContent.toString('utf-8').trim(), data);
+      return require('mustache').render(fileContent.toString('utf-8').trim(), data);
     } catch (reference) {
       throw new RuntimeError(
         MailError.CouldNotBuildTemplate,

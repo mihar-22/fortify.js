@@ -1,4 +1,4 @@
-import winston, { Logger as WinstonLogger, LoggerOptions } from 'winston';
+import { Logger as WinstonLogger, LoggerOptions } from 'winston';
 import {
   formatLog, Log, Logger, LogLevel,
 } from '../Logger';
@@ -12,7 +12,7 @@ export class Winston implements Logger {
 
   constructor(level: LogLevel, config?: WinstonConfig, prettify?: boolean) {
     this.prettify = prettify ?? false;
-    this.logger = winston.createLogger(config);
+    this.logger = require('winston').createLogger(config);
     this.logger.level = config?.level ?? level;
     this.logger.levels = {
       [LogLevel.Silent]: 0,
@@ -63,12 +63,20 @@ export class Winston implements Logger {
   }
 
   public addDefaultTransporter() {
+    const winston = require('winston');
+
     this.logger.add(new winston.transports.Console({
       level: this.level,
       format: this.prettify
         ? winston.format.printf(({
           level, message, label, data,
-        }) => formatLog(level as LogLevel, message, label, data, (this.level === LogLevel.Trace)))
+        }: any) => formatLog(
+          level as LogLevel,
+          message,
+          label,
+          data,
+          (this.level === LogLevel.Trace),
+        ))
         : undefined,
     }));
   }

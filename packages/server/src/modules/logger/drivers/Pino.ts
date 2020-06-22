@@ -1,4 +1,4 @@
-import pino, { Logger as PinoLogger, LoggerOptions } from 'pino';
+import { Logger as PinoLogger, LoggerOptions } from 'pino';
 import {
   formatLog, Log, Logger, LogLevel, NumericLogLevel,
 } from '../Logger';
@@ -28,7 +28,7 @@ export class Pino implements Logger {
       },
     } : {};
 
-    this.logger = pino({
+    this.logger = require('pino')({
       level,
       ...prettyConfig,
       ...config,
