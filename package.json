@@ -48,6 +48,7 @@
     "git-log-parser": "^1.2.0",
     "husky": "^4.2.5",
     "jest": "^26.0.1",
+    "jest-watch-typeahead": "^0.6.0",
     "rimraf": "^3.0.2",
     "rollup": "^2.17.1",
     "rollup-plugin-terser": "^6.1.0",

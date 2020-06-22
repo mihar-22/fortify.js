@@ -8,5 +8,5 @@ export interface SignOutResBody {}
 export const signOutRoute: Route<SignOutReqBody, SignOutResBody> = {
   path: '/signOut',
   method: HttpMethod.POST,
-  handler: (req, res) => {},
+  handler: async (req, res) => {},
 };

@@ -59,8 +59,8 @@ export class Smtp extends AbstractMailTransporter<SmtpConfig, SmtpResponse> {
       const previewUrl = getPreviewUrl(response);
       if (previewUrl) {
         this.events.dispatch(new Event(
-          MailEvent.PreviewCreated,
-          `Generated mail [${mail.subject}] preview: ${previewUrl}`,
+          MailEvent.Preview,
+          `[${mail.subject}]: ${previewUrl}`,
           { previewUrl, mail },
           LogLevel.Info,
         ));

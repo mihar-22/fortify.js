@@ -33,5 +33,8 @@ export class RuntimeError extends Error implements ServerError {
           : ''
       }`
       + `${reference ? `${bold('Stack Trace:')} ${reference.stack}` : ''}`;
+
+    // @see https://stackoverflow.com/questions/41102060/typescript-extending-error-class
+    Object.setPrototypeOf(this, RuntimeError.prototype);
   }
 }

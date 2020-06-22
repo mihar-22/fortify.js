@@ -8,5 +8,5 @@ export interface OAuth2RedirectResBody {}
 export const oauth2RedirectRoute: Route<OAuth2RedirectReqBody, OAuth2RedirectResBody> = {
   path: '/oauth2/redirect/:provider',
   method: HttpMethod.GET,
-  handler: (req, res) => {},
+  handler: async (req, res) => {},
 };

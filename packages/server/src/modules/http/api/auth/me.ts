@@ -8,5 +8,5 @@ export interface MeResBody {}
 export const meRoute: Route<MeReqBody, MeResBody> = {
   path: '/me',
   method: HttpMethod.GET,
-  handler: (req, res) => {},
+  handler: async (req, res) => {},
 };

@@ -8,5 +8,5 @@ export interface SignUpResBody {}
 export const signUpRoute: Route<SignUpReqBody, SignUpResBody> = {
   path: '/signUp',
   method: HttpMethod.POST,
-  handler: (req, res) => {},
+  handler: async (req, res) => {},
 };

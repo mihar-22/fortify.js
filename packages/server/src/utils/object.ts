@@ -26,3 +26,25 @@ export const mergeObjDeep = (target: any, source: any): object => {
 
   return target;
 };
+
+export const setLazyProp = <T>(
+  obj: object,
+  prop: string,
+  getter: () => T,
+): void => {
+  const opts = { configurable: true, enumerable: true };
+  const optsReset = { ...opts, writable: true };
+
+  Object.defineProperty(obj, prop, {
+    ...opts,
+    get: () => {
+      const value = getter();
+      // We set the property on the object to avoid recalculating it.
+      Object.defineProperty(obj, prop, { ...optsReset, value });
+      return value;
+    },
+    set: (value) => {
+      Object.defineProperty(obj, prop, { ...optsReset, value });
+    },
+  });
+};

@@ -32,4 +32,8 @@ module.exports = {
   collectCoverageFrom: [
     '/packages/*/src/**/*.{js,ts}'
   ],
+  watchPlugins: [
+    'jest-watch-typeahead/filename',
+    'jest-watch-typeahead/testname',
+  ],
 };

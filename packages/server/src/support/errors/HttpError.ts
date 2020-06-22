@@ -23,11 +23,15 @@ export class HttpError extends Error implements IHttpError, ServerError {
     this.stack = undefined;
     this.statusCode = statusCode;
     this.errors = errors;
+
+    // @see https://stackoverflow.com/questions/41102060/typescript-extending-error-class
+    Object.setPrototypeOf(this, HttpError.prototype);
   }
 
   public toLog(): any {
     return {
       code: this.code,
+      message: this.message,
       module: this.module,
       statusCode: this.statusCode,
       errors: this.errors ?? [],

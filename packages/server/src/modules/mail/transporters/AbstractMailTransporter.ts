@@ -44,7 +44,7 @@ export abstract class AbstractMailTransporter<
 
     this.events.dispatch(new Event(
       MailEvent.Sending,
-      `Mail [${mail.subject}] -> SENDING -> [${mail.to}]`,
+      `[${mail.subject}] -> SENDING -> [${mail.to}]`,
       { mail },
     ));
 
@@ -53,13 +53,13 @@ export abstract class AbstractMailTransporter<
     if (response.success) {
       this.events.dispatch(new Event(
         MailEvent.Sent,
-        `Mail [${mail.subject}] -> SENT -> [${mail.to}]`,
+        `[${mail.subject}] -> SENT -> [${mail.to}]`,
         { mail, response },
       ));
     } else {
       this.events.dispatch(new Event(
         MailEvent.Failed,
-        `Mail [${mail.subject}] -> FAILED -> [${mail.to}]`,
+        `[${mail.subject}] -> FAILED X [${mail.to}]`,
         { mail, response },
       ));
     }

@@ -9,28 +9,28 @@ import { RequestHandler } from './modules/http/request/RequestHandler';
 
 export * from './Config';
 
-export type BuildOutput = { any: RequestHandler } & Record<Endpoint, RequestHandler>;
+export type FortifyServer = { any: RequestHandler } & Record<Endpoint, RequestHandler>;
 
 export function buildFortifyServer(
   config?: Config,
   modules?: ModuleProvider<any>[],
-): BuildOutput | undefined {
+): FortifyServer {
   try {
     const app = bootstrap([...coreModules, ...(modules ?? [])], config);
 
     const output: any = {
-      any: app.get<RequestHandler>(DIToken.HttpRequestHandler('*')),
+      any: app.get(DIToken.HttpRequestHandler('*')),
     };
 
     Object.values(Endpoint).forEach((endpoint) => {
       output[endpoint] = app.get(DIToken.HttpRequestHandler(endpoint));
     });
 
-    // @TODO: resolve middleware.
+    // @TODO: export middleware.
 
-    return output as BuildOutput;
+    return output as FortifyServer;
   } catch (e) {
     if (config?.env !== Env.Production) { throw e; }
-    return undefined;
+    return {} as FortifyServer;
   }
 }

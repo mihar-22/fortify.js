@@ -4,15 +4,17 @@ import { URL } from 'url';
 import qs from 'querystring';
 import { HttpError } from '../../../support/errors';
 import { Module } from '../../Module';
-import { Cookies, FortifyRequest, Query } from './Request';
+import { Cookies, Query } from './Request';
 import { isArray, isObject } from '../../../utils';
 import { Cookie } from '../cookies/Cookie';
+import { TrustedProxies } from '../HttpConfig';
 
 const { parse } = require('content-type');
+const proxyaddr = require('proxy-addr');
 
 export const sendJsonResponse = (res: ServerResponse, body?: object) => {
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
-  res.write(body ?? {});
+  res.write(JSON.stringify(body ?? {}));
 };
 
 export const runConnectMiddleware = <ResultType>(
@@ -28,7 +30,7 @@ export const runConnectMiddleware = <ResultType>(
     });
   });
 
-export const parseJson = (str: string): object => {
+export const parseJsonBody = (str: string): object => {
   if (str.length === 0) { return {}; }
 
   try {
@@ -79,8 +81,10 @@ export const parseBody = async (
   const body = buffer.toString();
 
   if (type === 'application/json' || type === 'application/ld+json') {
-    return parseJson(body);
-  } if (type === 'application/x-www-form-urlencoded') {
+    return parseJsonBody(body);
+  }
+
+  if (type === 'application/x-www-form-urlencoded') {
     return qs.decode(body);
   }
 
@@ -114,24 +118,17 @@ export const parseQuery = ({ url }: IncomingMessage): Query => {
   return query;
 };
 
-export const setLazyProp = <T>(
-  req: FortifyRequest,
-  prop: string,
-  getter: () => T,
-): void => {
-  const opts = { configurable: true, enumerable: true };
-  const optsReset = { ...opts, writable: true };
+export const compileTrust = (trust?: TrustedProxies) => {
+  if (typeof trust === 'function') return trust;
 
-  Object.defineProperty(req, prop, {
-    ...opts,
-    get: () => {
-      const value = getter();
-      // We set the property on the object to avoid recalculating it.
-      Object.defineProperty(req, prop, { ...optsReset, value });
-      return value;
-    },
-    set: (value) => {
-      Object.defineProperty(req, prop, { ...optsReset, value });
-    },
-  });
+  // Support plain true/false.
+  if (trust === true) { return () => true; }
+
+  // Support trusting hop count.
+  if (typeof trust === 'number') {
+    return (ip: string, distanceFromSocket: number) => distanceFromSocket < trust;
+  }
+
+  // Support comma-separated values.
+  return proxyaddr.compile((typeof trust === 'string') ? trust.split(/ *, */) : (trust || []));
 };

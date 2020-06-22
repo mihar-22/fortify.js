@@ -3,23 +3,25 @@ import { HttpError } from './HttpError';
 import { Cookies, Params, Query } from './request/Request';
 
 export enum HttpEvent {
-  HttpRequest = 'HTTP_REQUEST',
-  HttpResponse = 'HTTP_RESPONSE',
+  Request = 'HTTP_REQUEST',
+  Response = 'HTTP_RESPONSE',
   // eslint-disable-next-line no-shadow
-  HttpError = 'HTTP_ERROR',
-  RequestHandlerFailed = 'REQUEST_HANDLER_FAILED'
+  Error = 'HTTP_ERROR',
+  HandlerFailed = 'HTTP_HANDLER_FAILED'
 }
 
 export interface HttpEventPayload {
-  [HttpEvent.HttpRequest]: {
+  [HttpEvent.Request]: {
+    ip: string,
+    path: string
     params: Params,
     cookies: Cookies,
     query: Query,
     body: any
   }
-  [HttpEvent.HttpResponse]: void
-  [HttpEvent.HttpError]: HttpError
-  [HttpEvent.RequestHandlerFailed]: Error
+  [HttpEvent.Response]: void
+  [HttpEvent.Error]: HttpError
+  [HttpEvent.HandlerFailed]: Error
 }
 
 export type HttpEventDispatcher = Dispatcher<HttpEventPayload>;

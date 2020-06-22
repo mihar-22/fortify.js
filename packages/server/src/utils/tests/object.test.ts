@@ -1,4 +1,4 @@
-import { mergeObjDeep } from '../object';
+import { mergeObjDeep, setLazyProp } from '../object';
 
 describe('utils', () => {
   describe('object', () => {
@@ -40,6 +40,18 @@ describe('utils', () => {
           },
           d: [1, 2, 3, 4, 5],
         });
+      });
+    });
+
+    describe('setLazyProp', () => {
+      test('prop is resolved lazily', () => {
+        const o: any = {};
+        const createProp = jest.fn();
+        setLazyProp(o, 'lazyProp', createProp);
+        expect(createProp).not.toHaveBeenCalled();
+        // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+        o.lazyProp;
+        expect(createProp).toHaveBeenCalled();
       });
     });
   });

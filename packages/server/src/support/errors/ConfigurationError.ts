@@ -24,5 +24,8 @@ export class ConfigurationError extends Error implements ServerError {
       + `${bold('Config Path:')} ${yellow(configPath)}\n\n`
       + `${bold('Message:')} ${message}`
       + `${link ? `\n\n${bold('Link:')} ${link}` : ''}`;
+
+    // @see https://stackoverflow.com/questions/41102060/typescript-extending-error-class
+    Object.setPrototypeOf(this, ConfigurationError.prototype);
   }
 }

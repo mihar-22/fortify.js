@@ -28,5 +28,8 @@ export class DependenciesMissingError extends Error implements ServerError {
       + `${bold('Module:')} ${module.toUpperCase()}\n\n`
       + `${bold('Message:')} ${this.message}\n\n`
       + `${bold('Fix:')} ${cyan(runCommand)}`;
+
+    // @see https://stackoverflow.com/questions/41102060/typescript-extending-error-class
+    Object.setPrototypeOf(this, DependenciesMissingError.prototype);
   }
 }

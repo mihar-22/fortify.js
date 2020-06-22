@@ -8,5 +8,5 @@ export interface VerifyEmailResBody {}
 export const verifyEmailRoute: Route<VerifyEmailReqBody, VerifyEmailResBody> = {
   path: '/verifyEmail/:email/:token',
   method: HttpMethod.GET,
-  handler: (req, res) => {},
+  handler: async (req, res) => {},
 };

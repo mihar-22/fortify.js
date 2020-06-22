@@ -1,13 +1,7 @@
-// Write tests for HTTP module.
-// Database module.
-// Test the database module.
-// Session module.
-// Test Session module. 
-// Auth module.
-// Test auth module.
+// Database module + int tests.
+// Session module + int tests.
+// Auth module + int tests.
+// HTTP middleware + (bind/export) + unit tests.
 // Wire it all together in the api routes. -> Figure out data validation.
-// Write the HTTP middleware.
-// Test the HTTP middleware.
-// Export the middleware.
+// API integration tests.
 // Build and validate.
-// E2E tests.

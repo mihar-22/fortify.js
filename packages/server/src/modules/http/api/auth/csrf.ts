@@ -8,5 +8,5 @@ export interface CsrfResBody {}
 export const csrfRoute: Route<CsrfReqBody, CsrfResBody> = {
   path: '/csrf',
   method: HttpMethod.GET,
-  handler: (req, res) => {},
+  handler: async (req, res) => {},
 };

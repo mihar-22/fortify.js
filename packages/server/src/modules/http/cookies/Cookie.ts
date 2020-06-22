@@ -54,10 +54,6 @@ export class Cookie {
     this.domain = params.domain;
   }
 
-  public isFresh(): boolean {
-    return dayjs(this.expires).isAfter(dayjs().subtract(5, 'minute'));
-  }
-
   public attachTo(res: ServerResponse): void {
     res.setHeader('Set-Cookie', CookieBuilder.serialize(
       (this.prefix && !this.name.startsWith('__')) ? `${this.prefix}${this.name}` : this.name,

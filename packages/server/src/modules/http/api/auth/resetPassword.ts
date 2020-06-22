@@ -8,5 +8,5 @@ export interface ResetPasswordResBody {}
 export const resetPasswordRoute: Route<ResetPasswordReqBody, ResetPasswordResBody> = {
   path: '/resetPassword',
   method: HttpMethod.POST,
-  handler: (req, res) => {},
+  handler: async (req, res) => {},
 };

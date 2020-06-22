@@ -63,7 +63,7 @@ export const LogLevelEmoji: Record<LogLevel, string> = {
   [LogLevel.Silent]: '👻',
   [LogLevel.Fatal]: '💀',
   [LogLevel.Error]: '🚨',
-  [LogLevel.Warn]: '⚠️',
+  [LogLevel.Warn]: '⚠️ ',
   [LogLevel.Info]: '✨',
   [LogLevel.Debug]: '🐛',
   [LogLevel.Trace]: '🔍',
@@ -77,12 +77,12 @@ export const formatLog = (
   verbose?: boolean,
 ): string => {
   // @ts-ignore
-  let levelF = `${kleur[LogLevelColor[level]](level.toUpperCase())}`;
-  if (level === LogLevel.Fatal) { levelF = kleur.bold(levelF); }
-  const timestampF = kleur.yellow(dayjs().format('HH:mm:ss.SSS'));
+  // let levelF = `${kleur[LogLevelColor[level]](level.slice(0, 4).toUpperCase())}`;
+  // if (level === LogLevel.Fatal) { levelF = kleur.bold(levelF.slice(0, 4)); }
+  const timestampF = kleur.gray(dayjs().format('HH:mm:ss.SSS'));
   const labelF = label ? ` [${kleur.bold(label.toUpperCase())}]` : '';
   const dataF = (verbose && data && Object.keys(data).length > 0)
     ? `\n\n${JSON.stringify(data, null, 2)}\n\n`
     : '\n';
-  return ` ${LogLevelEmoji[level]} ${timestampF}${labelF} ${levelF}: ${message}${dataF}`;
+  return `${timestampF}   \t${LogLevelEmoji[level]}${labelF} \t${message.trim()}${dataF}`;
 };
