@@ -72,7 +72,7 @@ export const buildRequestHandler = (
 
       const fortifyReq = req as FortifyRequest;
       fortifyReq.ip = ip;
-      fortifyReq.app = app;
+      fortifyReq.app = app.clone();
       fortifyReq.params = route.params;
       fortifyReq.body = await parseBody(req, '1mb');
       setLazyProp(fortifyReq, 'cookies', () => parseCookies(req));
@@ -97,7 +97,14 @@ export const buildRequestHandler = (
         LogLevel.Info,
       ));
 
+      // Note: This is NOT binding to the global application container, it's binding to the child
+      // container that is created solely for this req/res lifecycle.
+      fortifyReq.app.bind(DIToken.HttpRequest).toConstantValue(fortifyReq);
+      fortifyReq.app.bind(DIToken.HttpResponse).toConstantValue(fortifyRes);
+
       await requestHandler(fortifyReq, fortifyRes);
+
+      fortifyReq.app.destroy();
 
       dispatcher.dispatch(new Event(
         HttpEvent.HttpResponse,

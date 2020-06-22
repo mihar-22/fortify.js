@@ -1,4 +1,4 @@
-export enum ApiEndpoint {
+export enum Endpoint {
   SignIn = 'signIn',
   SignOut = 'signOut',
   SignUp = 'signUp',

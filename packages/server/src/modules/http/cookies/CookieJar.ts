@@ -37,7 +37,7 @@ export class CookieJar {
     return !!this.queued[name];
   }
 
-  public attach(res: ServerResponse) {
-    return Object.values(this.queued).forEach((cookie) => cookie.attach(res));
+  public attachTo(res: ServerResponse) {
+    return Object.values(this.queued).forEach((cookie) => cookie.attachTo(res));
   }
 }

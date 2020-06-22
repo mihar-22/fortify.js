@@ -11,32 +11,48 @@ import BindingToSyntax = interfaces.BindingToSyntax;
 export class App {
   private readonly env: Env;
 
-  private readonly config: Config;
+  private config?: Config;
 
-  private readonly container: Container;
+  private container?: Container;
 
   constructor(config: Config) {
     this.config = config;
-    this.env = config?.env ?? Env.Development;
+    this.env = config.env ?? Env.Development;
     this.container = new Container();
-    this.container.bind<App>(DIToken.App).toConstantValue(this);
     this.container.bind<Config>(DIToken.Config).toConstantValue(config);
   }
 
+  public clone(): App {
+    const clone = new App(this.config!);
+    clone.container = this.container!.createChild();
+    return clone;
+  }
+
   public get<T>(token: string): T {
-    return this.container.get<T>(token);
+    return this.container!.get<T>(token);
   }
 
   public bind<T>(token: string): BindingToSyntax<T> {
-    return this.container.bind<T>(token);
+    return this.container!.bind<T>(token);
   }
 
   public rebind<T>(token: string): BindingToSyntax<T> {
-    return this.container.rebind<T>(token);
+    return this.container!.rebind<T>(token);
   }
 
   public resolve<T>(constructorFunction: Newable<T>): T {
-    return this.container.resolve<T>(constructorFunction);
+    return this.container!.resolve<T>(constructorFunction);
+  }
+
+  public unbind(token: string) {
+    return this.container!.unbind(token);
+  }
+
+  public destroy(): void {
+    this.container!.unbindAll();
+    this.container!.parent = null;
+    this.config = undefined;
+    this.container = undefined;
   }
 
   public get isTestingEnv(): boolean {
@@ -61,10 +77,10 @@ export class App {
   }
 
   public getConfig<T extends Module>(module: T): Config[T] {
-    return this.config[module];
+    return this.config![module];
   }
 
   public setConfig<T extends Module>(module: T, config: Config[T]): void {
-    this.config[module] = config;
+    this.config![module] = config;
   }
 }

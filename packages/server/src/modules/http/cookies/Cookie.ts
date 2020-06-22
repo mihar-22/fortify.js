@@ -58,7 +58,7 @@ export class Cookie {
     return dayjs(this.expires).isAfter(dayjs().subtract(5, 'minute'));
   }
 
-  public attach(res: ServerResponse): void {
+  public attachTo(res: ServerResponse): void {
     res.setHeader('Set-Cookie', CookieBuilder.serialize(
       (this.prefix && !this.name.startsWith('__')) ? `${this.prefix}${this.name}` : this.name,
       this.value,
