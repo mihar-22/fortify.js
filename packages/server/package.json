@@ -24,8 +24,8 @@
     "scripts"
   ],
   "scripts": {
-    "prebuild": "rimraf dist",
-    "build": "yarn prebuild && tsc --module commonjs"
+    "build": "tsc --module commonjs",
+    "release": "semantic-release -e ../../tools/semantic-release"
   },
   "devDependencies": {
     "@firebase/auth-types": "^0.10.1",

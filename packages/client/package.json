@@ -18,7 +18,8 @@
     "dist"
   ],
   "scripts": {
-    "build": ""
+    "build": "echo \"No build configured.\"",
+    "release": "semantic-release -e ../../tools/semantic-release"
   },
   "keywords": [
     "fortify",

@@ -17,7 +17,8 @@ import {
   parseCookies,
   parseQuery,
   runConnectMiddleware,
-  sendJsonResponse, setLazyProp,
+  sendJsonResponse,
+  setLazyProp,
 } from './requestUtils';
 
 const proxyaddr = require('proxy-addr');
@@ -78,11 +79,11 @@ export const buildRequestHandler = (
       setLazyProp(fortifyReq, 'query', () => parseQuery(req));
 
       const fortifyRes = res as FortifyResponse;
+      fortifyRes.json = (data: any) => sendJsonResponse(res, data);
       fortifyRes.status = (statusCode: number) => {
         fortifyRes.statusCode = statusCode;
         return fortifyRes;
       };
-      fortifyRes.json = (data: any) => sendJsonResponse(res, data);
 
       dispatcher.dispatch(new Event(
         HttpEvent.HttpRequest,
