@@ -15,7 +15,7 @@ describe('Events', () => {
     let receivedEvents: Event<any, number>[] = [];
     const expectedEvent = new Event('EVENT_CODE_ONE', 'Description', 1);
     const getDispatcher = () => app.get<Dispatcher>(DIToken.EventDispatcher);
-    const resolveDispatcher = () => app.resolve<Dispatcher>(EventDispatcher);
+    const resolveDispatcher = () => app.get<Dispatcher>(EventDispatcher);
 
     const boot = (config?: Config) => {
       app = bootstrap(coreModules, config, true);

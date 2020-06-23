@@ -3,10 +3,19 @@ import { Module } from '../Module';
 import { App } from '../../App';
 import { DatabaseConfig } from './DatabaseConfig';
 
-export const DatabaseModule: ModuleProvider<DatabaseConfig> = {
-  module: Module.Database,
+export class DatabaseModule implements ModuleProvider<DatabaseConfig> {
+  public static id = Module.Database;
 
-  register: (app: App) => {
+  private readonly app: App;
+
+  private readonly config: DatabaseConfig;
+
+  constructor(app: App, config: DatabaseConfig) {
+    this.app = app;
+    this.config = config;
+  }
+
+  public register() {
     // ...
-  },
-};
+  }
+}

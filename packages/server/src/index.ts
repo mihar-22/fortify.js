@@ -2,7 +2,7 @@ import '@abraham/reflection';
 import { Config, Env } from './Config';
 import { bootstrap } from './bootstrap';
 import { coreModules } from './modules';
-import { ModuleProvider } from './support/ModuleProvider';
+import { ModuleProviderConstructor } from './support/ModuleProvider';
 import { DIToken } from './DIToken';
 import { Endpoint } from './modules/http/api/Endpoint';
 import { RequestHandler } from './modules/http/request/RequestHandler';
@@ -23,7 +23,7 @@ export type FortifyServer = { any: RequestHandler } & Record<Endpoint, RequestHa
 
 export function buildFortifyServer(
   config?: Config,
-  modules?: ModuleProvider<any>[],
+  modules?: ModuleProviderConstructor[],
 ): FortifyServer {
   try {
     const app = bootstrap([...coreModules, ...(modules ?? [])], config);

@@ -8,23 +8,33 @@ import { FakeEncrypter } from './FakeEncrypter';
 import { EncryptionConfig } from './EncryptionConfig';
 import { EncryptionError } from './EncryptionError';
 
-export const EncryptionModule: ModuleProvider<EncryptionConfig> = {
-  module: Module.Encryption,
+export class EncryptionModule implements ModuleProvider<EncryptionConfig> {
+  public static id = Module.Encryption;
 
-  defaults: () => ({
-    key: Buffer.from('s'.repeat(32)).toString('base64'),
-    cipher: CipherAlgorithm.AES256CBC,
-  }),
+  public static defaults() {
+    return {
+      key: Buffer.from('s'.repeat(32)).toString('base64'),
+      cipher: CipherAlgorithm.AES256CBC,
+    };
+  }
 
-  configValidation: (app: App) => {
-    const encryptionConfig = app.getConfig(Module.Encryption)!;
-    const { key, cipher } = encryptionConfig;
+  private readonly app: App;
+
+  private readonly config: EncryptionConfig;
+
+  constructor(app: App, config: EncryptionConfig) {
+    this.app = app;
+    this.config = config;
+  }
+
+  public configValidation() {
+    const { key, cipher } = this.config;
 
     const isBadProductionKey = !key
       || key.length === 0
       || key === Buffer.from('s'.repeat(32)).toString('base64');
 
-    if (app.isProductionEnv && isBadProductionKey) {
+    if (this.app.isProductionEnv && isBadProductionKey) {
       return {
         code: EncryptionError.MissingEncryptionKey,
         message: 'Your application is vulnerable because no encryption key has been specified.',
@@ -40,22 +50,17 @@ export const EncryptionModule: ModuleProvider<EncryptionConfig> = {
     }
 
     return undefined;
-  },
+  }
 
-  register: (app: App) => {
-    const encryptionConfig = app.getConfig(Module.Encryption)!;
+  public register() {
+    this.app.bindBuilder<() => Encrypter>(DIToken.Encrypter, () => {
+      const { key, cipher } = this.config;
+      return new CryptoEncrypter(key, cipher, this.app.get(DIToken.EventDispatcher));
+    });
+  }
 
-    app
-      .bind<Encrypter>(DIToken.Encrypter)
-      .toDynamicValue(() => {
-        const { key, cipher } = encryptionConfig;
-        return new CryptoEncrypter(key, cipher, app.get(DIToken.EventDispatcher));
-      })
-      .inSingletonScope();
-  },
-
-  registerTestingEnv: (app: App) => {
-    app.bind<Encrypter>(DIToken.FakeEncrypter).toConstantValue(new FakeEncrypter());
-    app.rebind<Encrypter>(DIToken.Encrypter).toConstantValue(app.get(DIToken.FakeEncrypter));
-  },
-};
+  public registerTestingEnv() {
+    this.app.bindValue<Encrypter>(DIToken.FakeEncrypter, new FakeEncrypter());
+    this.app.bindValue<Encrypter>(DIToken.Encrypter, this.app.get(DIToken.FakeEncrypter));
+  }
+}

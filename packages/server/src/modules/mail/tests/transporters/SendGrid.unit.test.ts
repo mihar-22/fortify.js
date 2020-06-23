@@ -23,7 +23,7 @@ describe('Mail', () => {
 
       beforeEach(() => {
         boot({ env: Env.Testing });
-        mailer = app.resolve(SendGrid);
+        mailer = app.get(SendGrid);
         mailer.setConfig(fakeConfig);
         mailer.setSender(mailSender);
         httpClient = app.get(DIToken.HttpClient);

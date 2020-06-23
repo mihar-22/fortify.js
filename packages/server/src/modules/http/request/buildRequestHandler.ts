@@ -22,6 +22,7 @@ import {
   runConnectMiddleware,
   sendJsonResponse,
 } from './requestUtils';
+import { CookieJar } from '../cookies/CookieJar';
 
 const proxyaddr = require('proxy-addr');
 
@@ -102,11 +103,12 @@ export const buildRequestHandler = (
 
       // Note: This is NOT binding to the global application container, it's binding to the child
       // container that is created solely for this req/res lifecycle.
-      fortifyReq.app.bind(DIToken.HttpRequest).toConstantValue(fortifyReq);
-      fortifyReq.app.bind(DIToken.HttpResponse).toConstantValue(fortifyRes);
+      fortifyReq.app.bindValue(DIToken.HttpRequest, fortifyReq);
+      fortifyReq.app.bindValue(DIToken.HttpResponse, fortifyRes);
 
       await requestHandler(fortifyReq, fortifyRes);
 
+      fortifyReq.app.get<CookieJar>(DIToken.CookieJar).attachTo(fortifyRes);
       fortifyReq.app.destroy();
 
       dispatcher.dispatch(new Event(

@@ -9,41 +9,44 @@ import { EventLogger } from './EventLogger';
 import { Logger } from '../logger/Logger';
 import { EventsConfig } from './EventsConfig';
 
-export const EventsModule: ModuleProvider<EventsConfig> = {
-  module: Module.Events,
+export class EventsModule implements ModuleProvider<EventsConfig> {
+  public static id = Module.Events;
 
-  defaults: () => ({
-    logEvents: true,
-  }),
+  public static defaults() {
+    return {
+      logEvents: true,
+    };
+  }
 
-  register: (app: App) => {
-    app
-      .bind<Dispatcher>(DIToken.EventDispatcher)
-      .toDynamicValue(() => app.resolve(EventDispatcher))
-      .inSingletonScope();
-  },
+  private readonly app: App;
 
-  registerTestingEnv: (app: App) => {
-    app
-      .bind<Dispatcher>(DIToken.FakeDispatcher)
-      .toConstantValue(new FakeDispatcher());
+  private readonly config: EventsConfig;
 
-    app
-      .rebind<Dispatcher>(DIToken.EventDispatcher)
-      .toConstantValue(app.get(DIToken.FakeDispatcher));
-  },
+  constructor(app: App, config: EventsConfig) {
+    this.app = app;
+    this.config = config;
+  }
 
-  boot: (app: App) => {
-    const config = app.getConfig(Module.Events);
-    const dispatcher = app.get<Dispatcher>(DIToken.EventDispatcher);
+  public register() {
+    this.app.bindBuilder<() => Dispatcher>(DIToken.EventDispatcher,
+      () => this.app.get(EventDispatcher));
+  }
 
-    config?.tap?.({
+  public registerTestingEnv() {
+    this.app.bindValue<Dispatcher>(DIToken.FakeDispatcher, new FakeDispatcher());
+    this.app.bindValue<Dispatcher>(DIToken.EventDispatcher, this.app.get(DIToken.FakeDispatcher));
+  }
+
+  public boot() {
+    const dispatcher = this.app.get<Dispatcher>(DIToken.EventDispatcher);
+
+    this.config.tap?.({
       listen: dispatcher.listen,
       listenTo: dispatcher.listenTo,
       listenToAll: dispatcher.listenToAll,
     });
 
-    const logger = app.get<Logger>(DIToken.Logger);
-    EventLogger.log(logger, dispatcher, config?.logEvents);
-  },
-};
+    const logger = this.app.get<Logger>(DIToken.Logger);
+    EventLogger.log(logger, dispatcher, this.config.logEvents);
+  }
+}

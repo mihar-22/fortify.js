@@ -9,6 +9,7 @@ module.exports = {
     'global-require': 'off',
     'react/jsx-props-no-spreading': 'off',
     'default-case': 'off',
+    'class-methods-use-this': 'off',
     'import/prefer-default-export': 'off',
     'import/no-extraneous-dependencies': 'off',
     '@typescript-eslint/camelcase': 'off',

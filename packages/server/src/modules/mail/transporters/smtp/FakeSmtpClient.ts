@@ -1,4 +1,4 @@
-import { injectable } from 'inversify';
+import { injectable } from 'tsyringe';
 import { SmtpClient } from './SmtpClient';
 
 @injectable()

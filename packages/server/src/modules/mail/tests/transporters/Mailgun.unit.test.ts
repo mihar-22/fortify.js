@@ -28,7 +28,7 @@ describe('Mail', () => {
 
       beforeEach(() => {
         boot({ env: Env.Testing });
-        mailer = app.resolve(Mailgun);
+        mailer = app.get(Mailgun);
         mailer.setConfig(fakeConfig);
         mailer.setSender(mailSender);
         httpClient = app.get(DIToken.HttpClient);

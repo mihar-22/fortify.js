@@ -52,7 +52,6 @@
     "cors": "^2.8.5",
     "dayjs": "^1.8.28",
     "hash-equals": "^0.0.3",
-    "inversify": "^5.0.1",
     "kleur": "^3.0.3",
     "mustache": "^4.0.1",
     "nanoid": "^3.1.9",
@@ -60,7 +59,8 @@
     "proxy-addr": "^2.0.6",
     "rate-limiter-flexible": "^2.1.7",
     "raw-body": "^2.4.1",
-    "trouter": "^3.1.0"
+    "trouter": "^3.1.0",
+    "tsyringe": "^4.3.0"
   },
   "keywords": [
     "fortify",

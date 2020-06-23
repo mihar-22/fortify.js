@@ -9,11 +9,15 @@ export interface InvalidConfiguration {
 }
 
 export interface ModuleProvider<ConfigType> {
-  module: Module;
-  defaults?: (app: App) => ConfigType;
-  configValidation?: (app: App) => InvalidConfiguration | undefined;
-  dependencies?: (app: App) => string[];
-  register: (app: App) => void
-  registerTestingEnv?: (app: App) => void
-  boot?: (app: App) => void
+  configValidation?(): InvalidConfiguration | undefined;
+  dependencies?(): string[] | void;
+  register(): void
+  registerTestingEnv?(): void
+  boot?(): void
+}
+
+export interface ModuleProviderConstructor<ConfigType = any> {
+  id: Module
+  defaults?: (app: App) => ConfigType
+  new(app: App, config: ConfigType): ModuleProvider<ConfigType>
 }

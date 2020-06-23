@@ -1,4 +1,4 @@
-import { injectable } from 'inversify';
+import { injectable } from 'tsyringe';
 import { Dispatcher, PayloadType, RemoveListenerCallback } from './Dispatcher';
 import {
   Event, EventCallback, EventCode, EventMatcher,

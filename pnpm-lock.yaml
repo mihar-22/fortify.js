@@ -60,7 +60,6 @@ importers:
       cors: 2.8.5
       dayjs: 1.8.28
       hash-equals: 0.0.3
-      inversify: 5.0.1
       kleur: 3.0.3
       mustache: 4.0.1
       nanoid: 3.1.10
@@ -69,6 +68,7 @@ importers:
       rate-limiter-flexible: 2.1.7
       raw-body: 2.4.1
       trouter: 3.1.0
+      tsyringe: 4.3.0
     devDependencies:
       '@firebase/auth-types': 0.10.1
       '@types/cookie': 0.4.0
@@ -103,7 +103,6 @@ importers:
       dotenv: ^8.2.0
       fetch-mock: ^9.10.1
       hash-equals: ^0.0.3
-      inversify: ^5.0.1
       kleur: ^3.0.3
       mustache: ^4.0.1
       nanoid: ^3.1.9
@@ -116,6 +115,7 @@ importers:
       sqlite3: ^4.2.0
       supertest: ^4.0.2
       trouter: ^3.1.0
+      tsyringe: ^4.3.0
       typescript: ^3.9.3
       winston: ^3.2.1
 lockfileVersion: 5.1
@@ -3833,10 +3833,6 @@ packages:
       node: '>=8'
     resolution:
       integrity: sha512-krrAJ7McQxGGmvaYbB7Q1mcA+cRwg9Ij2RfWIeVesNBgVDZmzY/Fa4IpZUT3bmdRzMzdf/mzltCG2Dq99IZGBA==
-  /inversify/5.0.1:
-    dev: false
-    resolution:
-      integrity: sha512-Ieh06s48WnEYGcqHepdsJUIJUXpwH5o5vodAX+DK2JA/gjy4EbEcQZxw+uFfzysmKjiLXGYwNG3qDZsKVMcINQ==
   /ip-regex/2.1.0:
     dev: true
     engines:
@@ -7515,7 +7511,6 @@ packages:
     resolution:
       integrity: sha512-dRcuzokWhajtZWkQsDVKbWyY+jgcLC5sqJhg2PSgf4ZkH2aHPvaOY8YWGhmjb68b5qqTfasSsDO9k7RUiEmZAw==
   /tslib/1.13.0:
-    dev: true
     resolution:
       integrity: sha512-i/6DQjL8Xf3be4K/E6Wgpekn5Qasl1usyw++dAA35Ue5orEn65VIxOA+YvNNl9HV3qv70T7CNwjODHZrLwvd1Q==
   /tsutils/3.17.1_typescript@3.9.5:
@@ -7529,6 +7524,14 @@ packages:
       typescript: '>=2.8.0 || >= 3.2.0-dev || >= 3.3.0-dev || >= 3.4.0-dev || >= 3.5.0-dev || >= 3.6.0-dev || >= 3.6.0-beta || >= 3.7.0-dev || >= 3.7.0-beta'
     resolution:
       integrity: sha512-kzeQ5B8H3w60nFY2g8cJIuH7JDpsALXySGtwGJ0p2LSjLgay3NdIpqq5SoOBe46bKDW2iq25irHCr8wjomUS2g==
+  /tsyringe/4.3.0:
+    dependencies:
+      tslib: 1.13.0
+    dev: false
+    engines:
+      node: '>= 6.0.0'
+    resolution:
+      integrity: sha512-Vzty1M/EQXSsEE8aoIOLl1l793chcPyQAnFJaS1mFDtFvNPY+jknSPwMIF6yfcjua+2GTgwxWFzuA3cjIx4NZA==
   /tunnel-agent/0.6.0:
     dependencies:
       safe-buffer: 5.2.1

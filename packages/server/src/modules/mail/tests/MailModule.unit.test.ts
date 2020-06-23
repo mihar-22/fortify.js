@@ -10,19 +10,19 @@ import { MailError } from '../MailError';
 import { Module } from '../../Module';
 import { MailTransporter } from '../Mail';
 import { coreModules } from '../../index';
-import { ModuleProvider } from '../../../support/ModuleProvider';
+import { ModuleProviderConstructor } from '../../../support/ModuleProvider';
 
 describe('Mail', () => {
   describe('Module', () => {
     let app: App;
 
-    const boot = (config?: Config, modules?: ModuleProvider<any>[]) => {
+    const boot = (config?: Config, modules?: ModuleProviderConstructor[]) => {
       app = bootstrap(modules ?? coreModules, config, true);
       return app;
     };
 
     test('resolves fake smtp client in testing env', () => {
-      boot(({ env: Env.Testing }));
+      boot({ env: Env.Testing });
       const clientFactory = app.get<SmtpClientFactory>(DIToken.SmtpClientFactory);
       expect(clientFactory({} as any)).toBeInstanceOf(FakeSmtpClient);
     });
@@ -116,7 +116,7 @@ describe('Mail', () => {
 
     test('returns correct smtp dependencies', () => {
       boot({ [Module.Mail]: { transporter: MailTransporter.Smtp } });
-      expect(MailModule.dependencies!(app)).toEqual(['nodemailer']);
+      expect(new MailModule(app, {}).dependencies()).toEqual(['nodemailer']);
     });
 
     test('returns correct dependencies if not smtp', () => {
@@ -126,7 +126,7 @@ describe('Mail', () => {
           [MailTransporter.Mailgun]: {} as any,
         },
       });
-      expect(MailModule.dependencies!(app)).toEqual([]);
+      expect(new MailModule(app, {})!.dependencies()).toEqual([]);
     });
   });
 });

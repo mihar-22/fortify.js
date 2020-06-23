@@ -1,4 +1,3 @@
-import { injectable } from 'inversify';
 import { Dispatcher } from '../../events/Dispatcher';
 import { Mailer } from '../Mailer';
 import { MailEvent, MailEventDispatcher } from '../MailEvent';
@@ -6,7 +5,6 @@ import { MailTemplateRenderer } from '../MailTemplateRenderer';
 import { Event } from '../../events/Event';
 import { Mail, MailResponse } from '../Mail';
 
-@injectable()
 export abstract class AbstractMailTransporter<
   ConfigType,
   ResponseType extends MailResponse

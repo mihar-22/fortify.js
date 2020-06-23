@@ -1,4 +1,4 @@
-import { injectable } from 'inversify';
+import { injectable } from 'tsyringe';
 import { ServerResponse } from 'http';
 import { Cookie, CookieParams } from './Cookie';
 

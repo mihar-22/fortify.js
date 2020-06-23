@@ -37,11 +37,15 @@ describe('Http', () => {
       expect(httpClientA).toBe(httpClientB);
     });
 
-    test('cookie jar should be transient scoped', () => {
+    test('cookie jar should be container scoped', () => {
       boot();
       const cookieJarA = app.get<CookieJar>(DIToken.CookieJar);
       const cookieJarB = app.get<CookieJar>(DIToken.CookieJar);
-      expect(cookieJarA).not.toBe(cookieJarB);
+      expect(cookieJarA).toBe(cookieJarB);
+      boot();
+      const cookieJarC = app.get<CookieJar>(DIToken.CookieJar);
+      expect(cookieJarC).not.toBe(cookieJarA);
+      expect(cookieJarC).not.toBe(cookieJarB);
     });
 
     test('should resolve all endpoint handlers', () => {

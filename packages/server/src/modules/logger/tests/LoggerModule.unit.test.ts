@@ -59,13 +59,13 @@ describe('Logger', () => {
     });
 
     test('returns correct deps for winston', () => {
-      boot({ [Module.Logger]: { driver: LogDriver.Winston } });
-      expect(LoggerModule.dependencies!(app)).toEqual(['winston']);
+      const mod = new LoggerModule(app, { driver: LogDriver.Winston });
+      expect(mod.dependencies()).toEqual(['winston']);
     });
 
     test('returns correct deps for pino', () => {
-      boot({ [Module.Logger]: { driver: LogDriver.Pino } });
-      expect(LoggerModule.dependencies!(app)).toEqual(['pino']);
+      const mod = new LoggerModule(app, { driver: LogDriver.Pino });
+      expect(mod.dependencies()).toEqual(['pino']);
     });
 
     test('should throw configuration error if winston transport is missing', () => {

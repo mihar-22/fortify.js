@@ -1,4 +1,4 @@
-import { ModuleProvider } from '../support/ModuleProvider';
+import { ModuleProviderConstructor } from '../support/ModuleProvider';
 import { MailModule } from './mail/MailModule';
 import { AuthModule } from './auth/AuthModule';
 import { SessionModule } from './session/SessionModule';
@@ -8,7 +8,7 @@ import { EventsModule } from './events/EventsModule';
 import { EncryptionModule } from './encryption/EncryptionModule';
 import { LoggerModule } from './logger/LoggerModule';
 
-export const coreModules: ModuleProvider<any>[] = [
+export const coreModules: ModuleProviderConstructor[] = [
   LoggerModule,
   EncryptionModule,
   EventsModule,

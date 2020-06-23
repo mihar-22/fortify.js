@@ -2,10 +2,19 @@ import { ModuleProvider } from '../../support/ModuleProvider';
 import { Module } from '../Module';
 import { App } from '../../App';
 
-export const AuthModule: ModuleProvider<undefined> = {
-  module: Module.Auth,
+export class AuthModule implements ModuleProvider<undefined> {
+  public static id = Module.Auth;
 
-  register: (app: App) => {
+  private readonly app: App;
+
+  private readonly config: undefined;
+
+  constructor(app: App, config: undefined) {
+    this.app = app;
+    this.config = config;
+  }
+
+  public register() {
     // ...
-  },
-};
+  }
+}

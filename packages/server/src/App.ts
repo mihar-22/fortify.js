@@ -1,56 +1,64 @@
 /* eslint-disable import/order */
 
-import { Container, interfaces } from 'inversify';
+import { container, instanceCachingFactory } from 'tsyringe';
 import { Config, Env } from './Config';
 import { Module } from './modules/Module';
 import { DIToken } from './DIToken';
+import constructor from 'tsyringe/dist/typings/types/constructor';
 
-import Newable = interfaces.Newable;
-import BindingToSyntax = interfaces.BindingToSyntax;
+export enum BindingScope {
+  Transient = 0,
+  Singleton = 1,
+  ResolutionScoped = 2,
+  ContainerScoped = 3
+}
 
 export class App {
   private readonly env: Env;
 
   private config?: Config;
 
-  private container?: Container;
+  private container?: typeof container;
 
   constructor(config: Config) {
     this.config = config;
     this.env = config.env ?? Env.Development;
-    this.container = new Container();
-    this.container.bind<Config>(DIToken.Config).toConstantValue(config);
+    this.container = container.createChildContainer();
+    this.container.register(DIToken.Config, { useValue: config });
   }
 
   public clone(): App {
     const clone = new App(this.config!);
-    clone.container = this.container!.createChild();
+    clone.container = this.container!.createChildContainer();
     return clone;
   }
 
-  public get<T>(token: string): T {
-    return this.container!.get<T>(token);
+  public get<T>(token: string | constructor<T>): T {
+    return this.container!.resolve<T>(token);
   }
 
-  public bind<T>(token: string): BindingToSyntax<T> {
-    return this.container!.bind<T>(token);
+  public bindValue<T>(token: string, value: T) {
+    this.container!.register<T>(token, { useValue: value });
   }
 
-  public rebind<T>(token: string): BindingToSyntax<T> {
-    return this.container!.rebind<T>(token);
+  public bindBuilder<T extends (...args: any[]) => any>(token: string, factory: T) {
+    this.container!.register<T>(token, { useFactory: instanceCachingFactory(factory) });
   }
 
-  public resolve<T>(constructorFunction: Newable<T>): T {
-    return this.container!.resolve<T>(constructorFunction);
+  public bindFactory<T extends (...args: any[]) => any>(token: string, factory: T) {
+    this.container!.register<T>(token, { useFactory: () => factory });
   }
 
-  public unbind(token: string) {
-    return this.container!.unbind(token);
+  public bindClass<T>(token: string, clazz: constructor<T>, scope?: BindingScope) {
+    this.container!.register<T>(
+      token,
+      clazz,
+      { lifecycle: (scope ?? BindingScope.Singleton) as any },
+    );
   }
 
   public destroy(): void {
-    this.container!.unbindAll();
-    this.container!.parent = null;
+    this.container!.reset();
     this.config = undefined;
     this.container = undefined;
   }
@@ -76,11 +84,11 @@ export class App {
     return (curr.length === 0) && !!obj;
   }
 
-  public getConfig<T extends Module>(module: T): Config[T] {
-    return this.config![module];
+  public getConfig<T extends Module>(mod: T): Config[T] {
+    return this.config![mod];
   }
 
-  public setConfig<T extends Module>(module: T, config: Config[T]): void {
-    this.config![module] = config;
+  public setConfig<T extends Module>(mod: T, config: Config[T]): void {
+    this.config![mod] = config;
   }
 }

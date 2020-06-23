@@ -1,7 +1,7 @@
 import { RateLimiterMemory } from 'rate-limiter-flexible';
 import { ModuleProvider } from '../../support/ModuleProvider';
 import { Module } from '../Module';
-import { App } from '../../App';
+import { App, BindingScope } from '../../App';
 import { buildHttpClient, HttpClient } from './HttpClient';
 import { DIToken } from '../../DIToken';
 import { buildFakeHttpClient } from './FakeHttpClient';
@@ -13,54 +13,54 @@ import { RequestHandler } from './request/RequestHandler';
 import { FakeCookieJar } from './cookies/FakeCookieJar';
 import { CookieJar } from './cookies/CookieJar';
 
-export const HttpModule: ModuleProvider<HttpConfig> = {
-  module: Module.Http,
+export class HttpModule implements ModuleProvider<HttpConfig> {
+  public static id = Module.Http;
 
-  defaults: () => ({
-    rateLimiter: new RateLimiterMemory({
-      keyPrefix: 'fortify',
-      points: 100, // 100 requests
-      duration: 60, // per 60s by IP
-    }),
-  }),
+  public static defaults() {
+    return {
+      rateLimiter: new RateLimiterMemory({
+        keyPrefix: 'fortify',
+        points: 100, // 100 requests
+        duration: 60, // per 60s by IP
+      }),
+    };
+  }
 
-  register: (app: App) => {
-    app
-      .bind<HttpClient>(DIToken.HttpClient)
-      .toDynamicValue(buildHttpClient)
-      .inSingletonScope();
+  private readonly app: App;
 
-    app
-      .bind<CookieJar>(DIToken.CookieJar)
-      .to(CookieJar)
-      .inTransientScope();
+  private readonly config: HttpConfig;
+
+  constructor(app: App, config: HttpConfig) {
+    this.app = app;
+    this.config = config;
+  }
+
+  public register() {
+    this.app.bindBuilder<() => HttpClient>(DIToken.HttpClient, buildHttpClient);
+
+    this.app.bindClass<CookieJar>(DIToken.CookieJar, CookieJar, BindingScope.ContainerScoped);
 
     // Bind each individual route.
     Object.values(Endpoint).forEach((endpoint) => {
-      app
-        .bind<RequestHandler>(DIToken.HttpRequestHandler(endpoint))
-        .toDynamicValue(() => {
-          const route = Routes[endpoint];
-          return buildRequestHandler(app, [route]);
-        })
-        .inSingletonScope();
+      this.app
+        .bindBuilder<() => RequestHandler>(DIToken.HttpRequestHandler(endpoint), () => {
+        const route = Routes[endpoint];
+        return buildRequestHandler(this.app, [route]);
+      });
     });
 
-    app
-      .bind<RequestHandler>(DIToken.HttpRequestHandler('*'))
-      .toDynamicValue(() => {
-        const allRoutes = Object.values(Routes);
-        return buildRequestHandler(app, allRoutes);
-      })
-      .inSingletonScope();
+    this.app.bindBuilder<() => RequestHandler>(DIToken.HttpRequestHandler('*'), () => {
+      const allRoutes = Object.values(Routes);
+      return buildRequestHandler(this.app, allRoutes);
+    });
 
     // @TODO: Bind middleware.
-  },
+  }
 
-  registerTestingEnv: (app: App) => {
-    app.bind(DIToken.FakeCookieJar).toConstantValue(new FakeCookieJar());
-    app.rebind(DIToken.CookieJar).toConstantValue(app.get(DIToken.FakeCookieJar));
-    app.bind<HttpClient>(DIToken.FakeHttpClient).toConstantValue(buildFakeHttpClient());
-    app.rebind<HttpClient>(DIToken.HttpClient).toConstantValue(app.get(DIToken.FakeHttpClient));
-  },
-};
+  public registerTestingEnv() {
+    this.app.bindValue(DIToken.FakeCookieJar, new FakeCookieJar());
+    this.app.bindValue(DIToken.CookieJar, this.app.get(DIToken.FakeCookieJar));
+    this.app.bindValue<HttpClient>(DIToken.FakeHttpClient, buildFakeHttpClient());
+    this.app.bindValue<HttpClient>(DIToken.HttpClient, this.app.get(DIToken.FakeHttpClient));
+  }
+}

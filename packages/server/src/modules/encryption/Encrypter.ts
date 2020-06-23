@@ -19,6 +19,6 @@ export interface EncryptedPayload {
 }
 
 export interface Encrypter {
-  encrypt(value: any, shouldSerialize: boolean): string
-  decrypt(payload: string, shouldDeserialize: boolean): any
+  encrypt(value: any, shouldSerialize?: boolean): string
+  decrypt(payload: string, shouldDeserialize?: boolean): any
 }
