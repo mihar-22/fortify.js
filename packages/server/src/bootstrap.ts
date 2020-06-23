@@ -79,7 +79,9 @@ export function bootstrap(
   }
 
   // 5.1. Additional overrides if testing any module but not setting app to testing environment.
-  testModules?.forEach((Module) => { Module.registerTestingEnv?.(app); });
+  testModules
+    ?.filter((Module) => !app.isTestingEnv || !modules.includes(Module))
+    .forEach((Module) => { Module.registerTestingEnv?.(app); });
 
   // 6. Boot all modules.
   modules.map((Module) => Module.boot?.(app));

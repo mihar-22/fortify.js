@@ -69,6 +69,21 @@ describe('Http', () => {
         });
     });
 
+    test('should match multiple routes', async () => {
+      const routeA = buildRoute('/pathA', HttpMethod.GET);
+      const routeB = buildRoute('/pathB', HttpMethod.GET);
+      const routes = [routeA, routeB];
+      const handler = buildRequestHandler(app, routes);
+
+      await request(handler)
+        .get('/pathA')
+        .expect(200);
+
+      await request(handler)
+        .get('/pathB')
+        .expect(200);
+    });
+
     test('should parse request body', async () => {
       const route = buildRoute('/testPath', HttpMethod.POST);
 
