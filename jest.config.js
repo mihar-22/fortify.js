@@ -14,7 +14,7 @@ module.exports = {
     "js"
   ],
   setupFiles: [
-    'reflect-metadata',
+    '@abraham/reflection',
     'dotenv/config'
   ],
   coveragePathIgnorePatterns: [

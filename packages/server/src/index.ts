@@ -1,4 +1,4 @@
-import 'reflect-metadata';
+import '@abraham/reflection';
 import { Config, Env } from './Config';
 import { bootstrap } from './bootstrap';
 import { coreModules } from './modules';

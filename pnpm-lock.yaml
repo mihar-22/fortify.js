@@ -54,6 +54,7 @@ importers:
     specifiers: {}
   packages/server:
     dependencies:
+      '@abraham/reflection': 0.7.0
       content-type: 1.0.4
       cookie: 0.4.1
       cors: 2.8.5
@@ -67,7 +68,6 @@ importers:
       proxy-addr: 2.0.6
       rate-limiter-flexible: 2.1.7
       raw-body: 2.4.1
-      reflect-metadata: 0.1.13
       trouter: 3.1.0
     devDependencies:
       '@firebase/auth-types': 0.10.1
@@ -87,6 +87,7 @@ importers:
       typescript: 3.9.5
       winston: 3.3.0
     specifiers:
+      '@abraham/reflection': ^0.7.0
       '@firebase/auth-types': ^0.10.1
       '@types/cookie': ^0.4.0
       '@types/cors': ^2.8.6
@@ -112,7 +113,6 @@ importers:
       proxy-addr: ^2.0.6
       rate-limiter-flexible: ^2.1.7
       raw-body: ^2.4.1
-      reflect-metadata: ^0.1.13
       sqlite3: ^4.2.0
       supertest: ^4.0.2
       trouter: ^3.1.0
@@ -120,6 +120,10 @@ importers:
       winston: ^3.2.1
 lockfileVersion: 5.1
 packages:
+  /@abraham/reflection/0.7.0:
+    dev: false
+    resolution:
+      integrity: sha512-W4V4I0PzxeWCiMKnS4n4x3Fzb8cQp2qlmBO7RACS/00YsvIgijjcBz5Mp3P1PPP9vSzpbmi0qwuVYZ4twXKwxg==
   /@babel/code-frame/7.10.3:
     dependencies:
       '@babel/highlight': 7.10.3
@@ -6335,10 +6339,6 @@ packages:
     dev: true
     resolution:
       integrity: sha1-iYS1gV2ZyyIEacme7v/jiRPmzAs=
-  /reflect-metadata/0.1.13:
-    dev: false
-    resolution:
-      integrity: sha512-Ts1Y/anZELhSsjMcU605fU9RE4Oi3p5ORujwbIKXfWa+0Zxs510Qrmrce5/Jowq3cHSZSJqBjypxmHarc+vEWg==
   /regenerator-runtime/0.11.1:
     dev: true
     resolution:
