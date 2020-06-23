@@ -1,24 +1,23 @@
 import { DIToken } from '../../../DIToken';
-import { LoggerModule } from '../../logger/LoggerModule';
 import { Config, Env } from '../../../Config';
-import { EventsModule } from '../../events/EventsModule';
 import { FakeSmtpClient, Nodemailer, SmtpClientFactory } from '../transporters';
 import { MailModule } from '../MailModule';
 import { Mailer, MailTransporterFactory } from '../Mailer';
 import { FakeMailer } from '../FakeMailer';
-import { HttpModule } from '../../http/HttpModule';
 import { App } from '../../../App';
 import { bootstrap } from '../../../bootstrap';
 import { MailError } from '../MailError';
 import { Module } from '../../Module';
 import { MailTransporter } from '../Mail';
+import { coreModules } from '../../index';
+import { ModuleProvider } from '../../../support/ModuleProvider';
 
 describe('Mail', () => {
   describe('Module', () => {
     let app: App;
 
-    const boot = (config?: Config) => {
-      app = bootstrap([LoggerModule, HttpModule, EventsModule, MailModule], config, true);
+    const boot = (config?: Config, modules?: ModuleProvider<any>[]) => {
+      app = bootstrap(modules ?? coreModules, config, true);
       return app;
     };
 
@@ -67,18 +66,24 @@ describe('Mail', () => {
 
     test('should throw if sandbox is enabled in production', () => {
       expect(() => {
-        boot({ env: Env.Production, [Module.Mail]: { sandbox: true } });
+        boot(
+          { env: Env.Production, [Module.Mail]: { sandbox: true } },
+          [MailModule],
+        );
       }).toThrow(MailError.SandboxEnabledInProduction);
     });
 
     test('should throw if transporter config is missing', () => {
       expect(() => {
-        boot({
-          env: Env.Production,
-          [Module.Mail]: {
-            transporter: MailTransporter.Mailgun,
+        boot(
+          {
+            env: Env.Production,
+            [Module.Mail]: {
+              transporter: MailTransporter.Mailgun,
+            },
           },
-        });
+          [MailModule],
+        );
       }).toThrow(MailError.MissingTransporterConfig);
     });
 
@@ -96,13 +101,16 @@ describe('Mail', () => {
 
     test('should throw if mail from is missing in production', () => {
       expect(() => {
-        boot({
-          env: Env.Production,
-          [Module.Mail]: {
-            transporter: MailTransporter.Smtp,
-            smtp: {} as any,
+        boot(
+          {
+            env: Env.Production,
+            [Module.Mail]: {
+              transporter: MailTransporter.Smtp,
+              smtp: {} as any,
+            },
           },
-        });
+          [MailModule],
+        );
       }).toThrow(MailError.MissingMailFrom);
     });
 

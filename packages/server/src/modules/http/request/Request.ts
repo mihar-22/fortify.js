@@ -1,5 +1,6 @@
 import { IncomingMessage, ServerResponse } from 'http';
 import { App } from '../../../App';
+import { Cookies, Params, Query } from './RequestInfo';
 
 export enum HttpMethod {
   GET = 'GET',
@@ -7,12 +8,6 @@ export enum HttpMethod {
   PUT = 'PUT',
   DELETE = 'DELETE',
 }
-
-export type Query = Record<string, string | string[]>;
-
-export type Cookies = Record<string, string>;
-
-export type Params = Record<string, string>;
 
 export interface FortifyRequest<BodyType = any> extends IncomingMessage {
   app: App

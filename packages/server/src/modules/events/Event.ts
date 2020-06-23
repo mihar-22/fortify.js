@@ -29,7 +29,7 @@ export class Event<EventCodeValue, PayloadType> {
     this.code = code;
     this.payload = payload;
     this.description = description;
-    this.logLevel = logLevel ?? LogLevel.Debug;
+    this.logLevel = logLevel ?? LogLevel.Info;
   }
 }
 

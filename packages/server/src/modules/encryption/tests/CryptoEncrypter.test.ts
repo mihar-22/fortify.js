@@ -2,19 +2,20 @@ import { randomBytes } from 'crypto';
 import { CryptoEncrypter } from '../CryptoEncrypter';
 import { CipherAlgorithm } from '../Encrypter';
 import { EncryptionErrorBuilder, EncryptionError } from '../EncryptionError';
-import { EncryptionModule } from '../EncryptionModule';
 import { Config, Env } from '../../../Config';
 import { DIToken } from '../../../DIToken';
 import { Module } from '../../Module';
 import { App } from '../../../App';
 import { bootstrap } from '../../../bootstrap';
+import { coreModules } from '../../index';
+import { EventsModule } from '../../events/EventsModule';
 
 describe('Encryption', () => {
   describe('CryptoEncrypter', () => {
     let app: App;
 
     const boot = (config?: Config) => {
-      app = bootstrap([EncryptionModule], config, true);
+      app = bootstrap(coreModules, config, true, [EventsModule]);
     };
 
     const getEncrypter = () => app.get<CryptoEncrypter>(DIToken.Encrypter);

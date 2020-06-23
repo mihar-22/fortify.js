@@ -6,8 +6,18 @@ import { ModuleProvider } from './support/ModuleProvider';
 import { DIToken } from './DIToken';
 import { Endpoint } from './modules/http/api/Endpoint';
 import { RequestHandler } from './modules/http/request/RequestHandler';
+import { MailEvent } from './modules/mail/MailEvent';
+import { EncryptionEvent } from './modules/encryption/EncryptionEvent';
+import { HttpEvent } from './modules/http/HttpEvent';
 
 export * from './Config';
+export * from './DIToken';
+
+export {
+  MailEvent,
+  HttpEvent,
+  EncryptionEvent,
+};
 
 export type FortifyServer = { any: RequestHandler } & Record<Endpoint, RequestHandler>;
 

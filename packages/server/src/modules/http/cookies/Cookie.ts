@@ -1,7 +1,7 @@
 import CookieBuilder from 'cookie';
 import dayjs from 'dayjs';
 import { ServerResponse } from 'http';
-import { Cookies } from '../request/Request';
+import { Cookies } from '../request/RequestInfo';
 
 export type CookiePrefix ='__Host-' | '__Secure-' | undefined;
 

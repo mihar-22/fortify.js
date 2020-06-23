@@ -1,12 +1,11 @@
 import { DIToken } from '../../../DIToken';
 import { Dispatcher } from '../Dispatcher';
 import { Config, Env } from '../../../Config';
-import { EventsModule } from '../EventsModule';
-import { LoggerModule } from '../../logger/LoggerModule';
 import { FakeDispatcher } from '../FakeDispatcher';
 import { App } from '../../../App';
 import { bootstrap } from '../../../bootstrap';
 import { EventDispatcher } from '../EventDispatcher';
+import { coreModules } from '../../index';
 
 describe('Events', () => {
   describe('Module', () => {
@@ -15,7 +14,7 @@ describe('Events', () => {
     const getDispatcher = () => app.get<Dispatcher>(DIToken.EventDispatcher);
 
     const boot = (config?: Config) => {
-      app = bootstrap([LoggerModule, EventsModule], config, true);
+      app = bootstrap(coreModules, config, true);
     };
 
     beforeEach(() => boot());

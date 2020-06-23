@@ -89,7 +89,7 @@ export const buildRequestHandler = (
 
       dispatcher.dispatch(new Event(
         HttpEvent.Request,
-        ` ${ip} --> ${green(`${req.method} ${path}`)}`,
+        `💻 ${ip} --> ${green(`${req.method} ${path}`)}`,
         {
           ip,
           path,
@@ -98,7 +98,6 @@ export const buildRequestHandler = (
           query: fortifyReq.query,
           body: fortifyReq.body,
         },
-        LogLevel.Info,
       ));
 
       // Note: This is NOT binding to the global application container, it's binding to the child
@@ -112,9 +111,8 @@ export const buildRequestHandler = (
 
       dispatcher.dispatch(new Event(
         HttpEvent.Response,
-        `${ip} <-- ${green(`${req.method} ${path} ${res.statusCode}`)}`,
+        `💻 ${ip} <-- ${green(`${req.method} ${path} ${res.statusCode}`)}`,
         undefined,
-        LogLevel.Info,
       ));
 
       fortifyRes.end();
@@ -122,7 +120,7 @@ export const buildRequestHandler = (
       if (e instanceof HttpError) {
         dispatcher.dispatch(new Event(
           HttpEvent.Error,
-          `${ip} <-- ${red(`${req.method} ${path} ${e.statusCode}`)}`,
+          `❌ ${ip} X-- ${red(`${req.method} ${path} ${e.statusCode}`)}`,
           e.toLog(),
           LogLevel.Warn,
         ));
@@ -134,7 +132,7 @@ export const buildRequestHandler = (
 
       dispatcher.dispatch(new Event(
         HttpEvent.HandlerFailed,
-        e.message,
+        `❌ ${e.message}`,
         e,
         LogLevel.Error,
       ));

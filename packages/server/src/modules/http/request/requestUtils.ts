@@ -4,10 +4,10 @@ import { URL } from 'url';
 import qs from 'querystring';
 import { HttpError } from '../../../support/errors';
 import { Module } from '../../Module';
-import { Cookies, Query } from './Request';
 import { isArray, isObject } from '../../../utils';
 import { Cookie } from '../cookies/Cookie';
 import { TrustedProxies } from '../HttpConfig';
+import { Cookies, Query } from './RequestInfo';
 
 const { parse } = require('content-type');
 const proxyaddr = require('proxy-addr');

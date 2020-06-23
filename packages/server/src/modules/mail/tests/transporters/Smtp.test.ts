@@ -1,13 +1,11 @@
-import { MailModule } from '../../MailModule';
 import { DIToken } from '../../../../DIToken';
 import { Config, Env } from '../../../../Config';
 import { FakeSmtpClient, Smtp } from '../../transporters';
-import { EventsModule } from '../../../events/EventsModule';
 import { App } from '../../../../App';
 import { bootstrap } from '../../../../bootstrap';
-import { LoggerModule } from '../../../logger/LoggerModule';
 import { MailTransporter } from '../../Mail';
 import { MailTransporterFactory } from '../../Mailer';
+import { coreModules } from '../../../index';
 
 describe('Mail', () => {
   describe('Transporters', () => {
@@ -32,7 +30,7 @@ describe('Mail', () => {
       };
 
       const boot = (config?: Config) => {
-        app = bootstrap([LoggerModule, EventsModule, MailModule], config, true);
+        app = bootstrap(coreModules, config, true);
         mailer = app.get<MailTransporterFactory>(
           DIToken.MailTransporterFactory,
         )(MailTransporter.Smtp) as Smtp;

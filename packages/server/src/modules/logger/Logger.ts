@@ -84,5 +84,5 @@ export const formatLog = (
   const dataF = (verbose && data && Object.keys(data).length > 0)
     ? `\n\n${JSON.stringify(data, null, 2)}\n\n`
     : '\n';
-  return `${timestampF}   \t${LogLevelEmoji[level]}${labelF} \t${message.trim()}${dataF}`;
+  return `${timestampF}\t${LogLevelEmoji[level]}${labelF} \t${message.trim()}${dataF}`;
 };

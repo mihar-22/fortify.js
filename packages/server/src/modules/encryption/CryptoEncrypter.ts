@@ -12,15 +12,25 @@ import {
   HashAlgorithm,
 } from './Encrypter';
 import { EncryptionError, EncryptionErrorBuilder } from './EncryptionError';
+import { EncryptionEvent, EncryptionEventDispatcher } from './EncryptionEvent';
+import { Dispatcher } from '../events/Dispatcher';
+import { Event } from '../events/Event';
 
 export class CryptoEncrypter implements Encrypter {
   protected readonly key: string;
 
   protected readonly cipherAlgorithm: CipherAlgorithm;
 
-  constructor(key: string, cipherAlgorithm = CipherAlgorithm.AES128CBC) {
+  protected readonly dispatcher: EncryptionEventDispatcher;
+
+  constructor(
+    key: string,
+    cipherAlgorithm = CipherAlgorithm.AES128CBC,
+    dispatcher: Dispatcher,
+  ) {
     this.key = key;
     this.cipherAlgorithm = cipherAlgorithm;
+    this.dispatcher = dispatcher;
   }
 
   public static generateKey(cipherAlgorithm = CipherAlgorithm.AES128CBC): string {
@@ -36,6 +46,13 @@ export class CryptoEncrypter implements Encrypter {
   public encrypt(value: any, shouldSerialize = true): string {
     const iv = randomBytes(CipherIVLength[this.cipherAlgorithm]);
     const cipher = createCipheriv(this.cipherAlgorithm, Buffer.from(this.key, 'base64'), iv);
+
+    this.dispatcher.dispatch(new Event(
+      EncryptionEvent.Encrypting,
+      '🔏 Encrypting...',
+      { payload: value },
+    ));
+
     const encryption = Buffer.concat([
       cipher.update(shouldSerialize ? serialize(value) : value),
       cipher.final(),
@@ -45,7 +62,15 @@ export class CryptoEncrypter implements Encrypter {
     // its authenticity. Then, we'll JSON the data into the "payload" array.
     const mac = this.createMac(iv.toString('base64'), encryption);
     const json = JSON.stringify({ iv: iv.toString('base64'), value: encryption, mac });
-    return Buffer.from(json).toString('base64');
+    const encryptedPayload = Buffer.from(json).toString('base64');
+
+    this.dispatcher.dispatch(new Event(
+      EncryptionEvent.Encrypted,
+      '🔐 Encrypted!',
+      { payload: encryptedPayload },
+    ));
+
+    return encryptedPayload;
   }
 
   public encryptString(value: string): string {
@@ -57,11 +82,28 @@ export class CryptoEncrypter implements Encrypter {
     const iv = Buffer.from(encryptedPayload.iv, 'base64');
     const decipher = createDecipheriv(this.cipherAlgorithm, Buffer.from(this.key, 'base64'), iv);
     try {
+      this.dispatcher.dispatch(new Event(
+        EncryptionEvent.Decrypting,
+        '🔐 Decrypting...',
+        { payload },
+      ));
+
       const decryption = Buffer.concat([
         decipher.update(Buffer.from(encryptedPayload.value, 'base64')),
         decipher.final(),
       ]);
-      return shouldDeserialize ? deserialize(decryption) : decryption.toString('utf-8');
+
+      const decryptedPayload = shouldDeserialize
+        ? deserialize(decryption)
+        : decryption.toString('utf-8');
+
+      this.dispatcher.dispatch(new Event(
+        EncryptionEvent.Decrypted,
+        '🔓 Decrypted!',
+        { payload: decryptedPayload },
+      ));
+
+      return decryptedPayload;
     } catch (e) {
       throw EncryptionErrorBuilder[EncryptionError.InvalidPayload]();
     }

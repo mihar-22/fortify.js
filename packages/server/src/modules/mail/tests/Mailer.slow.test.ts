@@ -1,21 +1,14 @@
 import { MailTransporterFactory } from '../Mailer';
 import { Config, Env } from '../../../Config';
 import { bootstrap } from '../../../bootstrap';
-import { LoggerModule } from '../../logger/LoggerModule';
-import { HttpModule } from '../../http/HttpModule';
-import { EventsModule } from '../../events/EventsModule';
-import { MailModule } from '../MailModule';
 import { Module } from '../../Module';
 import { MailTransporter } from '../Mail';
 import { DIToken } from '../../../DIToken';
+import { coreModules } from '../../index';
 
 describe('Mail', () => {
   describe('Mailer', () => {
-    const boot = (config?: Config) => bootstrap(
-      [LoggerModule, HttpModule, EventsModule, MailModule],
-      config,
-      true,
-    );
+    const boot = (config?: Config) => bootstrap(coreModules, config, true);
 
     const mail = {
       subject: 'Subject',

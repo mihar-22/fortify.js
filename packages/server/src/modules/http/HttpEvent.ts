@@ -1,6 +1,6 @@
 import { Dispatcher } from '../events/Dispatcher';
 import { HttpError } from './HttpError';
-import { Cookies, Params, Query } from './request/Request';
+import { Cookies, Params, Query } from './request/RequestInfo';
 
 export enum HttpEvent {
   Request = 'HTTP_REQUEST',

@@ -6,8 +6,7 @@ import { Event } from '../Event';
 import { App } from '../../../App';
 import { bootstrap } from '../../../bootstrap';
 import { EventDispatcher } from '../EventDispatcher';
-import { EventsModule } from '../EventsModule';
-import { LoggerModule } from '../../logger/LoggerModule';
+import { coreModules } from '../../index';
 
 describe('Events', () => {
   describe('EventDispatcher', () => {
@@ -19,7 +18,7 @@ describe('Events', () => {
     const resolveDispatcher = () => app.resolve<Dispatcher>(EventDispatcher);
 
     const boot = (config?: Config) => {
-      app = bootstrap([LoggerModule, EventsModule], config, true);
+      app = bootstrap(coreModules, config, true);
       dispatcher = resolveDispatcher();
     };
 

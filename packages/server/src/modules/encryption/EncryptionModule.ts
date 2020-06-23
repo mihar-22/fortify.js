@@ -49,7 +49,7 @@ export const EncryptionModule: ModuleProvider<EncryptionConfig> = {
       .bind<Encrypter>(DIToken.Encrypter)
       .toDynamicValue(() => {
         const { key, cipher } = encryptionConfig;
-        return new CryptoEncrypter(key, cipher);
+        return new CryptoEncrypter(key, cipher, app.get(DIToken.EventDispatcher));
       })
       .inSingletonScope();
   },

@@ -1,4 +1,3 @@
-import { EncryptionModule } from '../EncryptionModule';
 import { Config, Env } from '../../../Config';
 import { DIToken } from '../../../DIToken';
 import { CipherAlgorithm, Encrypter } from '../Encrypter';
@@ -7,13 +6,14 @@ import { FakeEncrypter } from '../FakeEncrypter';
 import { App } from '../../../App';
 import { bootstrap } from '../../../bootstrap';
 import { EncryptionError } from '../EncryptionError';
+import { coreModules } from '../../index';
 
 describe('Encryption', () => {
   describe('Module', () => {
     let app: App;
 
     const boot = (config?: Config) => {
-      app = bootstrap([EncryptionModule], config, true);
+      app = bootstrap(coreModules, config, true);
     };
 
     const getEncrypter = () => app.get<Encrypter>(DIToken.Encrypter);

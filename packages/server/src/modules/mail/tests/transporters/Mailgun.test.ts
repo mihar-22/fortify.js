@@ -1,14 +1,11 @@
 import { URLSearchParams } from 'url';
 import { App } from '../../../../App';
 import { bootstrap } from '../../../../bootstrap';
-import { EventsModule } from '../../../events/EventsModule';
-import { MailModule } from '../../MailModule';
 import { Mailgun, MailgunConfig } from '../../transporters';
-import { HttpModule } from '../../../http/HttpModule';
 import { DIToken } from '../../../../DIToken';
-import { LoggerModule } from '../../../logger/LoggerModule';
 import { Config, Env } from '../../../../Config';
 import { FakeHttpClient } from '../../../http/FakeHttpClient';
+import { coreModules } from '../../../index';
 
 describe('Mail', () => {
   describe('Transporters', () => {
@@ -26,11 +23,7 @@ describe('Mail', () => {
       };
 
       const boot = (config?: Config) => {
-        app = bootstrap(
-          [LoggerModule, HttpModule, EventsModule, MailModule],
-          config,
-          true,
-        );
+        app = bootstrap(coreModules, config, true);
       };
 
       beforeEach(() => {
