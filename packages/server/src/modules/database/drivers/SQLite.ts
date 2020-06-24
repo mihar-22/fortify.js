@@ -4,11 +4,11 @@ import { AbstractSQLDriver } from './AbstractSQLDriver';
 export class SQLite extends AbstractSQLDriver<DatabaseConfig[DatabaseDriver.SQLite]> {
   public driver = DatabaseDriver.SQLite;
 
-  public async performConnect() {
+  public async driverConnect() {
     // ...
   }
 
-  public async performDisconnect() {
+  public async driverDisconnect() {
     // ...
   }
 
@@ -17,6 +17,6 @@ export class SQLite extends AbstractSQLDriver<DatabaseConfig[DatabaseDriver.SQLi
   }
 
   public async runTransaction(cb: () => Promise<void>) {
-    // ...
+    await cb();
   }
 }

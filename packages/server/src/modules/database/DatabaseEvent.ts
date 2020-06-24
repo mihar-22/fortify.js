@@ -5,10 +5,10 @@ export enum DatabaseEvent {
   Connecting = 'DB_CONNECTING',
   Connected = 'DB_CONNECTED',
   ConnectionFailed = 'DB_CONNECTION_FAILED',
-  Created = 'DB_CREATED',
+  Create = 'DB_CREATE',
   Read = 'DB_READ',
-  Updated = 'DB_UPDATED',
-  Deleted = 'DB_DELETED',
+  Update = 'DB_UPDATE',
+  Delete = 'DB_DELETE',
   Disconnecting = 'DB_DISCONNECTING',
   Disconnected = 'DB_DISCONNECTED'
 }
@@ -19,7 +19,7 @@ export interface DatabaseEventPayload {
   [DatabaseEvent.ConnectionFailed]: Error
   [DatabaseEvent.Disconnecting]: void
   [DatabaseEvent.Disconnected]: void
-  [DatabaseEvent.Created]: {
+  [DatabaseEvent.Create]: {
     id: string | number,
     collection: DbCollection,
     data: object
@@ -30,12 +30,12 @@ export interface DatabaseEventPayload {
     select?: object,
     data?: any
   }
-  [DatabaseEvent.Updated]: {
+  [DatabaseEvent.Update]: {
     collection: DbCollection,
     filter: object,
     data: object
   }
-  [DatabaseEvent.Deleted]: {
+  [DatabaseEvent.Delete]: {
     collection: DbCollection,
     filter: object
   }

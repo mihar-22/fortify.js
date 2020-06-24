@@ -84,7 +84,10 @@ importers:
       '@types/trouter': 3.1.0
       dotenv: 8.2.0
       fetch-mock: 9.10.2_node-fetch@3.0.0-beta.7
+      mongodb: 3.5.9
+      mysql: 2.18.1
       nodemailer: 6.4.10
+      pg: 8.2.1_pg@8.2.1
       pino: 6.3.2
       sqlite3: 4.2.0
       sqliterally: 1.0.3
@@ -113,10 +116,13 @@ importers:
       fetch-mock: ^9.10.1
       hash-equals: ^0.0.3
       kleur: ^3.0.3
+      mongodb: ^3.5.9
       mustache: ^4.0.1
+      mysql: ^2.18.1
       nanoid: ^3.1.9
       node-fetch: ^3.0.0-beta.7
       nodemailer: ^6.4.8
+      pg: ^8.2.1
       pino: ^6.3.2
       proxy-addr: ^2.0.6
       rate-limiter-flexible: ^2.1.7
@@ -1838,6 +1844,17 @@ packages:
     dev: true
     resolution:
       integrity: sha512-IWIbu7pMqyw3EAJHzzHbWa85b6oud/yfKYg5rqB5hNE8CeMi3nX+2C2sj0HswfblST86hpVEOAb9x34NZd6P7A==
+  /bignumber.js/9.0.0:
+    dev: true
+    resolution:
+      integrity: sha512-t/OYhhJ2SD+YGBQcjY8GzzDHEk9f3nerxjtfa6tlMXfe7frs/WozhvCNoGvpM0P3bNf3Gq5ZRMlGr5f3r4/N8A==
+  /bl/2.2.0:
+    dependencies:
+      readable-stream: 2.3.7
+      safe-buffer: 5.2.1
+    dev: true
+    resolution:
+      integrity: sha512-wbgvOpqopSr7uq6fJrLH8EsvYMJf9gzfo2jCsL2eTy75qXPukA4pCgHamOQkZtY5vmfVtjB+P3LNlMHW5CEZXA==
   /bottleneck/2.19.5:
     dev: true
     resolution:
@@ -1892,10 +1909,22 @@ packages:
     dev: true
     resolution:
       integrity: sha512-gQxTNE/GAfIIrmHLUE3oJyp5FO6HRBfhjnw4/wMmA63ZGDJnWBmgY/lyQBpnDUkGmAhbSe39tx2d/iTOAfglwQ==
+  /bson/1.1.4:
+    dev: true
+    engines:
+      node: '>=0.6.19'
+    resolution:
+      integrity: sha512-S/yKGU1syOMzO86+dGpg2qGoDL0zvzcb262G+gqEy6TgP6rt6z6qxSFX/8X6vLC91P7G7C3nLs0+bvDzmvBA3Q==
   /buffer-from/1.1.1:
     dev: true
     resolution:
       integrity: sha512-MQcXEUbCKtEo7bhqEs6560Hyd4XaovZlO/k9V3hjVUF/zwW7KBVdSK4gIt/bzwS9MbR5qob+F5jusZsb0YQK2A==
+  /buffer-writer/2.0.0:
+    dev: true
+    engines:
+      node: '>=4'
+    resolution:
+      integrity: sha512-a7ZpuTZU1TRtnwyCNW3I5dc0wWNC3VR9S++Ewyk2HHZdrO3CQJqSpd+95Us590V6AL7JqUAH2IwZ/398PmNFgw==
   /builtin-modules/3.1.0:
     dev: true
     engines:
@@ -2538,6 +2567,12 @@ packages:
     dev: true
     resolution:
       integrity: sha1-hMbhWbgZBP3KWaDvRM2HDTElD5o=
+  /denque/1.4.1:
+    dev: true
+    engines:
+      node: '>=0.10'
+    resolution:
+      integrity: sha512-OfzPuSZKGcgr96rf1oODnfjqBFmr1DVoc/TrItj3Ohe0Ah1C5WX5Baquw/9U9KovnQ88EqmJbD66rKYUQYN1tQ==
   /depd/1.1.2:
     dev: false
     engines:
@@ -5113,6 +5148,11 @@ packages:
     hasBin: true
     resolution:
       integrity: sha512-EkE7RW6KcXfMHy2PA7Jg0YJE1l8UPEZE8k45tylzmZM30/r1M1MUXWQfJlrSbsTeh7m/XTwHbWUENvAJZpp1YA==
+  /memory-pager/1.5.0:
+    dev: true
+    optional: true
+    resolution:
+      integrity: sha512-ZS4Bp4r/Zoeq6+NLJpP+0Zzm0pR8whtGPf1XExKLJBAczGMnSi3It14OiNCStjQjM6NU1okjQGSxgEZN8eBYKg==
   /meow/5.0.0:
     dependencies:
       camelcase-keys: 4.2.0
@@ -5305,6 +5345,20 @@ packages:
       node: '>=0.10.0'
     resolution:
       integrity: sha512-xV2bxeN6F7oYjZWTe/YPAy6MN2M+sL4u/Rlm2AHCIVGfo2p1yGmBHQ6vHehl4bRTZBdHu3TSkWdYgkwpYzAGSw==
+  /mongodb/3.5.9:
+    dependencies:
+      bl: 2.2.0
+      bson: 1.1.4
+      denque: 1.4.1
+      require_optional: 1.0.1
+      safe-buffer: 5.2.1
+    dev: true
+    engines:
+      node: '>=4'
+    optionalDependencies:
+      saslprep: 1.0.3
+    resolution:
+      integrity: sha512-vXHBY1CsGYcEPoVWhwgxIBeWqP3dSu9RuRDsoLRPTITrcrgm1f0Ubu1xqF9ozMwv53agmEiZm0YGo+7WL3Nbug==
   /ms/2.0.0:
     dev: true
     resolution:
@@ -5324,6 +5378,17 @@ packages:
     dev: true
     resolution:
       integrity: sha512-nnbWWOkoWyUsTjKrhgD0dcz22mdkSnpYqbEjIm2nhwhuxlSkpywJmBo8h0ZqJdkp73mb90SssHkN4rsRaBAfAA==
+  /mysql/2.18.1:
+    dependencies:
+      bignumber.js: 9.0.0
+      readable-stream: 2.3.7
+      safe-buffer: 5.1.2
+      sqlstring: 2.3.1
+    dev: true
+    engines:
+      node: '>= 0.6'
+    resolution:
+      integrity: sha512-Bca+gk2YWmqp2Uf6k5NFEurwY/0td0cpebAucFpY/3jhrwrVGuxU2uQFCHjU19SJfje0yQvi+rVWdq78hR5lig==
   /nan/2.14.1:
     dev: true
     resolution:
@@ -5924,6 +5989,10 @@ packages:
       node: '>=6'
     resolution:
       integrity: sha512-R4nPAVTAU0B9D35/Gk3uJf/7XYbQcyohSKdvAxIRSNghFl4e71hVoGnBNQz9cWaXxO2I10KTC+3jMdvvoKw6dQ==
+  /packet-reader/1.0.0:
+    dev: true
+    resolution:
+      integrity: sha512-HAKu/fG3HpHFO0AA8WE8q2g+gBJaZ9MG7fcKk+IJPLTGAD6Psw4443l+9DGRbOIh3/aXr7Phy0TjilYivJo5XQ==
   /parent-module/1.0.1:
     dependencies:
       callsites: 3.1.0
@@ -6034,6 +6103,63 @@ packages:
     dev: true
     resolution:
       integrity: sha1-Ywn04OX6kT7BxpMHrjZLSzd8nns=
+  /pg-connection-string/2.2.3:
+    dev: true
+    resolution:
+      integrity: sha512-I/KCSQGmOrZx6sMHXkOs2MjddrYcqpza3Dtsy0AjIgBr/bZiPJRK9WhABXN1Uy1UDazRbi9gZEzO2sAhL5EqiQ==
+  /pg-int8/1.0.1:
+    dev: true
+    engines:
+      node: '>=4.0.0'
+    resolution:
+      integrity: sha512-WCtabS6t3c8SkpDBUlb1kjOs7l66xsGdKpIPZsg4wR+B3+u9UAum2odSsF9tnvxg80h4ZxLWMy4pRjOsFIqQpw==
+  /pg-pool/3.2.1_pg@8.2.1:
+    dependencies:
+      pg: 8.2.1_pg@8.2.1
+    dev: true
+    peerDependencies:
+      pg: '>=8.0'
+    resolution:
+      integrity: sha512-BQDPWUeKenVrMMDN9opfns/kZo4lxmSWhIqo+cSAF7+lfi9ZclQbr9vfnlNaPr8wYF3UYjm5X0yPAhbcgqNOdA==
+  /pg-protocol/1.2.4:
+    dev: true
+    resolution:
+      integrity: sha512-/8L/G+vW/VhWjTGXpGh8XVkXOFx1ZDY+Yuz//Ab8CfjInzFkreI+fDG3WjCeSra7fIZwAFxzbGptNbm8xSXenw==
+  /pg-types/2.2.0:
+    dependencies:
+      pg-int8: 1.0.1
+      postgres-array: 2.0.0
+      postgres-bytea: 1.0.0
+      postgres-date: 1.0.5
+      postgres-interval: 1.2.0
+    dev: true
+    engines:
+      node: '>=4'
+    resolution:
+      integrity: sha512-qTAAlrEsl8s4OiEQY69wDvcMIdQN6wdz5ojQiOy6YRMuynxenON0O5oCpJI6lshc6scgAY8qvJ2On/p+CXY0GA==
+  /pg/8.2.1_pg@8.2.1:
+    dependencies:
+      buffer-writer: 2.0.0
+      packet-reader: 1.0.0
+      pg-connection-string: 2.2.3
+      pg-pool: 3.2.1_pg@8.2.1
+      pg-protocol: 1.2.4
+      pg-types: 2.2.0
+      pgpass: 1.0.2
+      semver: 4.3.2
+    dev: true
+    engines:
+      node: '>= 8.0.0'
+    peerDependencies:
+      pg: '*'
+    resolution:
+      integrity: sha512-DKzffhpkWRr9jx7vKxA+ur79KG+SKw+PdjMb1IRhMiKI9zqYUGczwFprqy+5Veh/DCcFs1Y6V8lRLN5I1DlleQ==
+  /pgpass/1.0.2:
+    dependencies:
+      split: 1.0.1
+    dev: true
+    resolution:
+      integrity: sha1-Knu0G2BltnkH6R2hsHwYR8h3swY=
   /picomatch/2.2.2:
     dev: true
     engines:
@@ -6113,6 +6239,32 @@ packages:
       node: '>=0.10.0'
     resolution:
       integrity: sha1-AerA/jta9xoqbAL+q7jB/vfgDqs=
+  /postgres-array/2.0.0:
+    dev: true
+    engines:
+      node: '>=4'
+    resolution:
+      integrity: sha512-VpZrUqU5A69eQyW2c5CA1jtLecCsN2U/bD6VilrFDWq5+5UIEVO7nazS3TEcHf1zuPYO/sqGvUvW62g86RXZuA==
+  /postgres-bytea/1.0.0:
+    dev: true
+    engines:
+      node: '>=0.10.0'
+    resolution:
+      integrity: sha1-AntTPAqokOJtFy1Hz5zOzFIazTU=
+  /postgres-date/1.0.5:
+    dev: true
+    engines:
+      node: '>=0.10.0'
+    resolution:
+      integrity: sha512-pdau6GRPERdAYUQwkBnGKxEfPyhVZXG/JiS44iZWiNdSOWE09N2lUgN6yshuq6fVSon4Pm0VMXd1srUUkLe9iA==
+  /postgres-interval/1.2.0:
+    dependencies:
+      xtend: 4.0.2
+    dev: true
+    engines:
+      node: '>=0.10.0'
+    resolution:
+      integrity: sha512-9ZhXKM/rw350N1ovuWHbGxnGh/SNJ4cnxHiM0rxE4VN41wsg8P8zWn9hv/buK00RP4WvlOyr/RBDiptyxVbkZQ==
   /prelude-ls/1.1.2:
     dev: true
     engines:
@@ -6509,6 +6661,13 @@ packages:
     dev: true
     resolution:
       integrity: sha512-NKN5kMDylKuldxYLSUfrbo5Tuzh4hd+2E8NPPX02mZtn1VuREQToYe/ZdlJy+J3uCpfaiGF05e7B8W0iXbQHmg==
+  /require_optional/1.0.1:
+    dependencies:
+      resolve-from: 2.0.0
+      semver: 5.7.1
+    dev: true
+    resolution:
+      integrity: sha512-qhM/y57enGWHAe3v/NcwML6a3/vfESLe/sGM2dII+gEO0BpKRUkWZow/tyloNqJyN6kXSl3RyyM8Ll5D/sJP8g==
   /resolve-cwd/3.0.0:
     dependencies:
       resolve-from: 5.0.0
@@ -6517,6 +6676,12 @@ packages:
       node: '>=8'
     resolution:
       integrity: sha512-OrZaX2Mb+rJCpH/6CpSqt9xFVpN++x01XnN2ie9g6P5/3xelLAkXWVADpdz1IHD/KFfEXyE6V0U01OQ3UO2rEg==
+  /resolve-from/2.0.0:
+    dev: true
+    engines:
+      node: '>=0.10.0'
+    resolution:
+      integrity: sha1-lICrIOlP+h2egKgEx+oUdhGWa1c=
   /resolve-from/4.0.0:
     dev: true
     engines:
@@ -6676,6 +6841,15 @@ packages:
     hasBin: true
     resolution:
       integrity: sha512-hhbzAgTIX8O7SHfp2c8/kREfEn4qO/9q8C9beyY6+tvZ87EpoZ3i1RIEvp27YBswnNbY9mWd6paKVmKbAgLfZA==
+  /saslprep/1.0.3:
+    dependencies:
+      sparse-bitfield: 3.0.3
+    dev: true
+    engines:
+      node: '>=6'
+    optional: true
+    resolution:
+      integrity: sha512-/MY/PEMbk2SuY5sScONwhUDsV2p77Znkb/q3nSVstq/yQzYJOH/Azh29p9oJLsl3LnQwSvZDKagDGBsBwSooag==
   /sax/1.2.4:
     dev: true
     resolution:
@@ -6744,6 +6918,11 @@ packages:
       node: '>=6'
     resolution:
       integrity: sha512-mUdIBBvdn0PLOeP3TEkMH7HHeUP3GjsXCwKarjv/kGmUFOYg1VqEemKhoQpWMu6X2I8kHeuVdGibLGkVK+/5Qw==
+  /semver/4.3.2:
+    dev: true
+    hasBin: true
+    resolution:
+      integrity: sha1-x6BxWKgL7dBSNVt3DYLWZA+AO+c=
   /semver/5.7.1:
     dev: true
     hasBin: true
@@ -6956,6 +7135,13 @@ packages:
     dev: true
     resolution:
       integrity: sha512-9NykojV5Uih4lgo5So5dtw+f0JgJX30KCNI8gwhz2J9A15wD0Ml6tjHKwf6fTSa6fAdVBdZeNOs9eJ71qCk8vA==
+  /sparse-bitfield/3.0.3:
+    dependencies:
+      memory-pager: 1.5.0
+    dev: true
+    optional: true
+    resolution:
+      integrity: sha1-/0rm5oZWBWuks+eSqzM004JzyhE=
   /spawn-error-forwarder/1.0.0:
     dev: true
     resolution:
@@ -7026,6 +7212,12 @@ packages:
       node: '>=8'
     resolution:
       integrity: sha512-AJdEwrVCkENICfayfMoMSP2Nn64SnL09hU3gtEeGQArMdpW33XEToEFnDv2XRvhxedJXyU1YtKTroKpgNyOkOA==
+  /sqlstring/2.3.1:
+    dev: true
+    engines:
+      node: '>= 0.6'
+    resolution:
+      integrity: sha1-R1OT/56RR5rqYtyvDKPRSYOn+0A=
   /sshpk/1.16.1:
     dependencies:
       asn1: 0.2.4

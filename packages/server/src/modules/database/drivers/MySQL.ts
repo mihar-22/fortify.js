@@ -4,11 +4,11 @@ import { AbstractSQLDriver } from './AbstractSQLDriver';
 export class MySQL extends AbstractSQLDriver<DatabaseConfig[DatabaseDriver.MySQL]> {
   public driver = DatabaseDriver.MySQL;
 
-  public async performConnect() {
+  public async driverConnect() {
     // ...
   }
 
-  public async performDisconnect() {
+  public async driverDisconnect() {
     // ...
   }
 
@@ -17,6 +17,6 @@ export class MySQL extends AbstractSQLDriver<DatabaseConfig[DatabaseDriver.MySQL
   }
 
   public async runTransaction(cb: () => Promise<void>) {
-    // ...
+    await cb();
   }
 }

@@ -1,7 +1,10 @@
 import { Database } from './Database';
 import { NamingStrategy } from './NamingStrategy';
+import { DatabaseDriver } from './DatabaseConfig';
 
 export class FakeDatabase implements Database {
+  public driver = DatabaseDriver.Memory;
+
   public namingStrategy: NamingStrategy;
 
   constructor(namingStrategy: NamingStrategy) {

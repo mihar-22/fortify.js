@@ -16,9 +16,9 @@ export interface DatabaseConfig {
   driver?: DatabaseDriver
   namingStrategy?: NamingStrategy
   [DatabaseDriver.Memory]?: void
-  [DatabaseDriver.MariaDB]?: MySQLConfig
-  [DatabaseDriver.MySQL]?: MySQLConfig
-  [DatabaseDriver.Postgres]?: PostgresConfig
-  [DatabaseDriver.MongoDB]?: { uri: string } & MongoDBConfig
-  [DatabaseDriver.SQLite]?: { file?: string | ':memory:' }
+  [DatabaseDriver.MariaDB]?: string | MySQLConfig
+  [DatabaseDriver.MySQL]?: string | MySQLConfig
+  [DatabaseDriver.Postgres]?: string | PostgresConfig
+  [DatabaseDriver.MongoDB]?: string | ({ uri: string } & MongoDBConfig)
+  [DatabaseDriver.SQLite]?: string | ':memory:'
 }

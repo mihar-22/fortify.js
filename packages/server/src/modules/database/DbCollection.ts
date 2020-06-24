@@ -1,3 +1,4 @@
 export enum DbCollection {
-  Users = 'users'
+  Users = 'users',
+  UsersProfile = 'usersProfile'
 }

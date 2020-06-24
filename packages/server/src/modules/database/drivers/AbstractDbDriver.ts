@@ -1,4 +1,7 @@
-import { Database } from '../Database';
+import {
+  CreateData,
+  Database, Filter, Select, UpdateData,
+} from '../Database';
 import { NamingStrategy } from '../NamingStrategy';
 import { DbCollection } from '../DbCollection';
 import { Dispatcher } from '../../events/Dispatcher';
@@ -30,7 +33,7 @@ export abstract class AbstractDbDriver<ConfigType> implements Database<ConfigTyp
         undefined,
       ));
 
-      await this.performConnect();
+      await this.driverConnect();
 
       this.events.dispatch(new Event(
         DatabaseEvent.Connected,
@@ -64,7 +67,7 @@ export abstract class AbstractDbDriver<ConfigType> implements Database<ConfigTyp
       undefined,
     ));
 
-    await this.performDisconnect();
+    await this.driverDisconnect();
 
     this.events.dispatch(new Event(
       DatabaseEvent.Disconnected,
@@ -75,66 +78,90 @@ export abstract class AbstractDbDriver<ConfigType> implements Database<ConfigTyp
 
   private toNamingStrategy = (obj: any) => {
     if (this.namingStrategy !== NamingStrategy.SnakeCase) { return obj; }
+
     const clone: any = {};
+
     Object.keys(obj).forEach((key) => {
       clone[camelToSnakeCase(key)] = obj[key];
     });
+
     return clone;
   };
 
   private fromNamingStrategy = (obj: any) => {
     if (this.namingStrategy !== NamingStrategy.SnakeCase) { return obj; }
+
     const clone: any = {};
+
     Object.keys(obj).forEach((key) => {
       clone[snakeToCamelCase(key)] = obj[key];
     });
+
     return clone;
   };
 
-  public async create(collection: DbCollection, data: object) {
+  public async create<T>(collection: DbCollection, data: CreateData<T>) {
     const nData = this.toNamingStrategy(data);
-    const id = await this.performCreate(collection, nData);
+    const nCollection = this.toNamingStrategy(collection);
+
+    const id = await this.driverCreate(nCollection, nData);
+
     this.events.dispatch(new Event(
-      DatabaseEvent.Created,
-      `💾 Created new entry in \`${collection}\` collection.`,
-      { id, collection, data: nData },
+      DatabaseEvent.Create,
+      `💾 Created new entry in \`${nCollection}\` collection.`,
+      { id, collection: nCollection, data: nData },
     ));
+
     return id;
   }
 
-  public async read<T>(collection: DbCollection, filter: object, select?: object) {
+  public async read<T>(collection: DbCollection, filter: Filter<T>, select?: Select<T>) {
     const nFilter = this.toNamingStrategy(filter);
+    const nCollection = this.toNamingStrategy(collection);
     const nSelect = select ? this.toNamingStrategy(select) : undefined;
-    const data = await this.performRead<T>(collection, nFilter, nSelect);
+
+    const data = await this.driverRead(nCollection, nFilter, nSelect);
+
     this.events.dispatch(new Event(
       DatabaseEvent.Read,
-      `💾 Performed read on \`${collection}\` collection.`,
+      `💾 Performed read on \`${nCollection}\` collection.`,
       {
-        collection, filter: nFilter, select: nSelect, data,
+        collection: nCollection, filter: nFilter, select: nSelect, data,
       },
     ));
+
     return this.fromNamingStrategy(data);
   }
 
-  public async update(collection: DbCollection, filter: object, data: object) {
+  public async update<T>(collection: DbCollection, filter: Filter<T>, data: UpdateData<T>) {
     const nFilter = this.toNamingStrategy(filter);
     const nData = this.toNamingStrategy(data);
-    await this.performUpdate(collection, nFilter, nData);
+    const nCollection = this.toNamingStrategy(collection);
+
+    const affectedItems = await this.driverUpdate(nCollection, nFilter, nData);
+
     this.events.dispatch(new Event(
-      DatabaseEvent.Updated,
-      `💾 Updated data in \`${collection}\` collection.`,
-      { collection, filter: nFilter, data: nData },
+      DatabaseEvent.Update,
+      `💾 Updated ${affectedItems} items in \`${nCollection}\` collection.`,
+      { collection: nCollection, filter: nFilter, data: nData },
     ));
+
+    return affectedItems;
   }
 
-  public async delete(collection: DbCollection, filter: object) {
+  public async delete<T>(collection: DbCollection, filter: Filter<T>) {
     const nFilter = this.toNamingStrategy(filter);
-    await this.performDelete(collection, nFilter);
+    const nCollection = this.toNamingStrategy(collection);
+
+    const affectedItems = await this.driverDelete(nCollection, nFilter);
+
     this.events.dispatch(new Event(
-      DatabaseEvent.Deleted,
-      `💾 Deleted data in \`${collection}\` collection.`,
-      { collection, filter: nFilter },
+      DatabaseEvent.Delete,
+      `💾 Deleted ${affectedItems} items in \`${nCollection}\` collection.`,
+      { collection: nCollection, filter: nFilter },
     ));
+
+    return affectedItems;
   }
 
   public setConfig(config: ConfigType) {
@@ -145,29 +172,22 @@ export abstract class AbstractDbDriver<ConfigType> implements Database<ConfigTyp
 
   abstract async runTransaction(cb: () => Promise<void>): Promise<void>;
 
-  abstract async performConnect(): Promise<void>;
+  abstract async driverConnect(): Promise<void>;
 
-  abstract async performDisconnect(): Promise<void>;
+  abstract async driverDisconnect(): Promise<void>;
 
-  abstract async performCreate(
+  abstract async driverCreate(collection: DbCollection, data: any): Promise<number>;
+
+  abstract async driverRead(
     collection: DbCollection,
-    data: object
-  ): Promise<string | number>;
+    filter: Filter,
+    select?: Select
+  ): Promise<any[]>;
 
-  abstract async performRead<T>(
-    collection: DbCollection,
-    filter: object,
-    select?: object
-  ): Promise<T | undefined>;
+  abstract async driverUpdate(collection: DbCollection,
+    filter: Filter,
+    data: UpdateData
+  ): Promise<number>;
 
-  abstract async performUpdate(
-    collection: DbCollection,
-    filter: object,
-    data: object
-  ): Promise<void>;
-
-  abstract async performDelete(
-    collection: DbCollection,
-    filter: object
-  ): Promise<void>;
+  abstract async driverDelete(collection: DbCollection, filter: Filter): Promise<number>;
 }

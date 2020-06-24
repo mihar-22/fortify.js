@@ -12,6 +12,8 @@
 
 // Build Migrator.
 
+// need to figure out if some tables are needed. Checkboxes for tables?
+
 // Pull in migrations from '../../dist/src/modules/database/migrations'
 
 // Return it to call up or down.
