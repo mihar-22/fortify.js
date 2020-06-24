@@ -60,8 +60,9 @@ export function bootstrap(
     const pkg: Pkg = existsSync(pkgPath) ? JSON.parse(readFileSync(pkgPath).toString('utf-8')) : {};
     const isHomePkg = pkg.name?.includes('fortify.js');
     if (!isHomePkg) {
+      const missingDeps: string[] = [];
+
       mods.forEach((mod) => {
-        const missingDeps: string[] = [];
         const dependencies = mod.dependencies?.();
 
         if (dependencies) {
@@ -69,15 +70,10 @@ export function bootstrap(
             const hasDep = Object.prototype.hasOwnProperty.call(pkg.dependencies ?? {}, dependency);
             if (!hasDep) { missingDeps.push(dependency); }
           });
-
-          if (missingDeps.length > 0) {
-            throw new DependenciesMissingError(
-              missingDeps,
-              (mod.constructor as ModuleProviderConstructor).id,
-            );
-          }
         }
       });
+
+      if (missingDeps.length > 0) { throw new DependenciesMissingError(missingDeps); }
     }
   }
 
@@ -96,7 +92,8 @@ export function bootstrap(
     .forEach((mod) => { mod.registerTestingEnv?.(); });
 
   // 7. Boot all modules.
-  mods.map((mod) => mod.boot?.());
+  mods.forEach((mod) => mod.boot?.());
 
+  cachedApp = app;
   return app;
 }

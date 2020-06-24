@@ -73,9 +73,13 @@ importers:
       '@firebase/auth-types': 0.10.1
       '@types/cookie': 0.4.0
       '@types/cors': 2.8.6
+      '@types/mongodb': 3.5.24
       '@types/mustache': 4.0.1
+      '@types/mysql': 2.15.14
       '@types/nodemailer': 6.4.0
+      '@types/pg': 7.14.3
       '@types/pino': 6.3.0
+      '@types/sqlite3': 3.1.6
       '@types/supertest': 2.0.9
       '@types/trouter': 3.1.0
       dotenv: 8.2.0
@@ -83,6 +87,7 @@ importers:
       nodemailer: 6.4.10
       pino: 6.3.2
       sqlite3: 4.2.0
+      sqliterally: 1.0.3
       supertest: 4.0.2
       typescript: 3.9.5
       winston: 3.3.0
@@ -91,9 +96,13 @@ importers:
       '@firebase/auth-types': ^0.10.1
       '@types/cookie': ^0.4.0
       '@types/cors': ^2.8.6
+      '@types/mongodb': ^3.5.24
       '@types/mustache': ^4.0.1
+      '@types/mysql': ^2.15.14
       '@types/nodemailer': ^6.4.0
+      '@types/pg': ^7.14.3
       '@types/pino': ^6.0.1
+      '@types/sqlite3': ^3.1.6
       '@types/supertest': ^2.0.9
       '@types/trouter': ^3.1.0
       content-type: ^1.0.4
@@ -113,6 +122,7 @@ importers:
       rate-limiter-flexible: ^2.1.7
       raw-body: ^2.4.1
       sqlite3: ^4.2.0
+      sqliterally: ^1.0.3
       supertest: ^4.0.2
       trouter: ^3.1.0
       tsyringe: ^4.3.0
@@ -1103,6 +1113,12 @@ packages:
     dev: true
     resolution:
       integrity: sha512-W98JrE0j2K78swW4ukqMleo8R7h/pFETjM2DQ90MF6XK2i4LO4W3gQ71Lt4w3bfm2EvVSyWHplECvB5sK22yFQ==
+  /@types/bson/4.0.2:
+    dependencies:
+      '@types/node': 14.0.13
+    dev: true
+    resolution:
+      integrity: sha512-+uWmsejEHfmSjyyM/LkrP0orfE2m5Mx9Xel4tXNeqi1ldK5XMQcDsFkBmLDtuyKUbxj2jGDo0H240fbCRJZo7Q==
   /@types/color-name/1.1.1:
     dev: true
     resolution:
@@ -1202,10 +1218,23 @@ packages:
     dev: true
     resolution:
       integrity: sha1-aaI6OtKcrwCX8G7aWbNh7i8GOfY=
+  /@types/mongodb/3.5.24:
+    dependencies:
+      '@types/bson': 4.0.2
+      '@types/node': 14.0.13
+    dev: true
+    resolution:
+      integrity: sha512-8Pz4OLnqZCJf0Ut+JRFCrOUPerSpGRY1yPF8E3Vz8xltz/NcoddMd9NnpNtDiMzJOS2ctoNPcgbz05j4OqCRbg==
   /@types/mustache/4.0.1:
     dev: true
     resolution:
       integrity: sha512-wH6Tu9mbiOt0n5EvdoWy0VGQaJMHfLIxY/6wS0xLC7CV1taM6gESEzcYy0ZlWvxxiiljYvfDIvz4hHbUUDRlhw==
+  /@types/mysql/2.15.14:
+    dependencies:
+      '@types/node': 14.0.13
+    dev: true
+    resolution:
+      integrity: sha512-YyNcxZZ4qlb9v41lu8Qfo+quX8eUqz4mr/6Nx7sclc2pUemOvjU7xrpuVave0/sR/VdtDPTXZOWQLC/kthxrHg==
   /@types/node/14.0.13:
     dev: true
     resolution:
@@ -1224,6 +1253,17 @@ packages:
     dev: true
     resolution:
       integrity: sha512-//oorEZjL6sbPcKUaCdIGlIUeH26mgzimjBB77G6XRgnDl/L5wOnpyBGRe/Mmf5CVW3PwEBE1NjiMZ/ssFh4wA==
+  /@types/pg-types/1.11.5:
+    dev: true
+    resolution:
+      integrity: sha512-L8ogeT6vDzT1vxlW3KITTCt+BVXXVkLXfZ/XNm6UqbcJgxf+KPO7yjWx7dQQE8RW07KopL10x2gNMs41+IkMGQ==
+  /@types/pg/7.14.3:
+    dependencies:
+      '@types/node': 14.0.13
+      '@types/pg-types': 1.11.5
+    dev: true
+    resolution:
+      integrity: sha512-go5zddQ1FrUQHeBvqPzQ1svKo4KKucSwvqLsvwc/EIuQ9sxDA21b68xc/RwhzAK5pPCnez8NrkYatFIGdJBVvA==
   /@types/pino-std-serializers/2.4.1:
     dependencies:
       '@types/node': 14.0.13
@@ -1273,6 +1313,12 @@ packages:
     dev: true
     resolution:
       integrity: sha512-AfqR0fZMoUXUNwusgXKxcE9DPlHNDHQp6nKYUd4PSRpLobF5CCevSpyTEBcVZreqaWKCnGBr9KI1fHMTttoB7A==
+  /@types/sqlite3/3.1.6:
+    dependencies:
+      '@types/node': 14.0.13
+    dev: true
+    resolution:
+      integrity: sha512-OBsK0KIGUICExQ/ZvnPY4cKx5Kz4NcrVyGTIvOL5y4ajXu7r++RfBajfpGfGDmDVCKcoCDX1dO84/oeyeITnxA==
   /@types/stack-utils/1.0.1:
     dev: true
     resolution:
@@ -6974,6 +7020,12 @@ packages:
     requiresBuild: true
     resolution:
       integrity: sha512-roEOz41hxui2Q7uYnWsjMOTry6TcNUNmp8audCx18gF10P2NknwdpF+E+HKvz/F2NvPKGGBF4NGc+ZPQ+AABwg==
+  /sqliterally/1.0.3:
+    dev: true
+    engines:
+      node: '>=8'
+    resolution:
+      integrity: sha512-AJdEwrVCkENICfayfMoMSP2Nn64SnL09hU3gtEeGQArMdpW33XEToEFnDv2XRvhxedJXyU1YtKTroKpgNyOkOA==
   /sshpk/1.16.1:
     dependencies:
       asn1: 0.2.4

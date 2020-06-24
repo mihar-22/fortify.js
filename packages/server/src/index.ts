@@ -1,46 +1,38 @@
 import '@abraham/reflection';
-import { Config, Env } from './Config';
 import { bootstrap } from './bootstrap';
-import { coreModules } from './modules';
-import { ModuleProviderConstructor } from './support/ModuleProvider';
 import { DIToken } from './DIToken';
 import { Endpoint } from './modules/http/api/Endpoint';
-import { RequestHandler } from './modules/http/request/RequestHandler';
 import { MailEvent } from './modules/mail/MailEvent';
+import { DatabaseEvent } from './modules/database/DatabaseEvent';
 import { EncryptionEvent } from './modules/encryption/EncryptionEvent';
 import { HttpEvent } from './modules/http/HttpEvent';
+import { RequestHandler } from './modules/http/request/RequestHandler';
+import { coreModules } from './modules';
+import { Config } from './Config';
 
 export * from './Config';
-export * from './DIToken';
 
 export {
   MailEvent,
   HttpEvent,
   EncryptionEvent,
+  DatabaseEvent,
 };
 
 export type FortifyServer = { any: RequestHandler } & Record<Endpoint, RequestHandler>;
 
-export function buildFortifyServer(
-  config?: Config,
-  modules?: ModuleProviderConstructor[],
-): FortifyServer {
-  try {
-    const app = bootstrap([...coreModules, ...(modules ?? [])], config);
+export function buildFortifyServer(config?: Config): FortifyServer {
+  const app = bootstrap(coreModules, config);
 
-    const output: any = {
-      any: app.get(DIToken.HttpRequestHandler('*')),
-    };
+  const server: any = {
+    any: app.get(DIToken.HttpRequestHandler('*')),
+  };
 
-    Object.values(Endpoint).forEach((endpoint) => {
-      output[endpoint] = app.get(DIToken.HttpRequestHandler(endpoint));
-    });
+  Object.values(Endpoint).forEach((endpoint) => {
+    server[endpoint] = app.get(DIToken.HttpRequestHandler(endpoint));
+  });
 
-    // @TODO: export middleware.
+  // @TODO: export middleware.
 
-    return output as FortifyServer;
-  } catch (e) {
-    if (config?.env !== Env.Production) { throw e; }
-    return {} as FortifyServer;
-  }
+  return server as FortifyServer;
 }

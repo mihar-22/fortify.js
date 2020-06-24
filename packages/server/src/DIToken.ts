@@ -25,4 +25,7 @@ export const DIToken = Object.freeze({
   FakeHttpClient: fakeToken(clientToken('http')),
   SmtpClientFactory: factoryToken(clientToken('smtp')),
   FakeSmtpClient: fakeToken(clientToken('smtp')),
+  Database: Module.Database,
+  FakeDatabase: fakeToken(Module.Database),
+  DatabaseDriverFactory: factoryToken('databaseDriver'),
 });
