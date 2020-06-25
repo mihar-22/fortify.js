@@ -8,8 +8,6 @@
     "esModuleInterop": true,
     "moduleResolution": "node",
     "isolatedModules": true,
-    "outDir": "dist",
-    "declarationDir": "dist/types",
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "allowSyntheticDefaultImports": true,
@@ -20,6 +18,7 @@
     ]
   },
   "include": [
-    "packages/*/src"
+    "packages/*/src",
+    "packages/*/scripts"
   ]
 }

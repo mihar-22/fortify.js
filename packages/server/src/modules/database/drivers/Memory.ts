@@ -10,19 +10,6 @@ export class Memory extends AbstractDbDriver<void> {
 
   private db: Record<string | number, any> = {};
 
-  public async driverConnect() {
-    // no-op
-  }
-
-  public async driverDisconnect() {
-    // no-op
-  }
-
-  // For testing.
-  public getDb() {
-    return this.db;
-  }
-
   public async driverCreate(collection: DbCollection, data: CreateData) {
     if (!this.db[collection]) { this.db[collection] = {}; }
     const id = (Object.keys(this.db[collection]).length + 1);
@@ -34,7 +21,6 @@ export class Memory extends AbstractDbDriver<void> {
     if (!this.db[collection]) { this.db[collection] = {}; }
 
     const result: any[] = [];
-
     const c = this.db[collection];
 
     Object
@@ -56,13 +42,8 @@ export class Memory extends AbstractDbDriver<void> {
 
   public async driverUpdate(collection: DbCollection, filter: Filter, data: UpdateData) {
     if (!this.db[collection]) { this.db[collection] = {}; }
-
     const records = await this.driverRead(collection, filter);
-
-    records.forEach((record) => {
-      this.db[collection][record.id] = { ...record, ...data };
-    });
-
+    records.forEach((record) => { this.db[collection][record.id] = { ...record, ...data }; });
     return records.length;
   }
 
@@ -72,7 +53,8 @@ export class Memory extends AbstractDbDriver<void> {
     return records.length;
   }
 
-  public async runTransaction(cb: () => Promise<void>) {
-    await cb();
+  // For testing.
+  public getDb() {
+    return this.db;
   }
 }

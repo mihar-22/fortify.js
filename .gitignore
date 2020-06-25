@@ -11,6 +11,7 @@ yarn.lock
 .vscode
 .vs
 *.log
+databases
 *.cache
 .env
 lerna-debug.log

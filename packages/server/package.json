@@ -17,9 +17,7 @@
     "yarn": ">= 1 < 2"
   },
   "bin": {
-    "generate:key": "./scripts/generateKey.js",
-    "migration:up": "./scripts/migration/up.js",
-    "migration:down": "./scripts/migration/down.js"
+    "fortify-server": "./dist/scripts/cli.js"
   },
   "files": [
     "dist",

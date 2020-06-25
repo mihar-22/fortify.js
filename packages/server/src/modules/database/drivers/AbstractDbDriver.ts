@@ -7,9 +7,6 @@ import { DbCollection } from '../DbCollection';
 import { Dispatcher } from '../../events/Dispatcher';
 import { Event } from '../../events/Event';
 import { DatabaseEvent, DatabaseEventDispatcher } from '../DatabaseEvent';
-import { RuntimeError } from '../../../support/errors';
-import { DatabaseError } from '../DatabaseError';
-import { Module } from '../../Module';
 import { camelToSnakeCase, snakeToCamelCase } from '../../../utils/string';
 import { DatabaseDriver } from '../DatabaseConfig';
 
@@ -25,80 +22,10 @@ export abstract class AbstractDbDriver<ConfigType> implements Database<ConfigTyp
     this.namingStrategy = namingStrategy;
   }
 
-  public async connect() {
-    try {
-      this.events.dispatch(new Event(
-        DatabaseEvent.Connecting,
-        '🔌 Connecting...',
-        undefined,
-      ));
-
-      await this.driverConnect();
-
-      this.events.dispatch(new Event(
-        DatabaseEvent.Connected,
-        '🔗 Connected!',
-        undefined,
-      ));
-    } catch (e) {
-      this.events.dispatch(new Event(
-        DatabaseEvent.ConnectionFailed,
-        '❌ Failed to connect!',
-        e,
-      ));
-
-      throw new RuntimeError(
-        DatabaseError.ConnectionFailed,
-        `Failed to connect to the database: ${e.message}`,
-        Module.Database,
-        e,
-        [
-          'Bad connection configuration.',
-          'Database doesn\'t exist.',
-        ],
-      );
-    }
+  public async quit() {
+    if (!this.driverQuit) { return; }
+    await this.driverQuit();
   }
-
-  public async disconnect() {
-    this.events.dispatch(new Event(
-      DatabaseEvent.Disconnecting,
-      '🔗 Disconnecting...',
-      undefined,
-    ));
-
-    await this.driverDisconnect();
-
-    this.events.dispatch(new Event(
-      DatabaseEvent.Disconnected,
-      '🔌 Disconnected!',
-      undefined,
-    ));
-  }
-
-  private toNamingStrategy = (obj: any) => {
-    if (this.namingStrategy !== NamingStrategy.SnakeCase) { return obj; }
-
-    const clone: any = {};
-
-    Object.keys(obj).forEach((key) => {
-      clone[camelToSnakeCase(key)] = obj[key];
-    });
-
-    return clone;
-  };
-
-  private fromNamingStrategy = (obj: any) => {
-    if (this.namingStrategy !== NamingStrategy.SnakeCase) { return obj; }
-
-    const clone: any = {};
-
-    Object.keys(obj).forEach((key) => {
-      clone[snakeToCamelCase(key)] = obj[key];
-    });
-
-    return clone;
-  };
 
   public async create<T>(collection: DbCollection, data: CreateData<T>) {
     const nData = this.toNamingStrategy(data);
@@ -107,7 +34,7 @@ export abstract class AbstractDbDriver<ConfigType> implements Database<ConfigTyp
     const id = await this.driverCreate(nCollection, nData);
 
     this.events.dispatch(new Event(
-      DatabaseEvent.Create,
+      DatabaseEvent.Created,
       `💾 Created new entry in \`${nCollection}\` collection.`,
       { id, collection: nCollection, data: nData },
     ));
@@ -141,7 +68,7 @@ export abstract class AbstractDbDriver<ConfigType> implements Database<ConfigTyp
     const affectedItems = await this.driverUpdate(nCollection, nFilter, nData);
 
     this.events.dispatch(new Event(
-      DatabaseEvent.Update,
+      DatabaseEvent.Updated,
       `💾 Updated ${affectedItems} items in \`${nCollection}\` collection.`,
       { collection: nCollection, filter: nFilter, data: nData },
     ));
@@ -156,7 +83,7 @@ export abstract class AbstractDbDriver<ConfigType> implements Database<ConfigTyp
     const affectedItems = await this.driverDelete(nCollection, nFilter);
 
     this.events.dispatch(new Event(
-      DatabaseEvent.Delete,
+      DatabaseEvent.Deleted,
       `💾 Deleted ${affectedItems} items in \`${nCollection}\` collection.`,
       { collection: nCollection, filter: nFilter },
     ));
@@ -168,13 +95,23 @@ export abstract class AbstractDbDriver<ConfigType> implements Database<ConfigTyp
     this.config = config;
   }
 
+  private toNamingStrategy = (obj: any) => {
+    if (this.namingStrategy !== NamingStrategy.SnakeCase) { return obj; }
+    const snakedCasedClone: any = {};
+    Object.keys(obj).forEach((key) => { snakedCasedClone[camelToSnakeCase(key)] = obj[key]; });
+    return snakedCasedClone;
+  };
+
+  private fromNamingStrategy = (obj: any) => {
+    if (this.namingStrategy !== NamingStrategy.SnakeCase) { return obj; }
+    const camelCasedClone: any = {};
+    Object.keys(obj).forEach((key) => { camelCasedClone[snakeToCamelCase(key)] = obj[key]; });
+    return camelCasedClone;
+  };
+
   abstract driver: DatabaseDriver;
 
-  abstract async runTransaction(cb: () => Promise<void>): Promise<void>;
-
-  abstract async driverConnect(): Promise<void>;
-
-  abstract async driverDisconnect(): Promise<void>;
+  protected async driverQuit?(): Promise<void>;
 
   abstract async driverCreate(collection: DbCollection, data: any): Promise<number>;
 

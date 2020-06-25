@@ -2,24 +2,15 @@ import { DbCollection } from './DbCollection';
 import { Dispatcher } from '../events/Dispatcher';
 
 export enum DatabaseEvent {
-  Connecting = 'DB_CONNECTING',
-  Connected = 'DB_CONNECTED',
-  ConnectionFailed = 'DB_CONNECTION_FAILED',
-  Create = 'DB_CREATE',
+  Created = 'DB_CREATED',
   Read = 'DB_READ',
-  Update = 'DB_UPDATE',
-  Delete = 'DB_DELETE',
-  Disconnecting = 'DB_DISCONNECTING',
-  Disconnected = 'DB_DISCONNECTED'
+  Updated = 'DB_UPDATED',
+  Deleted = 'DB_DELETED',
+  Executing = 'DB_EXEC'
 }
 
 export interface DatabaseEventPayload {
-  [DatabaseEvent.Connecting]: void
-  [DatabaseEvent.Connected]: void
-  [DatabaseEvent.ConnectionFailed]: Error
-  [DatabaseEvent.Disconnecting]: void
-  [DatabaseEvent.Disconnected]: void
-  [DatabaseEvent.Create]: {
+  [DatabaseEvent.Created]: {
     id: string | number,
     collection: DbCollection,
     data: object
@@ -30,15 +21,16 @@ export interface DatabaseEventPayload {
     select?: object,
     data?: any
   }
-  [DatabaseEvent.Update]: {
+  [DatabaseEvent.Updated]: {
     collection: DbCollection,
     filter: object,
     data: object
   }
-  [DatabaseEvent.Delete]: {
+  [DatabaseEvent.Deleted]: {
     collection: DbCollection,
     filter: object
   }
+  [DatabaseEvent.Executing]: { sql: string, values: string[] }
 }
 
 export type DatabaseEventDispatcher = Dispatcher<DatabaseEventPayload>;

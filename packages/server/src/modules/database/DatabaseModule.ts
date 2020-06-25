@@ -30,6 +30,8 @@ export class DatabaseModule implements ModuleProvider<DatabaseConfig> {
     this.config = config;
   }
 
+  // @TODO: Validate config for each db.
+
   public dependencies() {
     const driver = this.config.driver!;
 
@@ -38,7 +40,7 @@ export class DatabaseModule implements ModuleProvider<DatabaseConfig> {
         return [];
       case DatabaseDriver.MySQL:
       case DatabaseDriver.MariaDB:
-        return ['mysql', 'sqliterally'];
+        return ['serverless-mysql', 'sqliterally'];
       case DatabaseDriver.MongoDB:
         return ['mongodb'];
       case DatabaseDriver.Postgres:

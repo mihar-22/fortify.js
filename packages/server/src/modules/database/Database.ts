@@ -11,13 +11,11 @@ export type Select<T = any, R extends keyof T = keyof T> = R[];
 export interface Database<ConfigType = any> {
   driver: Driver;
   namingStrategy: NamingStrategy
-  connect(): Promise<void>
-  disconnect(): Promise<void>
+  quit(): Promise<void>
   create<T>(collection: DbCollection, data: CreateData<T>): Promise<number>
   read<T>(collection: DbCollection, filter: Filter<T>, select?: Select<T>): Promise<T[]>
   update<T>(collection: DbCollection, filter: Filter<T>, data: UpdateData<T>): Promise<number>
   delete<T>(collection: DbCollection, filter: Filter<T>): Promise<number>
-  runTransaction(cb: () => Promise<void>): Promise<void>
   setConfig(config: ConfigType): void
 }
 

@@ -143,6 +143,11 @@ export const buildRequestHandler = (
       if (!app.isProductionEnv) {
         throw e;
       } else {
+        res.statusCode = 500;
+        sendJsonResponse(res, {
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Something has gone terribly wrong on our end.',
+        });
         res.end();
       }
     }

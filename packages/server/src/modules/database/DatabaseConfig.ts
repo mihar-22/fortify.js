@@ -19,6 +19,6 @@ export interface DatabaseConfig {
   [DatabaseDriver.MariaDB]?: string | MySQLConfig
   [DatabaseDriver.MySQL]?: string | MySQLConfig
   [DatabaseDriver.Postgres]?: string | PostgresConfig
-  [DatabaseDriver.MongoDB]?: string | ({ uri: string } & MongoDBConfig)
+  [DatabaseDriver.MongoDB]?: ({ uri: string, database: string } & MongoDBConfig)
   [DatabaseDriver.SQLite]?: string | ':memory:'
 }

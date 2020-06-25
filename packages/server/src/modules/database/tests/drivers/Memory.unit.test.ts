@@ -79,9 +79,35 @@ describe('Database', () => {
         }]);
       });
 
-      // update
+      test('should update item', async () => {
+        const affectedItems = await db
+          .update<TestUser>(DbCollection.Users, { id: 2 }, { lastName: 'New' });
+        expect(affectedItems).toBe(1);
+        expect(db.getDb()[DbCollection.Users][2].lastName).toBe('New');
+      });
 
-      // delete
+      test('should update multiple items', async () => {
+        const affectedItems = await db
+          .update<TestUser>(DbCollection.Users, { lastName: 'Doe' }, { firstName: 'New' });
+        expect(affectedItems).toBe(2);
+        expect(db.getDb()[DbCollection.Users][1].firstName).toBe('New');
+        expect(db.getDb()[DbCollection.Users][2].firstName).toBe('New');
+      });
+
+      test('should delete item', async () => {
+        const affectedItems = await db
+          .delete<TestUser>(DbCollection.Users, { id: 1 });
+        expect(affectedItems).toBe(1);
+        expect(db.getDb()[DbCollection.Users][1]).toBeUndefined();
+      });
+
+      test('should delete multiple items', async () => {
+        const affectedItems = await db
+          .delete<TestUser>(DbCollection.Users, { lastName: 'Doe' });
+        expect(affectedItems).toBe(2);
+        expect(db.getDb()[DbCollection.Users][1]).toBeUndefined();
+        expect(db.getDb()[DbCollection.Users][2]).toBeUndefined();
+      });
     });
   });
 });

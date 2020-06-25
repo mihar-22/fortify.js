@@ -1,22 +1,45 @@
+import { Pool, QueryResult } from 'pg';
 import { DatabaseConfig, DatabaseDriver } from '../DatabaseConfig';
-import { AbstractSQLDriver } from './AbstractSQLDriver';
+import { AbstractSQLDriver, Query } from './AbstractSQLDriver';
 
-export class Postgres extends AbstractSQLDriver<DatabaseConfig[DatabaseDriver.Postgres]> {
+export class Postgres extends AbstractSQLDriver<
+DatabaseConfig[DatabaseDriver.Postgres],
+QueryResult
+> {
   public driver = DatabaseDriver.Postgres;
 
-  public async driverConnect() {
-    // ...
+  protected pool?: Pool;
+
+  protected getPool(): Pool {
+    if (!this.pool) {
+      const pg = require('pg');
+      this.pool = new pg.Pool();
+    }
+
+    return this.pool!;
   }
 
-  public async driverDisconnect() {
-    // ...
+  public async driverQuit() {
+    return this.pool?.end();
   }
 
-  public async runQuery<T>(query: string): Promise<T> {
-    // ...
+  public async runQuery(query: Query): Promise<QueryResult> {
+    return this.getPool().query(query.text, query.values);
   }
 
-  public async runTransaction(cb: () => Promise<void>) {
-    await cb();
+  protected transformCreateRes(res: QueryResult): number {
+    return res.rows[0].id;
+  }
+
+  protected transformDeleteRes(res: QueryResult): number {
+    return res.rowCount;
+  }
+
+  protected transformReadRes(res: QueryResult): any[] {
+    return res.rows;
+  }
+
+  protected transformUpdateRes(res: QueryResult): number {
+    return res.rowCount;
   }
 }
