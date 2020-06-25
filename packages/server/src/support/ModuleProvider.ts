@@ -18,6 +18,6 @@ export interface ModuleProvider<ConfigType> {
 
 export interface ModuleProviderConstructor<ConfigType = any> {
   id: Module
-  defaults?: (app: App) => ConfigType
+  defaults?(app: App): ConfigType
   new(app: App, config: ConfigType): ModuleProvider<ConfigType>
 }

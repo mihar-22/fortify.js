@@ -25,14 +25,11 @@ export interface MailgunResponse extends MailResponse {
 
 @injectable()
 export class Mailgun extends AbstractMailTransporter<MailgunConfig, MailgunResponse> {
-  protected readonly httpClient: HttpClient;
-
   constructor(
-  @inject(DIToken.HttpClient) httpClient: HttpClient,
+    @inject(DIToken.HttpClient) protected readonly httpClient: HttpClient,
     @inject(DIToken.EventDispatcher) events: Dispatcher,
   ) {
     super(events);
-    this.httpClient = httpClient;
   }
 
   private getBaseUrl(): string {

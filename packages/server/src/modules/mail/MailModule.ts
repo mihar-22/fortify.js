@@ -33,14 +33,10 @@ export class MailModule implements ModuleProvider<MailConfig> {
     };
   }
 
-  private readonly app: App;
-
-  private readonly config: MailConfig;
-
-  constructor(app: App, config: MailConfig) {
-    this.app = app;
-    this.config = config;
-  }
+  constructor(
+    private readonly app: App,
+    private readonly config: MailConfig,
+  ) {}
 
   public configValidation() {
     const transporter = this.config.transporter!;

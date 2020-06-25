@@ -18,14 +18,10 @@ export class EventsModule implements ModuleProvider<EventsConfig> {
     };
   }
 
-  private readonly app: App;
-
-  private readonly config: EventsConfig;
-
-  constructor(app: App, config: EventsConfig) {
-    this.app = app;
-    this.config = config;
-  }
+  constructor(
+    private readonly app: App,
+    private readonly config: EventsConfig,
+  ) {}
 
   public register() {
     this.app.bindBuilder<() => Dispatcher>(DIToken.EventDispatcher,

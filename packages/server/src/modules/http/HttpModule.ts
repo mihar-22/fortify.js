@@ -26,14 +26,10 @@ export class HttpModule implements ModuleProvider<HttpConfig> {
     };
   }
 
-  private readonly app: App;
-
-  private readonly config: HttpConfig;
-
-  constructor(app: App, config: HttpConfig) {
-    this.app = app;
-    this.config = config;
-  }
+  constructor(
+    private readonly app: App,
+    private readonly config: HttpConfig,
+  ) {}
 
   public register() {
     this.app.bindBuilder<() => HttpClient>(DIToken.HttpClient, buildHttpClient);

@@ -16,11 +16,9 @@ export enum BindingScope {
 export class App {
   private readonly env: Env;
 
-  private config?: Config;
-
   private container?: typeof container;
 
-  constructor(config: Config) {
+  constructor(private readonly config: Config) {
     this.config = config;
     this.env = config.env ?? Env.Development;
     this.container = container.createChildContainer();
@@ -28,7 +26,7 @@ export class App {
   }
 
   public clone(): App {
-    const clone = new App(this.config!);
+    const clone = new App(this.config);
     clone.container = this.container!.createChildContainer();
     return clone;
   }
@@ -59,7 +57,6 @@ export class App {
 
   public destroy(): void {
     this.container!.reset();
-    this.config = undefined;
     this.container = undefined;
   }
 
@@ -85,10 +82,10 @@ export class App {
   }
 
   public getConfig<T extends Module>(mod: T): Config[T] {
-    return this.config![mod];
+    return this.config[mod];
   }
 
   public setConfig<T extends Module>(mod: T, config: Config[T]): void {
-    this.config![mod] = config;
+    this.config[mod] = config;
   }
 }

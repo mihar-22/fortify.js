@@ -2,27 +2,14 @@ import { bold } from 'kleur';
 import { ServerError } from './ServerError';
 
 export class RuntimeError extends Error implements ServerError {
-  public code: string;
-
-  public module: string;
-
-  public reference?: Error;
-
-  public possibleReasons: string[];
-
   constructor(
-    code: string,
-    message: string,
-    module: string,
-    reference?: Error,
-    possibleReasons?: string[],
+    public code: string,
+    public message: string,
+    public module: string,
+    public reference?: Error,
+    public possibleReasons: string[] = [],
   ) {
     super(undefined);
-
-    this.code = code;
-    this.module = module;
-    this.reference = reference;
-    this.possibleReasons = possibleReasons ?? [];
 
     this.message = `${bold('Code:')} ${bold().red(code)}\n\n`
       + `${bold('Module:')} ${module.toUpperCase()}\n\n`

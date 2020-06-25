@@ -35,8 +35,15 @@ export abstract class AbstractSQLDriver<
   public async driverRead(table: DbCollection, filter: Filter, select?: Select) {
     let q = this.query.from`${table}`;
     Object.keys(filter).forEach((col) => { q = q.where`${col} = ${filter[col]}`; });
-    select?.forEach((col) => { q = q.select`${col as string}`; });
+
+    if (select) {
+      select.forEach((col) => { q = q.select`${col as string}`; });
+    } else {
+      q = q.select`*`;
+    }
+
     const readQuery = q.build();
+    console.log(readQuery.text);
     this.fireExecEvent(readQuery);
     const res = await this.runQuery(readQuery);
     return this.transformReadRes(res);

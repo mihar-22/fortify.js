@@ -24,14 +24,14 @@ export interface Log {
 
 export interface Logger {
   level: LogLevel
-  silent: (log?: Log) => void
-  fatal: (log: Log) => void
-  error: (log: Log) => void
-  warn: (log: Log) => void
-  info: (log: Log) => void
-  debug: (log: Log) => void
-  trace: (log: Log) => void
-  addDefaultTransporter?: () => void
+  silent(log?: Log): void
+  fatal(log: Log): void
+  error(log: Log): void
+  warn(log: Log): void
+  info(log: Log): void
+  debug(log: Log): void
+  trace(log: Log): void
+  addDefaultTransporter?(): void
 }
 
 export type LogDriverFactory = (driver: LogDriver) => Logger;
@@ -84,5 +84,5 @@ export const formatLog = (
   const dataF = (verbose && data && Object.keys(data).length > 0)
     ? `\n\n${JSON.stringify(data, null, 2)}\n\n`
     : '\n';
-  return `${timestampF}\t${LogLevelEmoji[level]}${labelF} \t${message.trim()}${dataF}`;
+  return `${timestampF}\t${LogLevelEmoji[level]}${labelF} ${message.trim()}${dataF}`;
 };

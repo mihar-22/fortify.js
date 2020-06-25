@@ -5,12 +5,12 @@ import { ServerError } from './ServerError';
 export class DependenciesMissingError extends Error implements ServerError {
   public code: string;
 
-  public dependencies: string[];
-
-  constructor(dependencies: string[], isDevDep = false) {
+  constructor(
+    public dependencies: string[] = [],
+    public isDevDep = false,
+  ) {
     super(undefined);
 
-    this.dependencies = dependencies;
     this.stack = undefined;
     this.code = 'MISSING_DEPENDENCIES';
     this.message = 'Required dependencies have not been installed.';

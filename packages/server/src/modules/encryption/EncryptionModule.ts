@@ -18,14 +18,10 @@ export class EncryptionModule implements ModuleProvider<EncryptionConfig> {
     };
   }
 
-  private readonly app: App;
-
-  private readonly config: EncryptionConfig;
-
-  constructor(app: App, config: EncryptionConfig) {
-    this.app = app;
-    this.config = config;
-  }
+  constructor(
+    private readonly app: App,
+    private readonly config: EncryptionConfig,
+  ) {}
 
   public configValidation() {
     const { key, cipher } = this.config;

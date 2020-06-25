@@ -13,9 +13,10 @@
     "build": "pnpm run clean:build && pnpm run build --recursive",
     "lint": "eslint --ext .js,.ts packages/*/src --ignore-path .gitignore --fix",
     "test": "jest packages/.+\\.unit --maxWorkers=1",
-    "test:integration": "jest packages/.+\\.int --maxWorkers=1",
-    "test:slow": "jest packages/.+\\.slow --maxWorkers=1",
     "test:watch": "pnpm run test -- --watch",
+    "test:integration": "jest packages/.+\\.int --maxWorkers=1",
+    "test:integration:watch": "jest packages/.+\\.int --maxWorkers=1 --watch",
+    "test:slow": "jest packages/.+\\.slow --maxWorkers=1",
     "test:coverage": "pnpm run test -- --coverage",
     "validate": "pnpm run lint && pnpm run test && pnpm run test:integration && pnpm run build",
     "release": "pnpm run validate && pnpm run release --recursive"

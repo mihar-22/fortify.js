@@ -11,6 +11,7 @@ import { buildRequestHandler } from '../../request/buildRequestHandler';
 import { FortifyRequest, FortifyResponse, HttpMethod } from '../../request/Request';
 import { HttpEvent } from '../../HttpEvent';
 import { FortifyRequestHandler } from '../../request/RequestHandler';
+import { HttpErr } from '../../HttpErr';
 
 describe('Http', () => {
   describe('buildRequestHandler', () => {
@@ -42,7 +43,7 @@ describe('Http', () => {
         .get('/')
         .expect(404)
         .then((res) => {
-          expect(res.body.code).toEqual('INVALID_ROUTE');
+          expect(res.body.code).toEqual(HttpErr.InvalidRoute);
         });
 
       expect(route.handler).not.toHaveBeenCalled();
@@ -195,7 +196,7 @@ describe('Http', () => {
         .get('/testPath')
         .expect(429)
         .then((res) => {
-          expect(res.body.code).toEqual('TOO_MANY_REQUESTS');
+          expect(res.body.code).toEqual(HttpErr.TooManyRequests);
         });
     });
 
@@ -247,7 +248,7 @@ describe('Http', () => {
         .send('x%239')
         .expect(400)
         .then((res) => {
-          expect(res.body.code).toEqual('INVALID_JSON');
+          expect(res.body.code).toEqual(HttpErr.InvalidRequestJson);
         });
     });
   });

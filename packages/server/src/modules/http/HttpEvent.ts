@@ -1,5 +1,5 @@
 import { Dispatcher } from '../events/Dispatcher';
-import { HttpError } from './HttpError';
+import { HttpErrorResponse } from './HttpErrorResponse';
 import { Cookies, Params, Query } from './request/RequestInfo';
 
 export enum HttpEvent {
@@ -20,7 +20,7 @@ export interface HttpEventPayload {
     body: any
   }
   [HttpEvent.Response]: void
-  [HttpEvent.Error]: HttpError
+  [HttpEvent.Error]: HttpErrorResponse
   [HttpEvent.HandlerFailed]: Error
 }
 

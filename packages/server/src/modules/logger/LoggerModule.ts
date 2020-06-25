@@ -22,14 +22,10 @@ export class LoggerModule implements ModuleProvider<LoggerConfig> {
     };
   }
 
-  private readonly app: App;
-
-  private readonly config: LoggerConfig;
-
-  constructor(app: App, config: LoggerConfig) {
-    this.app = app;
-    this.config = config;
-  }
+  constructor(
+    private readonly app: App,
+    private readonly config: LoggerConfig,
+  ) {}
 
   public configValidation() {
     const driver = this.config.driver!;

@@ -22,14 +22,11 @@ export interface SendGridResponse extends MailResponse {
 
 @injectable()
 export class SendGrid extends AbstractMailTransporter<SendGridConfig, SendGridResponse> {
-  protected readonly httpClient: HttpClient;
-
   constructor(
-  @inject(DIToken.HttpClient) httpClient: HttpClient,
+    @inject(DIToken.HttpClient) protected readonly httpClient: HttpClient,
     @inject(DIToken.EventDispatcher) events: Dispatcher,
   ) {
     super(events);
-    this.httpClient = httpClient;
   }
 
   public async sendMail(mail: Mail<any>, html?: string): Promise<SendGridResponse> {

@@ -8,6 +8,7 @@ import { isArray, isObject } from '../../../utils';
 import { Cookie } from '../cookies/Cookie';
 import { TrustedProxies } from '../HttpConfig';
 import { Cookies, Query } from './RequestInfo';
+import { HttpErr } from '../HttpErr';
 
 const { parse } = require('content-type');
 const proxyaddr = require('proxy-addr');
@@ -37,7 +38,7 @@ export const parseJsonBody = (str: string): object => {
     return JSON.parse(str);
   } catch (e) {
     throw new HttpError(
-      'INVALID_JSON',
+      HttpErr.InvalidRequestJson,
       'Request body contains invalid JSON.',
       Module.Http,
       400,
@@ -63,14 +64,14 @@ export const parseBody = async (
   } catch (e) {
     if (e.type === 'entity.too.large') {
       throw new HttpError(
-        'BODY_TOO_LARGE',
+        HttpErr.RequestBodyTooLarge,
         `Request body exceeded limit [${limit}]`,
         Module.Http,
         413,
       );
     } else {
       throw new HttpError(
-        'INVALID_BODY',
+        HttpErr.InvalidRequestBody,
         'Request body is invalid/malformed.',
         Module.Http,
         400,

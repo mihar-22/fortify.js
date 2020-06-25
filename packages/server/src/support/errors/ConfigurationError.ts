@@ -2,21 +2,15 @@ import { bold, yellow } from 'kleur';
 import { ServerError } from './ServerError';
 
 export class ConfigurationError extends Error implements ServerError {
-  public code: string;
-
-  public module: string;
-
-  public configPath: string;
-
-  public link?: string;
-
-  constructor(code: string, message: string, configPath: string, module: string, link?: string) {
+  constructor(
+    public code: string,
+    public message: string,
+    public configPath: string,
+    public module: string,
+    public link?: string,
+  ) {
     super(undefined);
 
-    this.code = code;
-    this.configPath = configPath;
-    this.module = module;
-    this.link = link;
     this.stack = undefined;
 
     this.message = `${bold('Code:')} ${bold().red(this.code)}\n\n`

@@ -1,9 +1,8 @@
-import { Dispatcher } from '../../events/Dispatcher';
 import { Mailer } from '../Mailer';
 import { MailEvent, MailEventDispatcher } from '../MailEvent';
-import { MailTemplateRenderer } from '../MailTemplateRenderer';
 import { Event } from '../../events/Event';
 import { Mail, MailResponse } from '../Mail';
+import { renderMailTemplate } from '../renderMailTemplate';
 
 export abstract class AbstractMailTransporter<
   ConfigType,
@@ -15,11 +14,7 @@ export abstract class AbstractMailTransporter<
 
   protected sandbox?: boolean;
 
-  protected readonly events: MailEventDispatcher<any, ResponseType>;
-
-  protected constructor(events: Dispatcher) {
-    this.events = events;
-  }
+  protected constructor(protected readonly events: MailEventDispatcher<any, ResponseType>) {}
 
   abstract async sendMail(mail: Mail<any>, html?: string): Promise<ResponseType>;
 
@@ -37,7 +32,7 @@ export abstract class AbstractMailTransporter<
 
   public async send(mail: Mail<any>): Promise<ResponseType> {
     const html = mail.template
-      ? (await MailTemplateRenderer.render(mail.template, mail.data))
+      ? (await renderMailTemplate(mail.template, mail.data))
       : undefined;
 
     this.events.dispatch(new Event(

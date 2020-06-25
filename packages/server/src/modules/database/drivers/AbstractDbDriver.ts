@@ -4,23 +4,18 @@ import {
 } from '../Database';
 import { NamingStrategy } from '../NamingStrategy';
 import { DbCollection } from '../DbCollection';
-import { Dispatcher } from '../../events/Dispatcher';
 import { Event } from '../../events/Event';
 import { DatabaseEvent, DatabaseEventDispatcher } from '../DatabaseEvent';
 import { camelToSnakeCase, snakeToCamelCase } from '../../../utils/string';
 import { DatabaseDriver } from '../DatabaseConfig';
 
 export abstract class AbstractDbDriver<ConfigType> implements Database<ConfigType> {
-  public events: DatabaseEventDispatcher;
-
   public config?: ConfigType;
 
-  public namingStrategy: NamingStrategy;
-
-  constructor(events: Dispatcher, namingStrategy: NamingStrategy) {
-    this.events = events;
-    this.namingStrategy = namingStrategy;
-  }
+  constructor(
+    protected readonly events: DatabaseEventDispatcher,
+    public readonly namingStrategy: NamingStrategy,
+  ) {}
 
   public async quit() {
     if (!this.driverQuit) { return; }

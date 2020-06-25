@@ -13,25 +13,14 @@ import {
 } from './Encrypter';
 import { EncryptionError, EncryptionErrorBuilder } from './EncryptionError';
 import { EncryptionEvent, EncryptionEventDispatcher } from './EncryptionEvent';
-import { Dispatcher } from '../events/Dispatcher';
 import { Event } from '../events/Event';
 
 export class CryptoEncrypter implements Encrypter {
-  protected readonly key: string;
-
-  protected readonly cipherAlgorithm: CipherAlgorithm;
-
-  protected readonly dispatcher: EncryptionEventDispatcher;
-
   constructor(
-    key: string,
-    cipherAlgorithm = CipherAlgorithm.AES128CBC,
-    dispatcher: Dispatcher,
-  ) {
-    this.key = key;
-    this.cipherAlgorithm = cipherAlgorithm;
-    this.dispatcher = dispatcher;
-  }
+    private readonly key: string,
+    private readonly cipherAlgorithm = CipherAlgorithm.AES128CBC,
+    private readonly dispatcher: EncryptionEventDispatcher,
+  ) {}
 
   public static generateKey(cipherAlgorithm = CipherAlgorithm.AES128CBC): string {
     return randomBytes(cipherAlgorithm === CipherAlgorithm.AES128CBC ? 16 : 32).toString('base64');

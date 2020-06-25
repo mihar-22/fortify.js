@@ -19,14 +19,11 @@ import { Mail } from '../../Mail';
 export class Smtp extends AbstractMailTransporter<SmtpConfig, SmtpResponse> {
   protected client?: SmtpClient;
 
-  protected readonly clientFactory: SmtpClientFactory;
-
   constructor(
-  @inject(DIToken.SmtpClientFactory) clientFactory: SmtpClientFactory,
+    @inject(DIToken.SmtpClientFactory) protected readonly clientFactory: SmtpClientFactory,
     @inject(DIToken.EventDispatcher) events: Dispatcher,
   ) {
     super(events);
-    this.clientFactory = clientFactory;
   }
 
   private async buildSandboxClient() {
@@ -60,7 +57,7 @@ export class Smtp extends AbstractMailTransporter<SmtpConfig, SmtpResponse> {
       if (previewUrl) {
         this.events.dispatch(new Event(
           MailEvent.Preview,
-          `[${mail.subject}]: ${previewUrl}`,
+          `📖 [${mail.subject}]: ${previewUrl}`,
           { previewUrl, mail },
           LogLevel.Info,
         ));

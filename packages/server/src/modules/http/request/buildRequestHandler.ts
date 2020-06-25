@@ -14,6 +14,7 @@ import { HttpEvent, HttpEventDispatcher } from '../HttpEvent';
 import { Event } from '../../events/Event';
 import { LogLevel } from '../../logger/Logger';
 import { setLazyProp } from '../../../utils';
+import { HttpErr } from '../HttpErr';
 import {
   compileTrust,
   parseBody,
@@ -50,7 +51,7 @@ export const buildRequestHandler = (
 
       if (!requestHandler) {
         throw new HttpError(
-          'INVALID_ROUTE',
+          HttpErr.InvalidRoute,
           'No handler wants to take your request :(.',
           Module.Http,
           404,
@@ -66,7 +67,7 @@ export const buildRequestHandler = (
         res.setHeader('X-RateLimit-Reset', dayjs().add(limiterRes.msBeforeNext, 'ms').toString());
       } catch (e) {
         throw new HttpError(
-          'TOO_MANY_REQUESTS',
+          HttpErr.TooManyRequests,
           'Too many requests in a short period.',
           Module.Http,
           429,
@@ -145,7 +146,7 @@ export const buildRequestHandler = (
       } else {
         res.statusCode = 500;
         sendJsonResponse(res, {
-          code: 'INTERNAL_SERVER_ERROR',
+          code: HttpErr.InternalServerError,
           message: 'Something has gone terribly wrong on our end.',
         });
         res.end();

@@ -10,6 +10,7 @@ import {
 } from './drivers';
 import { Database, DatabaseConstructor, DatabaseFactory } from './Database';
 import { FakeDatabase } from './FakeDatabase';
+import { Migrator } from './Migrator';
 
 export class DatabaseModule implements ModuleProvider<DatabaseConfig> {
   public static id = Module.Database;
@@ -21,14 +22,10 @@ export class DatabaseModule implements ModuleProvider<DatabaseConfig> {
     };
   }
 
-  private readonly app: App;
-
-  private readonly config: DatabaseConfig;
-
-  constructor(app: App, config: DatabaseConfig) {
-    this.app = app;
-    this.config = config;
-  }
+  constructor(
+    private readonly app: App,
+    private readonly config: DatabaseConfig,
+  ) {}
 
   // @TODO: Validate config for each db.
 
@@ -77,6 +74,8 @@ export class DatabaseModule implements ModuleProvider<DatabaseConfig> {
 
     this.app.bindBuilder<() => Database>(DIToken.Database, () => this.app
       .get<DatabaseFactory>(DIToken.DatabaseDriverFactory)(this.config!.driver!));
+
+    this.app.bindClass(DIToken.Migrator, Migrator);
   }
 
   public registerTestingEnv() {
