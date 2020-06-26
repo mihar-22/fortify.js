@@ -1,28 +1,30 @@
 import { Module } from '../Module';
 import { App } from '../../App';
 import {
-  createSmtpTransport, FakeSmtpClient,
+  createSmtpTransport,
+  FakeSmtpClient,
   Mailgun,
   SendGrid,
   Smtp,
   SmtpClientFactory, SmtpConfig,
+  MailerTransporterConstructor,
+  MailTransporter,
+  MailTransporterFactory,
+  MailTransporterId,
+  FakeMailTransporter,
 } from './transporters';
 import { DIToken } from '../../DIToken';
-import {
-  Mailer, MailerConstructor, MailTransporterFactory,
-} from './Mailer';
-import { FakeMailer } from './FakeMailer';
+import { Mailer } from './Mailer';
 import { MailConfig } from './MailConfig';
 import { ModuleProvider } from '../../support/ModuleProvider';
 import { MailError } from './MailError';
-import { MailTransporter } from './Mail';
 
 export class MailModule implements ModuleProvider<MailConfig> {
   public static id = Module.Mail;
 
   public static defaults(app: App) {
     return {
-      transporter: MailTransporter.Smtp,
+      transporter: MailTransporterId.Smtp,
       sandbox: app.isDevelopmentEnv,
       allowSandboxInProduction: false,
       // @TODO: insert app name and domain here.
@@ -40,7 +42,7 @@ export class MailModule implements ModuleProvider<MailConfig> {
 
   public configValidation() {
     const transporter = this.config.transporter!;
-    const isSmtpTransport = transporter === MailTransporter.Smtp;
+    const isSmtpTransport = transporter === MailTransporterId.Smtp;
 
     if (this.app.isProductionEnv && !this.config.allowSandboxInProduction && this.config.sandbox) {
       return {
@@ -66,7 +68,7 @@ export class MailModule implements ModuleProvider<MailConfig> {
       return {
         code: MailError.MissingSmtpConfig,
         message: 'Sandbox mode has been disabled and no SMTP configuration was found.',
-        path: MailTransporter.Smtp,
+        path: MailTransporterId.Smtp,
       };
     }
 
@@ -83,7 +85,7 @@ export class MailModule implements ModuleProvider<MailConfig> {
 
   public dependencies() {
     const { transporter } = this.app.getConfig(Module.Mail)!;
-    return (transporter === MailTransporter.Smtp) ? ['nodemailer'] : [];
+    return (transporter === MailTransporterId.Smtp) ? ['nodemailer'] : [];
   }
 
   public register() {
@@ -94,26 +96,30 @@ export class MailModule implements ModuleProvider<MailConfig> {
 
     this.app.bindFactory<MailTransporterFactory>(
       DIToken.MailTransporterFactory,
-      (transporter: MailTransporter) => {
-        const transporters: Record<MailTransporter, MailerConstructor> = {
-          [MailTransporter.Smtp]: Smtp,
-          [MailTransporter.Mailgun]: Mailgun,
-          [MailTransporter.SendGird]: SendGrid,
+      (id: MailTransporterId) => {
+        const transporters: Record<MailTransporterId, MailerTransporterConstructor> = {
+          [MailTransporterId.Smtp]: Smtp,
+          [MailTransporterId.Mailgun]: Mailgun,
+          [MailTransporterId.SendGird]: SendGrid,
         };
 
-        const mailer = this.app.get<Mailer<any>>(transporters[transporter]);
-        mailer.useSandbox(this.config.sandbox!);
-        mailer.setConfig(this.config[transporter]);
-        mailer.setSender(`${this.config.from!.name} <${this.config.from!.address}>`);
-
-        return mailer;
+        return this.app.get<MailTransporter>(transporters[id]);
       },
     );
 
-    this.app.bindBuilder<() => Mailer<any>>(DIToken.Mailer,
-      () => this.app.get<MailTransporterFactory>(
+    this.app.bindBuilder<() => MailTransporter>(DIToken.MailTransporter, () => {
+      const transporter = this.app.get<MailTransporterFactory>(
         DIToken.MailTransporterFactory,
-      )(this.config.transporter!));
+      )(this.config.transporter!);
+
+      transporter.sandbox = this.config.sandbox!;
+      transporter.config = this.config[this.config.transporter!];
+      transporter.sender = `${this.config.from!.name} <${this.config.from!.address}>`;
+
+      return transporter;
+    });
+
+    this.app.bindClass(DIToken.Mailer, Mailer);
   }
 
   public registerTestingEnv() {
@@ -122,7 +128,11 @@ export class MailModule implements ModuleProvider<MailConfig> {
       DIToken.SmtpClientFactory,
       () => this.app.get(DIToken.FakeSmtpClient),
     );
-    this.app.bindValue<Mailer<any>>(DIToken.FakeMailer, new FakeMailer());
-    this.app.bindValue<Mailer<any>>(DIToken.Mailer, this.app.get(DIToken.FakeMailer));
+
+    this.app.bindValue<MailTransporter>(DIToken.FakeMailerTransporter, new FakeMailTransporter());
+    this.app.bindValue<MailTransporter>(
+      DIToken.MailTransporter,
+      this.app.get(DIToken.FakeMailerTransporter),
+    );
   }
 }

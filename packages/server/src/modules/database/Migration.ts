@@ -1,6 +1,7 @@
+import { DatabaseDriver } from './drivers';
 import { Database } from './Database';
 
-export interface Migration<DatabaseType extends Database> {
-  up(database: DatabaseType): Promise<void>
-  down(database: DatabaseType): Promise<void>
+export interface Migration<DriverType extends DatabaseDriver = DatabaseDriver> {
+  up(database: Database<DriverType>): Promise<void>
+  down(database: Database<DriverType>): Promise<void>
 }

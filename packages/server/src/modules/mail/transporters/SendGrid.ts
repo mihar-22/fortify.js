@@ -1,9 +1,8 @@
 import { inject, injectable } from 'tsyringe';
-import { AbstractMailTransporter } from './AbstractMailTransporter';
 import { DIToken } from '../../../DIToken';
-import { Dispatcher } from '../../events/Dispatcher';
 import { HttpClient } from '../../http/HttpClient';
 import { Mail, MailResponse } from '../Mail';
+import { MailTransporter, MailTransporterId } from './MailTransporter';
 
 export interface SendGridConfig {
   apiKey: string
@@ -21,23 +20,28 @@ export interface SendGridResponse extends MailResponse {
 }
 
 @injectable()
-export class SendGrid extends AbstractMailTransporter<SendGridConfig, SendGridResponse> {
-  constructor(
-    @inject(DIToken.HttpClient) protected readonly httpClient: HttpClient,
-    @inject(DIToken.EventDispatcher) events: Dispatcher,
-  ) {
-    super(events);
-  }
+export class SendGrid implements MailTransporter<SendGridConfig, SendGridResponse> {
+  public id = MailTransporterId.Smtp;
 
-  public async sendMail(mail: Mail<any>, html?: string): Promise<SendGridResponse> {
+  public config?: SendGridConfig;
+
+  public sandbox = false;
+
+  public sender = '';
+
+  constructor(
+    @inject(DIToken.HttpClient) private readonly httpClient: HttpClient,
+  ) {}
+
+  public async send(mail: Mail<any>, html?: string): Promise<SendGridResponse> {
     try {
       const response = await this.httpClient(
         'https://api.sendgrid.com/v3/mail/send', {
           method: 'POST',
           body: JSON.stringify({
             from: {
-              name: this.sender?.match(/.+</)?.[0].slice(0, -1).trim(),
-              email: this.sender?.match(/<(.+)>/)?.[1],
+              name: this.sender.match(/.+</)?.[0].slice(0, -1).trim(),
+              email: this.sender.match(/<(.+)>/)?.[1],
             },
             personalizations: [{
               subject: mail.subject,
@@ -52,7 +56,7 @@ export class SendGrid extends AbstractMailTransporter<SendGridConfig, SendGridRe
             } : undefined].filter(Boolean),
             mail_settings: {
               sandbox_mode: {
-                enable: this.sandbox!,
+                enable: this.sandbox,
               },
             },
           }),

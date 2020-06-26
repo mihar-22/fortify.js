@@ -1,10 +1,11 @@
-import { MailTransporterFactory } from '../Mailer';
 import { Config, Env } from '../../../Config';
 import { bootstrap } from '../../../bootstrap';
 import { Module } from '../../Module';
-import { MailTransporter } from '../Mail';
 import { DIToken } from '../../../DIToken';
 import { coreModules } from '../../index';
+import {
+  Mailgun, MailTransporterId, SendGrid, Smtp,
+} from '../transporters';
 
 describe('Mail', () => {
   describe('Mailer', () => {
@@ -23,15 +24,12 @@ describe('Mail', () => {
       const app = boot({
         env: Env.Development,
         [Module.Mail]: {
-          transporter: MailTransporter.Smtp,
+          transporter: MailTransporterId.Smtp,
         },
       });
 
-      const mailer = app.get<MailTransporterFactory>(
-        DIToken.MailTransporterFactory,
-      )(MailTransporter.Smtp);
-
-      const response = await mailer.send(mail);
+      const transporter = app.get<Smtp>(DIToken.MailTransporter);
+      const response = await transporter.send(mail);
       expect(response).toBeDefined();
       expect(response.success).toBeTruthy();
       expect(response.messageId).toBeDefined();
@@ -41,19 +39,16 @@ describe('Mail', () => {
       const app = boot({
         env: Env.Development,
         [Module.Mail]: {
-          transporter: MailTransporter.Mailgun,
-          [MailTransporter.Mailgun]: {
+          transporter: MailTransporterId.Mailgun,
+          [MailTransporterId.Mailgun]: {
             domain: process.env.MAILGUN_DOMAIN!,
             apiKey: process.env.MAILGUN_API_KEY!,
           },
         },
       });
 
-      const mailer = app.get<MailTransporterFactory>(
-        DIToken.MailTransporterFactory,
-      )(MailTransporter.Mailgun);
-
-      const response = await mailer.send(mail);
+      const transporter = app.get<Mailgun>(DIToken.MailTransporter);
+      const response = await transporter.send(mail);
       expect(response).toBeDefined();
       expect(response.success).toBeTruthy();
     });
@@ -62,18 +57,15 @@ describe('Mail', () => {
       const app = boot({
         env: Env.Development,
         [Module.Mail]: {
-          transporter: MailTransporter.SendGird,
-          [MailTransporter.SendGird]: {
+          transporter: MailTransporterId.SendGird,
+          [MailTransporterId.SendGird]: {
             apiKey: process.env.SENDGRID_API_KEY!,
           },
         },
       });
 
-      const mailer = app.get<MailTransporterFactory>(
-        DIToken.MailTransporterFactory,
-      )(MailTransporter.SendGird);
-
-      const response = await mailer.send(mail);
+      const transporter = app.get<SendGrid>(DIToken.MailTransporter);
+      const response = await transporter.send(mail);
       expect(response).toBeDefined();
       expect(response.success).toBeTruthy();
     });

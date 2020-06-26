@@ -1,11 +1,8 @@
-import { AbstractDbDriver } from './AbstractDbDriver';
-import { DbCollection } from '../DbCollection';
 import {
-  CreateData, Filter, Select, UpdateData,
-} from '../Database';
-import { DatabaseEvent } from '../DatabaseEvent';
+  CreateData, DatabaseDriver, DatabaseDriverId, Filter, Select, UpdateData,
+} from './DatabaseDriver';
+import { DatabaseEvent, DatabaseEventDispatcher } from '../DatabaseEvent';
 import { Event } from '../../events/Event';
-import { DatabaseDriver } from '../DatabaseConfig';
 
 export interface Query {
   text: string
@@ -14,26 +11,34 @@ export interface Query {
 }
 
 export abstract class AbstractSQLDriver<
-  ConfigType,
-  ResultType
-> extends AbstractDbDriver<ConfigType> {
+  ConfigType = any,
+  ResultType = any
+> implements DatabaseDriver<ConfigType> {
   public sql = require('sqliterally').sql;
 
   public query = require('sqliterally').query;
 
+  public config?: ConfigType;
+
+  abstract id: DatabaseDriverId;
+
   abstract async runQuery(query: Query): Promise<ResultType>;
 
-  public async driverCreate(table: DbCollection, data: CreateData) {
+  constructor(private readonly events: DatabaseEventDispatcher) {}
+
+  public async create(table: string, data: CreateData) {
     const cols = Object.keys(data).join(', ');
     const values = Object.values(data).join(', ');
-    const insertQuery = this.sql`INSERT INTO ${table} (${cols}) VALUES (${values})`;
-    this.fireExecEvent(insertQuery);
-    const res = await this.runQuery(insertQuery);
+    const insertIntoClause = this.sql([`INSERT INTO ${table}`]);
+    const insertStmt = this.sql`${insertIntoClause} (${cols}) VALUES (${values})`.prefix('');
+    this.fireExecEvent(insertStmt);
+    const res = await this.runQuery(insertStmt);
     return this.transformCreateRes(res);
   }
 
-  public async driverRead(table: DbCollection, filter: Filter, select?: Select) {
-    let q = this.query.from`${table}`;
+  public async read(table: string, filter: Filter, select?: Select) {
+    let q = this.query.from([table]);
+
     Object.keys(filter).forEach((col) => { q = q.where`${col} = ${filter[col]}`; });
 
     if (select) {
@@ -42,30 +47,34 @@ export abstract class AbstractSQLDriver<
       q = q.select`*`;
     }
 
-    const readQuery = q.build();
-    console.log(readQuery.text);
-    this.fireExecEvent(readQuery);
-    const res = await this.runQuery(readQuery);
+    const readStmt = q.build();
+    this.fireExecEvent(readStmt);
+    const res = await this.runQuery(readStmt);
     return this.transformReadRes(res);
   }
 
-  public async driverUpdate(table: DbCollection, filter: Filter, data: UpdateData) {
-    let q = this.query.update`${table}`;
+  public async update(table: string, filter: Filter, data: UpdateData) {
+    let q = this.query.update([table]);
     Object.keys(filter).forEach((col) => { q = q.where`${col} = ${filter[col]}`; });
     Object.keys(data).forEach((col) => { q = q.set`${col} = ${data[col]}`; });
-    const updateQuery = q.build();
-    this.fireExecEvent(updateQuery);
-    const res = await this.runQuery(updateQuery);
+    const updateStmt = q.build();
+    this.fireExecEvent(updateStmt);
+    const res = await this.runQuery(updateStmt);
     return this.transformUpdateRes(res);
   }
 
-  public async driverDelete(table: DbCollection, filter: Filter) {
-    let whereStmt = this.query;
-    Object.keys(filter).forEach((col) => { whereStmt = whereStmt.where`${col} = ${filter[col]}`; });
-    const deleteQuery = this.sql`DELETE FROM ${table} ${whereStmt}`;
-    this.fireExecEvent(deleteQuery);
-    const res = await this.runQuery(deleteQuery);
+  public async delete(table: string, filter: Filter) {
+    let q = this.query.from([table]);
+    Object.keys(filter).forEach((col) => { q = q.where`${col} = ${filter[col]}`; });
+    const deleteStmt = this.sql`DELETE ${q}`;
+    this.fireExecEvent(deleteStmt);
+    const res = await this.runQuery(deleteStmt);
     return this.transformDeleteRes(res);
+  }
+
+  public async dropCollection(collection: string) {
+    const dropTableStmt = this.sql([`DROP TABLE ${collection}`]);
+    await this.runQuery(dropTableStmt);
   }
 
   protected fireExecEvent = (query: Query) => {
@@ -73,7 +82,7 @@ export abstract class AbstractSQLDriver<
       DatabaseEvent.Executing,
       '🔋 Executing query...',
       {
-        sql: (this.driver === DatabaseDriver.Postgres)
+        sql: (this.id === DatabaseDriverId.Postgres)
           ? query.text
           : query.sql,
         values: query.values,

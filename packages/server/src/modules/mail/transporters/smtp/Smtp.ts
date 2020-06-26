@@ -8,25 +8,35 @@ import {
   SmtpConfig,
   SmtpResponse,
 } from './SmtpClient';
-import { AbstractMailTransporter } from '../AbstractMailTransporter';
 import { Dispatcher } from '../../../events/Dispatcher';
 import { MailEvent } from '../../MailEvent';
 import { LogLevel } from '../../../logger/Logger';
 import { Event } from '../../../events/Event';
 import { Mail } from '../../Mail';
+import { MailTransporter, MailTransporterId } from '../MailTransporter';
 
 @injectable()
-export class Smtp extends AbstractMailTransporter<SmtpConfig, SmtpResponse> {
-  protected client?: SmtpClient;
+export class Smtp implements MailTransporter<SmtpConfig, SmtpResponse> {
+  public id = MailTransporterId.Smtp;
+
+  public config?: SmtpConfig;
+
+  public sandbox = false;
+
+  public sender = '';
+
+  private client?: SmtpClient;
 
   constructor(
-    @inject(DIToken.SmtpClientFactory) protected readonly clientFactory: SmtpClientFactory,
-    @inject(DIToken.EventDispatcher) events: Dispatcher,
-  ) {
-    super(events);
+    @inject(DIToken.SmtpClientFactory) private readonly clientFactory: SmtpClientFactory,
+    @inject(DIToken.EventDispatcher) private readonly events: Dispatcher,
+  ) {}
+
+  private async buildClient(): Promise<SmtpClient> {
+    return this.sandbox ? this.buildSandboxClient() : this.clientFactory(this.config!);
   }
 
-  private async buildSandboxClient() {
+  private async buildSandboxClient(): Promise<SmtpClient> {
     const testAccount = await createSmtpTestAccount();
 
     return this.clientFactory({
@@ -37,11 +47,7 @@ export class Smtp extends AbstractMailTransporter<SmtpConfig, SmtpResponse> {
     });
   }
 
-  private async buildClient() {
-    return this.sandbox ? this.buildSandboxClient() : this.clientFactory(this.config!);
-  }
-
-  public async sendMail(mail: Mail<any>, html?: string): Promise<SmtpResponse> {
+  public async send(mail: Mail<any>, html?: string): Promise<SmtpResponse> {
     if (!this.client) { this.client = await this.buildClient(); }
 
     try {

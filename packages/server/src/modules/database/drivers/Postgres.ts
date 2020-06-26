@@ -1,16 +1,15 @@
-import { Pool, QueryResult } from 'pg';
-import { DatabaseConfig, DatabaseDriver } from '../DatabaseConfig';
+import { ClientConfig, Pool, QueryResult } from 'pg';
 import { AbstractSQLDriver, Query } from './AbstractSQLDriver';
+import { DatabaseDriverId } from './DatabaseDriver';
 
-export class Postgres extends AbstractSQLDriver<
-DatabaseConfig[DatabaseDriver.Postgres],
-QueryResult
-> {
-  public driver = DatabaseDriver.Postgres;
+export type PostgresConfig = string | ClientConfig;
 
-  protected pool?: Pool;
+export class Postgres extends AbstractSQLDriver<PostgresConfig> {
+  public id = DatabaseDriverId.Postgres;
 
-  protected getPool(): Pool {
+  private pool?: Pool;
+
+  private getPool(): Pool {
     if (!this.pool) {
       const pg = require('pg');
       this.pool = new pg.Pool();
@@ -19,12 +18,12 @@ QueryResult
     return this.pool!;
   }
 
-  public async driverQuit() {
-    return this.pool?.end();
-  }
-
   public async runQuery(query: Query): Promise<QueryResult> {
     return this.getPool().query(query.text, query.values);
+  }
+
+  public async quit() {
+    return this.pool?.end();
   }
 
   protected transformCreateRes(res: QueryResult): number {

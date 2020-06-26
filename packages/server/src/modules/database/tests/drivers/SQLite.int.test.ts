@@ -1,27 +1,27 @@
 import { bootstrap } from '../../../../bootstrap';
 import { coreModules } from '../../../index';
-import { Env } from '../../../../Config';
-import { Database, DatabaseFactory } from '../../Database';
 import { DIToken } from '../../../../DIToken';
-import { DatabaseDriver } from '../../DatabaseConfig';
 import { Module } from '../../../Module';
+import { Database } from '../../Database';
+import { DatabaseDriverId, SQLite } from '../../drivers';
+import { EventsModule } from '../../../events/EventsModule';
 
 describe('Database', () => {
   describe('Drivers', () => {
     describe('SQLite', () => {
-      let db: Database;
+      let db: Database<SQLite>;
 
       beforeEach(() => {
         const app = bootstrap(coreModules, {
-          env: Env.Testing,
           [Module.Database]: {
-            [DatabaseDriver.SQLite]: ':memory:',
+            driver: DatabaseDriverId.SQLite,
           },
-        });
-        db = app.get<DatabaseFactory>(DIToken.DatabaseDriverFactory)(DatabaseDriver.SQLite);
+        }, true, [EventsModule]);
+
+        // db = app.get(DIToken.Database);
       });
 
-      test('should create data in db and return id', async () => {
+      test('should create data and return id', async () => {
       });
 
       test('should read in empty array', async () => {

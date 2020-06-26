@@ -1,5 +1,6 @@
-import { MailgunConfig, SendGridConfig, SmtpConfig } from './transporters';
-import { MailTransporter } from './Mail';
+import {
+  MailgunConfig, SendGridConfig, SmtpConfig, MailTransporterId,
+} from './transporters';
 
 export interface MailFrom {
   name: string
@@ -8,10 +9,10 @@ export interface MailFrom {
 
 export interface MailConfig {
   from?: MailFrom
-  transporter?: MailTransporter
+  transporter?: MailTransporterId
   sandbox?: boolean
   allowSandboxInProduction?: boolean
-  [MailTransporter.Smtp]?: SmtpConfig
-  [MailTransporter.Mailgun]?: MailgunConfig
-  [MailTransporter.SendGird]?: SendGridConfig
+  [MailTransporterId.Smtp]?: SmtpConfig
+  [MailTransporterId.Mailgun]?: MailgunConfig
+  [MailTransporterId.SendGird]?: SendGridConfig
 }

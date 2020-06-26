@@ -1,6 +1,6 @@
 import { MySQL } from './MySQL';
-import { DatabaseDriver } from '../DatabaseConfig';
+import { DatabaseDriverId } from './DatabaseDriver';
 
 export class MariaDB extends MySQL {
-  public driver = DatabaseDriver.MariaDB;
+  public id = DatabaseDriverId.MariaDB;
 }

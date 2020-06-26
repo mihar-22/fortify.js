@@ -1,14 +1,19 @@
 import { DIToken } from '../../../DIToken';
 import { Config, Env } from '../../../Config';
-import { FakeSmtpClient, Nodemailer, SmtpClientFactory } from '../transporters';
+import {
+  FakeMailTransporter,
+  FakeSmtpClient,
+  MailTransporter, MailTransporterFactory,
+  MailTransporterId,
+  Nodemailer,
+  SmtpClientFactory,
+} from '../transporters';
 import { MailModule } from '../MailModule';
-import { Mailer, MailTransporterFactory } from '../Mailer';
-import { FakeMailer } from '../FakeMailer';
+import { Mailer } from '../Mailer';
 import { App } from '../../../App';
 import { bootstrap } from '../../../bootstrap';
 import { MailError } from '../MailError';
 import { Module } from '../../Module';
-import { MailTransporter } from '../Mail';
 import { coreModules } from '../../index';
 import { ModuleProviderConstructor } from '../../../support/ModuleProvider';
 
@@ -33,34 +38,28 @@ describe('Mail', () => {
       expect(clientFactory({} as any)).toBeInstanceOf(Nodemailer);
     });
 
-    test('resolves fake mailer in testing env', () => {
+    test('resolves fake mail transporter in testing env', () => {
       boot(({ env: Env.Testing }));
-      const mailer = app.get<Mailer<any>>(DIToken.Mailer);
-      expect(mailer).toBeInstanceOf(FakeMailer);
+      const transporter = app.get(DIToken.FakeMailerTransporter);
+      expect(transporter).toBeInstanceOf(FakeMailTransporter);
     });
 
     test('mailer should be singleton scoped', () => {
       boot();
-      const mailerA = app.get<Mailer<any>>(DIToken.Mailer);
-      const mailerB = app.get<Mailer<any>>(DIToken.Mailer);
+      const mailerA = app.get<Mailer>(DIToken.Mailer);
+      const mailerB = app.get<Mailer>(DIToken.Mailer);
       expect(mailerA).toBe(mailerB);
     });
 
     test('resolves all transporters', () => {
-      Object.values(MailTransporter).forEach((transporter) => {
-        const cApp = boot({
-          mail: {
-            transporter,
-            [MailTransporter.Smtp]: {} as any,
-            [MailTransporter.SendGird]: {} as any,
-            [MailTransporter.Mailgun]: {} as any,
-          },
-        });
-
-        const mailer = cApp.get<Mailer<any>>(DIToken.Mailer);
+      Object.values(MailTransporterId).forEach((id) => {
+        const config: Config = { [Module.Mail]: { transporter: id } };
+        config[Module.Mail]![id] = {} as any;
+        const cApp = boot(config);
+        const transporter = cApp.get<MailTransporter>(DIToken.MailTransporter);
         const { constructor } = cApp
-          .get<MailTransporterFactory>(DIToken.MailTransporterFactory)(transporter);
-        expect(mailer).toBeInstanceOf(constructor);
+          .get<MailTransporterFactory>(DIToken.MailTransporterFactory)(id);
+        expect(transporter).toBeInstanceOf(constructor);
       });
     });
 
@@ -79,7 +78,7 @@ describe('Mail', () => {
           {
             env: Env.Production,
             [Module.Mail]: {
-              transporter: MailTransporter.Mailgun,
+              transporter: MailTransporterId.Mailgun,
             },
           },
           [MailModule],
@@ -92,7 +91,7 @@ describe('Mail', () => {
         boot({
           env: Env.Development,
           [Module.Mail]: {
-            transporter: MailTransporter.Smtp,
+            transporter: MailTransporterId.Smtp,
             sandbox: false,
           },
         });
@@ -105,7 +104,7 @@ describe('Mail', () => {
           {
             env: Env.Production,
             [Module.Mail]: {
-              transporter: MailTransporter.Smtp,
+              transporter: MailTransporterId.Smtp,
               smtp: {} as any,
             },
           },
@@ -115,15 +114,15 @@ describe('Mail', () => {
     });
 
     test('returns correct smtp dependencies', () => {
-      boot({ [Module.Mail]: { transporter: MailTransporter.Smtp } });
+      boot({ [Module.Mail]: { transporter: MailTransporterId.Smtp } });
       expect(new MailModule(app, {}).dependencies()).toEqual(['nodemailer']);
     });
 
     test('returns correct dependencies if not smtp', () => {
       boot({
         [Module.Mail]: {
-          transporter: MailTransporter.Mailgun,
-          [MailTransporter.Mailgun]: {} as any,
+          transporter: MailTransporterId.Mailgun,
+          [MailTransporterId.Mailgun]: {} as any,
         },
       });
       expect(new MailModule(app, {})!.dependencies()).toEqual([]);

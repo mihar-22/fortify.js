@@ -1,25 +1,22 @@
 import { Database, RunResult } from 'sqlite3';
 import { promisify } from 'util';
-import { DatabaseConfig, DatabaseDriver } from '../DatabaseConfig';
 import { AbstractSQLDriver, Query } from './AbstractSQLDriver';
+import { DatabaseDriverId } from './DatabaseDriver';
 
-export class SQLite extends AbstractSQLDriver<DatabaseConfig[DatabaseDriver.SQLite], any> {
-  public driver = DatabaseDriver.SQLite;
+export type SQLiteConfig = string | ':memory:';
 
-  protected db?: Database;
+export class SQLite extends AbstractSQLDriver<SQLiteConfig> {
+  public id = DatabaseDriverId.SQLite;
 
-  protected getDb(): Database {
+  private db?: Database;
+
+  private getDb(): Database {
     if (!this.db) {
       const sqlite3 = require('sqlite3');
       this.db = new sqlite3.Database(this.config!);
     }
 
     return this.db!;
-  }
-
-  public async driverQuit() {
-    if (!this.db) { return; }
-    await promisify(this.db!.close)();
   }
 
   public async runQuery(query: Query): Promise<any> {
@@ -33,6 +30,11 @@ export class SQLite extends AbstractSQLDriver<DatabaseConfig[DatabaseDriver.SQLi
         resolve(res);
       });
     });
+  }
+
+  public async quit() {
+    if (!this.db) { return; }
+    await promisify(this.db.close)();
   }
 
   protected transformCreateRes(res: any): number {

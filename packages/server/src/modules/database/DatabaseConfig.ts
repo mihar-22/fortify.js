@@ -1,24 +1,16 @@
-import { ConnectionConfig as MySQLConfig } from 'mysql';
-import { ClientConfig as PostgresConfig } from 'pg';
-import { MongoClientOptions as MongoDBConfig } from 'mongodb';
 import { NamingStrategy } from './NamingStrategy';
-
-export enum DatabaseDriver {
-  Memory = 'memory',
-  MySQL = 'mysql',
-  MariaDB = 'mariadb',
-  Postgres = 'postgres',
-  SQLite = 'sqlite',
-  MongoDB = 'mongo',
-}
+import {
+  DatabaseDriverId, MongoDBConfig, MySQLConfig, PostgresConfig, SQLiteConfig,
+} from './drivers';
 
 export interface DatabaseConfig {
-  driver?: DatabaseDriver
+  driver?: DatabaseDriverId
   namingStrategy?: NamingStrategy
-  [DatabaseDriver.Memory]?: void
-  [DatabaseDriver.MariaDB]?: string | MySQLConfig
-  [DatabaseDriver.MySQL]?: string | MySQLConfig
-  [DatabaseDriver.Postgres]?: string | PostgresConfig
-  [DatabaseDriver.MongoDB]?: ({ uri: string, database: string } & MongoDBConfig)
-  [DatabaseDriver.SQLite]?: string | ':memory:'
+  collectionPrefix?: string
+  [DatabaseDriverId.Memory]?: void
+  [DatabaseDriverId.MariaDB]?: MySQLConfig
+  [DatabaseDriverId.MySQL]?: MySQLConfig
+  [DatabaseDriverId.Postgres]?: PostgresConfig
+  [DatabaseDriverId.MongoDB]?: MongoDBConfig
+  [DatabaseDriverId.SQLite]?: SQLiteConfig
 }

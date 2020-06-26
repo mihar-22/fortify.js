@@ -10,7 +10,7 @@ describe('Mail', () => {
   describe('Transporters', () => {
     describe('SendGrid', () => {
       let app: App;
-      let mailer: SendGrid;
+      let transporter: SendGrid;
       let httpClient: FakeHttpClient;
 
       const mailSender = 'Test App <no-reply@localhost.com>';
@@ -23,9 +23,9 @@ describe('Mail', () => {
 
       beforeEach(() => {
         boot({ env: Env.Testing });
-        mailer = app.get(SendGrid);
-        mailer.setConfig(fakeConfig);
-        mailer.setSender(mailSender);
+        transporter = app.get(SendGrid);
+        transporter.config = fakeConfig;
+        transporter.sender = mailSender;
         httpClient = app.get(DIToken.HttpClient);
       });
 
@@ -35,7 +35,7 @@ describe('Mail', () => {
 
         httpClient.post(expectedUrl, expectedResponse);
 
-        const response = await mailer.sendMail({
+        const response = await transporter.send({
           to: mailRecipient,
           subject: 'Subject',
           text: 'apples',

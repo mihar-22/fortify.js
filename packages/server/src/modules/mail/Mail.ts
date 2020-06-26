@@ -1,11 +1,5 @@
 import { PayloadType } from '../events/Dispatcher';
 
-export enum MailTransporter {
-  Smtp = 'smtp',
-  SendGird = 'sendGrid',
-  Mailgun = 'mailgun'
-}
-
 export interface MailResponse {
   success: boolean
 }

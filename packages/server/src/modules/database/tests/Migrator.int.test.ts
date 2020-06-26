@@ -3,8 +3,6 @@ import { bootstrap } from '../../../bootstrap';
 import { coreModules } from '../../index';
 import { DIToken } from '../../../DIToken';
 import { Config } from '../../../Config';
-import { Module } from '../../Module';
-import { DatabaseDriver } from '../DatabaseConfig';
 
 describe('Database', () => {
   describe('Migrator', () => {
@@ -12,10 +10,10 @@ describe('Database', () => {
 
     const boot = (config?: Config) => {
       const app = bootstrap(coreModules, config);
-      migrator = app.get<Migrator>(DIToken.Migrator);
+      migrator = app.get(DIToken.Migrator);
     };
 
-    test('should load sql migrations', () => {
+    test('', () => {
     });
   });
 });

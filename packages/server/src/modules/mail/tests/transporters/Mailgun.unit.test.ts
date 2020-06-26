@@ -11,7 +11,7 @@ describe('Mail', () => {
   describe('Transporters', () => {
     describe('Mailgun', () => {
       let app: App;
-      let mailer: Mailgun;
+      let transporter: Mailgun;
       let httpClient: FakeHttpClient;
 
       const mailSender = 'Test App <no-reply@localhost.com>';
@@ -28,9 +28,9 @@ describe('Mail', () => {
 
       beforeEach(() => {
         boot({ env: Env.Testing });
-        mailer = app.get(Mailgun);
-        mailer.setConfig(fakeConfig);
-        mailer.setSender(mailSender);
+        transporter = app.get(Mailgun);
+        transporter.config = fakeConfig;
+        transporter.sender = mailSender;
         httpClient = app.get(DIToken.HttpClient);
       });
 
@@ -40,7 +40,7 @@ describe('Mail', () => {
 
         httpClient.post(expectedUrl, expectedResponse);
 
-        const response = await mailer.sendMail({
+        const response = await transporter.send({
           to: mailRecipient,
           subject: 'Subject',
           text: 'apples',

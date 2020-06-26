@@ -1,23 +1,31 @@
 import { ModuleProvider } from '../../support/ModuleProvider';
 import { Module } from '../Module';
 import { App } from '../../App';
-import { DatabaseConfig, DatabaseDriver } from './DatabaseConfig';
 import { NamingStrategy } from './NamingStrategy';
 import { DIToken } from '../../DIToken';
 import {
-  Memory, MongoDB, MySQL,
-  Postgres, MariaDB, SQLite,
+  Memory,
+  MongoDB,
+  MySQL,
+  Postgres,
+  MariaDB,
+  SQLite,
+  DatabaseDriverId,
+  DatabaseDriverFactory,
+  DatabaseDriverConstructor,
+  DatabaseDriver,
 } from './drivers';
-import { Database, DatabaseConstructor, DatabaseFactory } from './Database';
-import { FakeDatabase } from './FakeDatabase';
 import { Migrator } from './Migrator';
+import { DatabaseConfig } from './DatabaseConfig';
+import { Database } from './Database';
+import { FakeDatabaseDriver } from './drivers/FakeDatabaseDriver';
 
 export class DatabaseModule implements ModuleProvider<DatabaseConfig> {
   public static id = Module.Database;
 
   public static defaults() {
     return {
-      driver: DatabaseDriver.Memory,
+      driver: DatabaseDriverId.Memory,
       namingStrategy: NamingStrategy.CamelCase,
     };
   }
@@ -33,16 +41,16 @@ export class DatabaseModule implements ModuleProvider<DatabaseConfig> {
     const driver = this.config.driver!;
 
     switch (driver) {
-      case DatabaseDriver.Memory:
+      case DatabaseDriverId.Memory:
         return [];
-      case DatabaseDriver.MySQL:
-      case DatabaseDriver.MariaDB:
+      case DatabaseDriverId.MySQL:
+      case DatabaseDriverId.MariaDB:
         return ['serverless-mysql', 'sqliterally'];
-      case DatabaseDriver.MongoDB:
+      case DatabaseDriverId.MongoDB:
         return ['mongodb'];
-      case DatabaseDriver.Postgres:
+      case DatabaseDriverId.Postgres:
         return ['pg', 'sqliterally'];
-      case DatabaseDriver.SQLite:
+      case DatabaseDriverId.SQLite:
         return ['sqlite3', 'sqliterally'];
     }
 
@@ -50,36 +58,41 @@ export class DatabaseModule implements ModuleProvider<DatabaseConfig> {
   }
 
   public register() {
-    this.app.bindFactory<DatabaseFactory>(
+    this.app.bindFactory<DatabaseDriverFactory>(
       DIToken.DatabaseDriverFactory,
-      (driver: DatabaseDriver) => {
-        const drivers: Record<DatabaseDriver, DatabaseConstructor> = {
-          [DatabaseDriver.Memory]: Memory,
-          [DatabaseDriver.MongoDB]: MongoDB,
-          [DatabaseDriver.MySQL]: MySQL,
-          [DatabaseDriver.MariaDB]: MariaDB,
-          [DatabaseDriver.SQLite]: SQLite,
-          [DatabaseDriver.Postgres]: Postgres,
+      (id: DatabaseDriverId) => {
+        const drivers: Record<DatabaseDriverId, DatabaseDriverConstructor> = {
+          [DatabaseDriverId.Memory]: Memory,
+          [DatabaseDriverId.MongoDB]: MongoDB,
+          [DatabaseDriverId.MySQL]: MySQL,
+          [DatabaseDriverId.MariaDB]: MariaDB,
+          [DatabaseDriverId.SQLite]: SQLite,
+          [DatabaseDriverId.Postgres]: Postgres,
         };
 
-        const db = new drivers[driver](
-          this.app.get(DIToken.EventDispatcher),
-          this.config.namingStrategy!,
-        );
-
-        db.setConfig(this.config[driver]);
-        return db;
+        return new drivers[id](this.app.get(DIToken.EventDispatcher));
       },
     );
 
-    this.app.bindBuilder<() => Database>(DIToken.Database, () => this.app
-      .get<DatabaseFactory>(DIToken.DatabaseDriverFactory)(this.config!.driver!));
+    this.app.bindBuilder<() => DatabaseDriver>(DIToken.DatabaseDriver, () => {
+      const driver = this.app.get<DatabaseDriverFactory>(
+        DIToken.DatabaseDriverFactory,
+      )(this.config.driver!);
 
+      driver.config = this.config[this.config.driver!];
+
+      return driver;
+    });
+
+    this.app.bindClass(DIToken.Database, Database);
     this.app.bindClass(DIToken.Migrator, Migrator);
   }
 
   public registerTestingEnv() {
-    this.app.bindValue(DIToken.FakeDatabase, new FakeDatabase(this.config.namingStrategy!));
-    this.app.bindValue(DIToken.Database, this.app.get(DIToken.FakeDatabase));
+    this.app.bindValue<DatabaseDriver>(DIToken.FakeDatabaseDriver, new FakeDatabaseDriver());
+    this.app.bindValue<DatabaseDriver>(
+      DIToken.DatabaseDriver,
+      this.app.get(DIToken.FakeDatabaseDriver),
+    );
   }
 }

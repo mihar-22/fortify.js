@@ -1,14 +1,16 @@
-import { Pool } from 'mysql';
+import { ConnectionConfig, Pool } from 'mysql';
 import { promisify } from 'util';
-import { DatabaseConfig, DatabaseDriver } from '../DatabaseConfig';
 import { AbstractSQLDriver, Query } from './AbstractSQLDriver';
+import { DatabaseDriverId } from './DatabaseDriver';
 
-export class MySQL extends AbstractSQLDriver<DatabaseConfig[DatabaseDriver.MySQL], any> {
-  public driver = DatabaseDriver.MySQL;
+export type MySQLConfig = string | ConnectionConfig;
 
-  protected pool?: Pool;
+export class MySQL extends AbstractSQLDriver<MySQLConfig> {
+  public id = DatabaseDriverId.MySQL;
 
-  protected getPool(): Pool {
+  private pool?: Pool;
+
+  private getPool(): Pool {
     if (!this.pool) {
       const mysql = require('mysql');
       this.pool = mysql.createPool(this.config!);
@@ -17,13 +19,13 @@ export class MySQL extends AbstractSQLDriver<DatabaseConfig[DatabaseDriver.MySQL
     return this.pool!;
   }
 
-  protected async driverQuit() {
-    if (!this.pool) { return; }
-    await promisify(this.pool.end)();
-  }
-
   public async runQuery(query: Query): Promise<any> {
     return promisify(this.getPool().query)({ sql: query.sql, values: query.values });
+  }
+
+  public async quit() {
+    if (!this.pool) { return; }
+    await promisify(this.pool.end)();
   }
 
   protected transformCreateRes(res: any): number {

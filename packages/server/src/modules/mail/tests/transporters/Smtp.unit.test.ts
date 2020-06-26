@@ -3,15 +3,13 @@ import { Config, Env } from '../../../../Config';
 import { FakeSmtpClient, Smtp } from '../../transporters';
 import { App } from '../../../../App';
 import { bootstrap } from '../../../../bootstrap';
-import { MailTransporter } from '../../Mail';
-import { MailTransporterFactory } from '../../Mailer';
 import { coreModules } from '../../../index';
 
 describe('Mail', () => {
   describe('Transporters', () => {
     describe('Smtp', () => {
       let app: App;
-      let mailer: Smtp;
+      let transporter: Smtp;
       let smtpClient: FakeSmtpClient;
 
       const mailRecipient = 'john_doe@localhost.com';
@@ -31,9 +29,8 @@ describe('Mail', () => {
 
       const boot = (config?: Config) => {
         app = bootstrap(coreModules, config, true);
-        mailer = app.get<MailTransporterFactory>(
-          DIToken.MailTransporterFactory,
-        )(MailTransporter.Smtp) as Smtp;
+        transporter = app.get(Smtp);
+        transporter.sender = mailSender;
       };
 
       beforeEach(() => {
@@ -43,7 +40,7 @@ describe('Mail', () => {
 
       test('sends mail', async () => {
         smtpClient.sendMail.mockReturnValueOnce({});
-        await mailer.sendMail(mail);
+        await transporter.send(mail);
         expect(smtpClient.sendMail).toHaveBeenCalledWith({
           subject: mail.subject,
           to: mail.to,

@@ -1,10 +1,9 @@
 import { inject, injectable } from 'tsyringe';
 import { URLSearchParams } from 'url';
-import { AbstractMailTransporter } from './AbstractMailTransporter';
 import { DIToken } from '../../../DIToken';
 import { HttpClient } from '../../http/HttpClient';
-import { Dispatcher } from '../../events/Dispatcher';
 import { Mail, MailResponse } from '../Mail';
+import { MailTransporter, MailTransporterId } from './MailTransporter';
 
 export enum MailgunRegion {
   US = 'us',
@@ -24,20 +23,25 @@ export interface MailgunResponse extends MailResponse {
 }
 
 @injectable()
-export class Mailgun extends AbstractMailTransporter<MailgunConfig, MailgunResponse> {
+export class Mailgun implements MailTransporter<MailgunConfig, MailgunResponse> {
+  public id = MailTransporterId.Mailgun;
+
+  public config?: MailgunConfig;
+
+  public sandbox = false;
+
+  public sender = '';
+
   constructor(
-    @inject(DIToken.HttpClient) protected readonly httpClient: HttpClient,
-    @inject(DIToken.EventDispatcher) events: Dispatcher,
-  ) {
-    super(events);
-  }
+    @inject(DIToken.HttpClient) private readonly httpClient: HttpClient,
+  ) {}
 
   private getBaseUrl(): string {
     const region = this.config!.region ?? MailgunRegion.US;
     return (region === MailgunRegion.US) ? 'api.mailgun.net' : 'api.eu.mailgun.net';
   }
 
-  public async sendMail(mail: Mail<any>, html?: string): Promise<MailgunResponse> {
+  public async send(mail: Mail<any>, html?: string): Promise<MailgunResponse> {
     try {
       const response = await this.httpClient(
         `https://${this.getBaseUrl()}/v3/${this.config!.domain}/messages`, {

@@ -1,17 +1,20 @@
-import { Db, MongoClient } from 'mongodb';
-import { AbstractDbDriver } from './AbstractDbDriver';
-import { DatabaseConfig, DatabaseDriver } from '../DatabaseConfig';
-import { DbCollection } from '../DbCollection';
-import { CreateData, Filter, UpdateData } from '../Database';
+import { Db, MongoClient, MongoClientOptions } from 'mongodb';
+import {
+  CreateData, DatabaseDriver, DatabaseDriverId, Filter, UpdateData,
+} from './DatabaseDriver';
 
-export class MongoDB extends AbstractDbDriver<DatabaseConfig[DatabaseDriver.MongoDB]> {
-  public driver = DatabaseDriver.MongoDB;
+export type MongoDBConfig = { uri: string, database: string } & MongoClientOptions;
 
-  protected client?: MongoClient;
+export class MongoDB implements DatabaseDriver<MongoDBConfig> {
+  public id = DatabaseDriverId.MongoDB;
 
-  protected db?: Db;
+  public config?: MongoDBConfig;
 
-  protected getDb(): Db {
+  private client?: MongoClient;
+
+  private db?: Db;
+
+  private getDb(): Db {
     if (!this.client) {
       const mongodb = require('mongodb');
       this.client = new mongodb.MongoClient(this.config!.uri, this.config!);
@@ -21,23 +24,27 @@ export class MongoDB extends AbstractDbDriver<DatabaseConfig[DatabaseDriver.Mong
     return this.db!;
   }
 
-  public async driverCreate(collection: DbCollection, data: CreateData) {
+  public async create(collection: string, data: CreateData) {
     const res = await this.getDb().collection(collection).insertOne(data);
     return res.insertedId;
   }
 
-  public async driverRead(collection: DbCollection, filter: Filter) {
+  public async read(collection: string, filter: Filter) {
     const res = await this.getDb().collection(collection).find(filter);
     return res?.toArray();
   }
 
-  public async driverUpdate(collection: DbCollection, filter: Filter, data: UpdateData) {
+  public async update(collection: string, filter: Filter, data: UpdateData) {
     const res = await this.getDb().collection(collection).updateMany(filter, data);
     return res.modifiedCount;
   }
 
-  public async driverDelete(collection: DbCollection, filter: Filter) {
+  public async delete(collection: string, filter: Filter) {
     const res = await this.getDb().collection(collection).deleteMany(filter);
     return res.deletedCount ?? 0;
+  }
+
+  public async dropCollection(collection: string) {
+    await this.getDb().collection(collection).drop();
   }
 }
