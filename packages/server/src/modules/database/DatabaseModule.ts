@@ -4,21 +4,15 @@ import { App } from '../../App';
 import { NamingStrategy } from './NamingStrategy';
 import { DIToken } from '../../DIToken';
 import {
-  Memory,
-  MongoDB,
-  MySQL,
-  Postgres,
-  MariaDB,
-  SQLite,
-  DatabaseDriverId,
-  DatabaseDriverFactory,
-  DatabaseDriverConstructor,
-  DatabaseDriver,
+  DatabaseDriver, DatabaseDriverConstructor,
+  DatabaseDriverFactory, DatabaseDriverId,
+  FakeDatabaseDriver, Memory,
+  MongoDB, Knex,
 } from './drivers';
 import { Migrator } from './Migrator';
 import { DatabaseConfig } from './DatabaseConfig';
 import { Database } from './Database';
-import { FakeDatabaseDriver } from './drivers/FakeDatabaseDriver';
+import { DatabaseError } from './DatabaseError';
 
 export class DatabaseModule implements ModuleProvider<DatabaseConfig> {
   public static id = Module.Database;
@@ -36,7 +30,29 @@ export class DatabaseModule implements ModuleProvider<DatabaseConfig> {
     private readonly config: DatabaseConfig,
   ) {}
 
-  // @TODO: Validate config for each db.
+  public configValidation() {
+    const driver = this.config.driver!;
+    const isMemoryDriver = (driver === DatabaseDriverId.Memory);
+
+    if (this.app.isProductionEnv && !this.config.allowMemoryDriverInProduction && isMemoryDriver) {
+      return {
+        code: DatabaseError.MemoryDriverUsedInProduction,
+        message: 'Memory driver has been selected in production, if you want to allow this then'
+          + 'set `config.database.allowMemoryDriverInProduction` to `true``',
+        path: 'driver',
+      };
+    }
+
+    if (!isMemoryDriver && !this.app.configPathExists(Module.Database, driver)) {
+      return {
+        code: DatabaseError.MissingDriverConfig,
+        message: `The database driver [${driver}] was selected but no configuration was found.`,
+        path: driver,
+      };
+    }
+
+    return undefined;
+  }
 
   public dependencies() {
     const driver = this.config.driver!;
@@ -44,15 +60,21 @@ export class DatabaseModule implements ModuleProvider<DatabaseConfig> {
     switch (driver) {
       case DatabaseDriverId.Memory:
         return [];
-      case DatabaseDriverId.MySQL:
-      case DatabaseDriverId.MariaDB:
-        return ['serverless-mysql', 'sqliterally'];
       case DatabaseDriverId.MongoDB:
         return ['mongodb'];
+      case DatabaseDriverId.MySQL:
+      case DatabaseDriverId.MariaDB:
+        return ['knex', 'mysql'];
+      case DatabaseDriverId.MySQL2:
+        return ['knex', 'mysql2'];
+      case DatabaseDriverId.OracleDB:
+        return ['knex', 'oracledb'];
+      case DatabaseDriverId.MSSQL:
+        return ['knex', 'mssql'];
       case DatabaseDriverId.Postgres:
-        return ['pg', 'sqliterally'];
+        return ['knex', 'pg'];
       case DatabaseDriverId.SQLite:
-        return ['sqlite3', 'sqliterally'];
+        return ['knex', 'sqlite3'];
     }
 
     return [];
@@ -65,13 +87,16 @@ export class DatabaseModule implements ModuleProvider<DatabaseConfig> {
         const drivers: Record<DatabaseDriverId, DatabaseDriverConstructor> = {
           [DatabaseDriverId.Memory]: Memory,
           [DatabaseDriverId.MongoDB]: MongoDB,
-          [DatabaseDriverId.MySQL]: MySQL,
-          [DatabaseDriverId.MariaDB]: MariaDB,
-          [DatabaseDriverId.SQLite]: SQLite,
-          [DatabaseDriverId.Postgres]: Postgres,
+          [DatabaseDriverId.MySQL]: Knex,
+          [DatabaseDriverId.MySQL2]: Knex,
+          [DatabaseDriverId.MariaDB]: Knex,
+          [DatabaseDriverId.Postgres]: Knex,
+          [DatabaseDriverId.SQLite]: Knex,
+          [DatabaseDriverId.OracleDB]: Knex,
+          [DatabaseDriverId.MSSQL]: Knex,
         };
 
-        return new drivers[id](this.app.get(DIToken.EventDispatcher));
+        return new drivers[id]();
       },
     );
 

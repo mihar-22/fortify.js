@@ -5,15 +5,18 @@ export type Select<T = any, R extends keyof T = keyof T> = R[];
 
 export enum DatabaseDriverId {
   Memory = 'memory',
+  MongoDB = 'mongo',
   MySQL = 'mysql',
+  MySQL2 = 'mysql2',
   MariaDB = 'mariadb',
   Postgres = 'postgres',
   SQLite = 'sqlite',
-  MongoDB = 'mongo',
+  OracleDB = 'oracledb',
+  MSSQL = 'mssql'
 }
 
 export interface DatabaseDriver<ConfigType = any> {
-  id: DatabaseDriverId
+  id?: DatabaseDriverId
   config?: ConfigType
   quit?(): Promise<void>
   create(collection: string, data: CreateData): Promise<number>

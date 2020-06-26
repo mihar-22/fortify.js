@@ -17,7 +17,8 @@ export class Migrator {
   }
 
   private buildMigrations() {
-    const migrationsDir = `${__dirname}/migrations/${this.database.driver.id}`;
+    const driverDir = this.database.isKnexDriver ? 'sql' : this.database.driver.id;
+    const migrationsDir = `${__dirname}/migrations/${driverDir}`;
 
     if (existsSync(migrationsDir)) {
       readdirSync(migrationsDir).forEach((file) => {
@@ -33,7 +34,9 @@ export class Migrator {
       },
 
       down: async () => {
-        await Promise.all(Object.values(DbCollection).map((c) => this.database.dropCollection(c)));
+        await Promise.all(
+          Object.values(DbCollection).reverse().map((c) => this.database.dropCollection(c)),
+        );
       },
     });
   }
@@ -41,7 +44,7 @@ export class Migrator {
   public async up() {
     try {
       await Promise.all(
-        this.migrations.map((migration) => migration.up(this.database)),
+        this.migrations.map((migration) => migration.up?.(this.database)),
       );
     } catch (err) {
       throw new RuntimeError(
@@ -56,7 +59,7 @@ export class Migrator {
   public async down() {
     try {
       await Promise.all(
-        this.migrations.reverse().map((migration) => migration.down(this.database)),
+        this.migrations.reverse().map((migration) => migration.down?.(this.database)),
       );
     } catch (err) {
       throw new RuntimeError(

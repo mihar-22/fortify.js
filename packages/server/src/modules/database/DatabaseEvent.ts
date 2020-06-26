@@ -5,8 +5,7 @@ export enum DatabaseEvent {
   Created = 'DB_CREATED',
   Read = 'DB_READ',
   Updated = 'DB_UPDATED',
-  Deleted = 'DB_DELETED',
-  Executing = 'DB_EXEC'
+  Deleted = 'DB_DELETED'
 }
 
 export interface DatabaseEventPayload {
@@ -30,7 +29,6 @@ export interface DatabaseEventPayload {
     collection: DbCollection,
     filter: object
   }
-  [DatabaseEvent.Executing]: { sql: string, values: string[] }
 }
 
 export type DatabaseEventDispatcher = Dispatcher<DatabaseEventPayload>;

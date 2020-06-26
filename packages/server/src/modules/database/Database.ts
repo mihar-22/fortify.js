@@ -4,12 +4,7 @@ import { fromNamingStrategy, NamingStrategy, toNamingStrategy } from './NamingSt
 import { DbCollection } from './DbCollection';
 import { Event } from '../events/Event';
 import {
-  CreateData,
-  DatabaseDriver,
-  DatabaseDriverId,
-  Filter,
-  Select,
-  UpdateData,
+  CreateData, DatabaseDriver, DatabaseDriverId, Filter, Select, UpdateData,
 } from './drivers';
 import { DIToken } from '../../DIToken';
 
@@ -24,15 +19,9 @@ export class Database<DriverType extends DatabaseDriver = DatabaseDriver> {
     @inject(DIToken.EventDispatcher) private readonly events: DatabaseEventDispatcher,
   ) {}
 
-  public get isSQLDriver() {
-    const sqlDrivers = [
-      DatabaseDriverId.MySQL,
-      DatabaseDriverId.SQLite,
-      DatabaseDriverId.Postgres,
-      DatabaseDriverId.MariaDB,
-    ];
-
-    return sqlDrivers.includes(this.driver.id);
+  public get isKnexDriver() {
+    return (this.driver.id !== DatabaseDriverId.Memory)
+      && (this.driver.id !== DatabaseDriverId.MongoDB);
   }
 
   public async create<T>(collection: DbCollection, data: CreateData<T>) {

@@ -1,6 +1,8 @@
 import { Db, MongoClient, MongoClientOptions } from 'mongodb';
 import {
-  CreateData, DatabaseDriver, DatabaseDriverId, Filter, UpdateData,
+  CreateData, DatabaseDriver,
+  DatabaseDriverId, Filter,
+  UpdateData,
 } from './DatabaseDriver';
 
 export type MongoDBConfig = { uri: string, database: string } & MongoClientOptions;
@@ -14,7 +16,7 @@ export class MongoDB implements DatabaseDriver<MongoDBConfig> {
 
   private db?: Db;
 
-  private getDb(): Db {
+  public getDb(): Db {
     if (!this.client) {
       const mongodb = require('mongodb');
       this.client = new mongodb.MongoClient(this.config!.uri, this.config!);

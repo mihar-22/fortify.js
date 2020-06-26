@@ -1,11 +1,17 @@
 import {
-  CreateData, DatabaseDriver, DatabaseDriverId, Filter, Select, UpdateData,
+  CreateData, DatabaseDriver,
+  DatabaseDriverId, Filter,
+  Select, UpdateData,
 } from './DatabaseDriver';
 
 export class Memory implements DatabaseDriver<undefined> {
   public id = DatabaseDriverId.Memory;
 
   private db: Record<string | number, any> = {};
+
+  public getDb() {
+    return this.db;
+  }
 
   public async create(collection: string, data: CreateData) {
     this.createCollection(collection);
@@ -48,11 +54,6 @@ export class Memory implements DatabaseDriver<undefined> {
     const records = await this.read(collection, filter);
     records.forEach((record) => { delete this.db[collection][record.id]; });
     return records.length;
-  }
-
-  // For testing.
-  public getDb() {
-    return this.db;
   }
 
   public createCollection(collection: string) {
