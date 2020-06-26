@@ -27,6 +27,7 @@ export class DatabaseModule implements ModuleProvider<DatabaseConfig> {
     return {
       driver: DatabaseDriverId.Memory,
       namingStrategy: NamingStrategy.CamelCase,
+      collectionPrefix: '',
     };
   }
 
@@ -84,7 +85,13 @@ export class DatabaseModule implements ModuleProvider<DatabaseConfig> {
       return driver;
     });
 
-    this.app.bindClass(DIToken.Database, Database);
+    this.app.bindBuilder<() => Database>(DIToken.Database, () => {
+      const database = this.app.get(Database);
+      database.namingStrategy = this.config.namingStrategy!;
+      database.collectionPrefix = this.config.collectionPrefix!;
+      return database;
+    });
+
     this.app.bindClass(DIToken.Migrator, Migrator);
   }
 

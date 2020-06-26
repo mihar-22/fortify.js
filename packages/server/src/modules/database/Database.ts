@@ -37,7 +37,7 @@ export class Database<DriverType extends DatabaseDriver = DatabaseDriver> {
 
   public async create<T>(collection: DbCollection, data: CreateData<T>) {
     const nData = this.toNamingStrategy(data);
-    const nCollection = this.toNamingStrategy(this.prefixCollection(collection));
+    const nCollection = this.formatCollectionName(collection);
 
     const id = await this.driver.create(nCollection, nData);
 
@@ -52,8 +52,8 @@ export class Database<DriverType extends DatabaseDriver = DatabaseDriver> {
 
   public async read<T>(collection: DbCollection, filter: Filter<T>, select?: Select<T>) {
     const nFilter = this.toNamingStrategy(filter);
-    const nCollection = this.toNamingStrategy(this.prefixCollection(collection));
     const nSelect = select ? this.toNamingStrategy(select) : undefined;
+    const nCollection = this.formatCollectionName(collection);
 
     const data = await this.driver.read(nCollection, nFilter, nSelect);
 
@@ -71,7 +71,7 @@ export class Database<DriverType extends DatabaseDriver = DatabaseDriver> {
   public async update<T>(collection: DbCollection, filter: Filter<T>, data: UpdateData<T>) {
     const nFilter = this.toNamingStrategy(filter);
     const nData = this.toNamingStrategy(data);
-    const nCollection = this.toNamingStrategy(this.prefixCollection(collection));
+    const nCollection = this.formatCollectionName(collection);
 
     const affectedItems = await this.driver.update(nCollection, nFilter, nData);
 
@@ -86,7 +86,7 @@ export class Database<DriverType extends DatabaseDriver = DatabaseDriver> {
 
   public async delete<T>(collection: DbCollection, filter: Filter<T>) {
     const nFilter = this.toNamingStrategy(filter);
-    const nCollection = this.toNamingStrategy(this.prefixCollection(collection));
+    const nCollection = this.formatCollectionName(collection);
 
     const affectedItems = await this.driver.delete(nCollection, nFilter);
 
@@ -100,7 +100,7 @@ export class Database<DriverType extends DatabaseDriver = DatabaseDriver> {
   }
 
   public async dropCollection(collection: DbCollection) {
-    await this.driver.dropCollection(this.prefixCollection(collection));
+    await this.driver.dropCollection(this.formatCollectionName(collection));
   }
 
   public async quit() {
@@ -108,15 +108,19 @@ export class Database<DriverType extends DatabaseDriver = DatabaseDriver> {
     await this.driver.quit();
   }
 
-  private fromNamingStrategy(obj: any) {
-    return fromNamingStrategy(obj, this.namingStrategy);
+  public formatCollectionName(collection: DbCollection) {
+    const name = (this.collectionPrefix.length > 0)
+      ? `${this.collectionPrefix}${collection.charAt(0).toUpperCase()}${collection.slice(1)}`
+      : collection;
+
+    return this.toNamingStrategy(name);
   }
 
-  private toNamingStrategy(obj: any) {
-    return toNamingStrategy(obj, this.namingStrategy);
+  public fromNamingStrategy(input: string | Record<string, any>) {
+    return fromNamingStrategy(input, this.namingStrategy);
   }
 
-  private prefixCollection(collection: DbCollection) {
-    return `${this.collectionPrefix}${collection}`;
+  public toNamingStrategy(input: string | Record<string, any>) {
+    return toNamingStrategy(input, this.namingStrategy);
   }
 }

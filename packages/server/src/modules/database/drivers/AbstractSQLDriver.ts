@@ -3,6 +3,7 @@ import {
 } from './DatabaseDriver';
 import { DatabaseEvent, DatabaseEventDispatcher } from '../DatabaseEvent';
 import { Event } from '../../events/Event';
+import { NamingStrategy, toNamingStrategy } from '../NamingStrategy';
 
 export interface Query {
   text: string
@@ -75,6 +76,27 @@ export abstract class AbstractSQLDriver<
   public async dropCollection(collection: string) {
     const dropTableStmt = this.sql([`DROP TABLE ${collection}`]);
     await this.runQuery(dropTableStmt);
+  }
+
+  public buildCreateTableQuery(
+    tableName: string,
+    columns: Record<string, string>,
+    namingStrategy: NamingStrategy,
+    appendQuery?: Query,
+  ): Query {
+    const casedColumns = toNamingStrategy(columns, namingStrategy);
+
+    let q = this.sql([`CREATE TABLE ${tableName} (\n`]);
+
+    Object.keys(casedColumns).forEach((column, i) => {
+      const end = (Object.keys(casedColumns).length === (i - 1)) ? ',\n' : '\n';
+      q = q.append(`\t${column} ${casedColumns[column]}${end}`);
+    });
+
+    if (appendQuery) { q = q.append(appendQuery); }
+    q = q.append(');');
+
+    return q;
   }
 
   protected fireExecEvent = (query: Query) => {

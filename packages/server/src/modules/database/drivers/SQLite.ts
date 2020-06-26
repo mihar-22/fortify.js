@@ -22,8 +22,8 @@ export class SQLite extends AbstractSQLDriver<SQLiteConfig> {
   public async runQuery(query: Query): Promise<any> {
     return new Promise((resolve, reject) => {
       this.getDb().run(query.sql, query.values, (res: RunResult, err: Error | null) => {
-        if (err) {
-          reject(err);
+        if ((res as any)?.code === 'SQLITE_ERROR' || err) {
+          reject(err || res);
           return;
         }
 

@@ -1,4 +1,5 @@
 import { camelToSnakeCase, snakeToCamelCase } from '../../utils/string';
+import { isString } from '../../utils';
 
 export enum NamingStrategy {
   SnakeCase = 'snakeCase',
@@ -6,17 +7,29 @@ export enum NamingStrategy {
 }
 
 // Assumes default case is camelCase.
-export const toNamingStrategy = (obj: any, namingStrategy: NamingStrategy) => {
-  if (namingStrategy !== NamingStrategy.SnakeCase) { return obj; }
+export const toNamingStrategy = (
+  input: string | Record<string, any>,
+  namingStrategy: NamingStrategy,
+) => {
+  if (namingStrategy !== NamingStrategy.SnakeCase) { return input; }
+  if (isString(input)) { return camelToSnakeCase(input as string); }
   const snakedCasedClone: any = {};
-  Object.keys(obj).forEach((key) => { snakedCasedClone[camelToSnakeCase(key)] = obj[key]; });
+  Object.keys(input).forEach((key) => {
+    snakedCasedClone[camelToSnakeCase(key)] = (input as any)[key];
+  });
   return snakedCasedClone;
 };
 
 // Assumes default case is camelCase.
-export const fromNamingStrategy = (obj: any, namingStrategy: NamingStrategy) => {
-  if (namingStrategy !== NamingStrategy.SnakeCase) { return obj; }
+export const fromNamingStrategy = (
+  input: string | Record<string, any>,
+  namingStrategy: NamingStrategy,
+) => {
+  if (namingStrategy !== NamingStrategy.SnakeCase) { return input; }
+  if (isString(input)) { return snakeToCamelCase(input as string); }
   const camelCasedClone: any = {};
-  Object.keys(obj).forEach((key) => { camelCasedClone[snakeToCamelCase(key)] = obj[key]; });
+  Object.keys(input).forEach((key) => {
+    camelCasedClone[snakeToCamelCase(key)] = (input as any)[key];
+  });
   return camelCasedClone;
 };

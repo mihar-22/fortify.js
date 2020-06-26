@@ -10,6 +10,7 @@ export class RuntimeError extends Error implements ServerError {
     public possibleReasons: string[] = [],
   ) {
     super(undefined);
+    this.stack = undefined;
 
     this.message = `${bold('Code:')} ${bold().red(code)}\n\n`
       + `${bold('Module:')} ${module.toUpperCase()}\n\n`
@@ -17,7 +18,7 @@ export class RuntimeError extends Error implements ServerError {
       + `${
         (possibleReasons!.length > 0)
           ? `\n\n${bold('Possible Reasons:')} ${JSON.stringify(possibleReasons, undefined, 2)}\n\n`
-          : ''
+          : '\n\n'
       }`
       + `${reference ? `${bold('Stack Trace:')} ${reference.stack}` : ''}`;
 
