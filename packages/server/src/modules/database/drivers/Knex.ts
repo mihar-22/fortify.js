@@ -1,21 +1,32 @@
 import KnexBuilder, {
-  MsSqlConnectionConfig, MySqlConnectionConfig,
-  OracleDbConnectionConfig, PgConnectionConfig,
+  MsSqlConnectionConfig,
+  MySqlConnectionConfig,
+  OracleDbConnectionConfig,
+  PgConnectionConfig,
   Sqlite3ConnectionConfig,
 } from 'knex';
 import {
-  CreateData, DatabaseDriver,
-  DatabaseDriverId, Filter,
-  Select, UpdateData,
+  CreateData,
+  DatabaseDriver,
+  DatabaseDriverId,
+  Filter,
+  Select,
+  UpdateData,
 } from './DatabaseDriver';
 
-export type MySQLConfig = MySqlConnectionConfig;
-export type MySQL2Config = MySqlConnectionConfig;
-export type MariaDBConfig = MySqlConnectionConfig;
-export type PostgresConfig = PgConnectionConfig;
-export type SQLiteConfig = Sqlite3ConnectionConfig;
-export type OracleDBConfig = OracleDbConnectionConfig;
-export type MSSQLConfig = MsSqlConnectionConfig;
+type Config<ConnectionConfigType> = {
+  debug?: boolean
+  version?: number
+  connection: ConnectionConfigType
+};
+
+export type MySQLConfig = Config<MySqlConnectionConfig>;
+export type MySQL2Config = Config<MySqlConnectionConfig>;
+export type MariaDBConfig = Config<MySqlConnectionConfig>;
+export type PostgresConfig = Config<PgConnectionConfig>;
+export type SQLiteConfig = Config<Sqlite3ConnectionConfig>;
+export type OracleDBConfig = Config<OracleDbConnectionConfig>;
+export type MSSQLConfig = Config<MsSqlConnectionConfig>;
 
 export type SQLConfig = MySQLConfig
 | MySQL2Config
@@ -34,7 +45,11 @@ export class Knex implements DatabaseDriver<SQLConfig> {
 
   public getBuilder(): KnexBuilder {
     if (!this.builder) {
-      this.builder = require('knex')(this.config!);
+      this.builder = require('knex')({
+        ...this.config!,
+        client: this.id!,
+        useNullAsDefault: (this.id === DatabaseDriverId.SQLite),
+      });
     }
 
     return this.builder!;

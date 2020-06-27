@@ -1,10 +1,13 @@
 import { Migration } from '../../Migration';
 import { Knex } from '../../drivers';
+import { DbCollection } from '../../DbCollection';
 
 export default {
   async up(db) {
-    const builder = db.driver.getBuilder();
+    const { schema } = db.driver.getBuilder();
 
-    // here we build our table.
+    await schema.createTable(DbCollection.Users, (table) => {
+      table.increments().primary();
+    });
   },
 } as Migration<Knex>;

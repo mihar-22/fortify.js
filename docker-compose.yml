@@ -1,25 +1,5 @@
 version: '3.7'
 services:
-  mysql:
-    image: mysql:latest
-    ports:
-      - 8083:3306
-    volumes:
-      - ./databases/mysql:/var/lib/mysql
-    environment:
-      MYSQL_ROOT_PASSWORD: pwd
-      MYSQL_DATABASE: fortify
-  postgres:
-    image: postgres:latest
-    restart: always
-    volumes:
-      - ./databases/postgres:/var/lib/postgresql/data
-    ports:
-      - 8084:5432
-    environment:
-      POSTGRES_USER: root
-      POSTGRES_PASSWORD: pwd
-      POSTGRES_DB: fortify
   mongo:
     image: mongo:latest
     restart: always
@@ -31,3 +11,23 @@ services:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: pwd
       MONGO_INITDB_DATABASE: fortify
+#  mysql:
+#    image: mysql:latest
+#    ports:
+#      - 8083:3306
+#    volumes:
+#      - ./databases/mysql:/var/lib/mysql
+#    environment:
+#      MYSQL_ROOT_PASSWORD: pwd
+#      MYSQL_DATABASE: fortify
+#  postgres:
+#    image: postgres:latest
+#    restart: always
+#    volumes:
+#      - ./databases/postgres:/var/lib/postgresql/data
+#    ports:
+#      - 8084:5432
+#    environment:
+#      POSTGRES_USER: root
+#      POSTGRES_PASSWORD: pwd
+#      POSTGRES_DB: fortify

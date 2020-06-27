@@ -4,10 +4,14 @@ import { App } from '../../App';
 import { NamingStrategy } from './NamingStrategy';
 import { DIToken } from '../../DIToken';
 import {
-  DatabaseDriver, DatabaseDriverConstructor,
-  DatabaseDriverFactory, DatabaseDriverId,
-  FakeDatabaseDriver, Memory,
-  MongoDB, Knex,
+  DatabaseDriver,
+  DatabaseDriverConstructor,
+  DatabaseDriverFactory,
+  DatabaseDriverId,
+  FakeDatabaseDriver,
+  Knex,
+  Memory,
+  MongoDB,
 } from './drivers';
 import { Migrator } from './Migrator';
 import { DatabaseConfig } from './DatabaseConfig';
@@ -96,7 +100,9 @@ export class DatabaseModule implements ModuleProvider<DatabaseConfig> {
           [DatabaseDriverId.MSSQL]: Knex,
         };
 
-        return new drivers[id]();
+        const driver = new drivers[id]();
+        driver.id = id;
+        return driver;
       },
     );
 

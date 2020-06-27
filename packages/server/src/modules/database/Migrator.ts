@@ -70,4 +70,9 @@ export class Migrator {
       );
     }
   }
+
+  public async refresh() {
+    await this.down();
+    await this.up();
+  }
 }

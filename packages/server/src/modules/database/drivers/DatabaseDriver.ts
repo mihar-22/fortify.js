@@ -12,7 +12,7 @@ export enum DatabaseDriverId {
   Postgres = 'postgres',
   SQLite = 'sqlite',
   OracleDB = 'oracledb',
-  MSSQL = 'mssql'
+  MSSQL = 'mssql',
 }
 
 export interface DatabaseDriver<ConfigType = any> {

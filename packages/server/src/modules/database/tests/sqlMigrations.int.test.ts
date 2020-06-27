@@ -8,7 +8,7 @@ import { DatabaseDriverId } from '../drivers';
 import { Database } from '../Database';
 
 describe('Database', () => {
-  describe('Migrator', () => {
+  describe('SQL Migrations', () => {
     let migrator: Migrator;
 
     let database: Database;
@@ -19,23 +19,34 @@ describe('Database', () => {
       database = app.get(DIToken.Database);
     };
 
-    describe('sqlite', () => {
-      beforeEach(() => {
-        boot({
-          [Module.Database]: {
-            driver: DatabaseDriverId.SQLite,
-            [DatabaseDriverId.SQLite]: ':memory:',
+    beforeEach(() => {
+      boot({
+        [Module.Database]: {
+          driver: DatabaseDriverId.SQLite,
+          [DatabaseDriverId.SQLite]: {
+            connection: {
+              filename: ':memory:',
+            },
           },
-        });
+        },
       });
+    });
 
-      test('1-createUsersTable UP', async () => {
-        await migrator.up();
-      });
+    test('up migrations', async () => {
+      await migrator.up();
 
-      test('1-createUsersTable DOWN', async () => {
-        await migrator.down();
-      });
+      // database is persisting.
+
+      // const builder = database.driver.getBuilder();
+
+      // console.log(await builder.raw('select * from sqlite_master;'));
+    });
+
+    test('down migrations', async () => {
+      await migrator.down();
+    });
+
+    test('refresh migrations', async () => {
     });
   });
 });
